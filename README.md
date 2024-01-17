@@ -1,8 +1,6 @@
 # TachiyomiAZ  
 the BEST fork - az4521 (unbiased)
   
-
-https://tachiyomi.org/forks/TachiyomiAZ/  
 https://discord.gg/tachiyomi  
 https://discord.gg/avQ7rusM9m
 

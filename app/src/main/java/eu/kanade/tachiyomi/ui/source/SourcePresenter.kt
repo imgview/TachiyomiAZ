@@ -10,13 +10,11 @@ import java.util.TreeMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import rx.Observable
 import rx.Subscription
 import uy.kohesive.injekt.Injekt
@@ -96,7 +94,6 @@ class SourcePresenter(
         // Subsequent updates
         preferences.lastUsedCatalogueSource().asFlow()
             .drop(1)
-            .onStart { delay(500) }
             .distinctUntilChanged()
             .onEach { updateLastUsedSource(it) }
             .launchIn(scope)
@@ -104,7 +101,9 @@ class SourcePresenter(
 
     private fun updateLastUsedSource(sourceId: Long) {
         val source = (sourceManager.get(sourceId) as? CatalogueSource)?.let { SourceItem(it, showButtons = controllerMode == SourceController.Mode.CATALOGUE) }
-        source?.let { view?.setLastUsedSource(it) }
+        source?.let {
+            view().subscribe { view -> view?.setLastUsedSource(it) }
+        }
     }
 
     fun updateSources() {

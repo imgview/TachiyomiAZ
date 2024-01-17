@@ -6,6 +6,12 @@ https://tachiyomi.org/forks/TachiyomiAZ/
 https://discord.gg/tachiyomi  
 https://discord.gg/avQ7rusM9m
 
+## features since tachiyomi.org yeeted /forks
+- more hentai (batch add etc)
+- more fumo (fumo theme)
+- material design 1 (sidebar + hamburger)
+- Get Recommendations From MyAnimeList And AniDB
+
 ## TODO
 > warning: the code is spaghetti  
 > if some of these sound interesting, feel free to open a pull request. thanks!

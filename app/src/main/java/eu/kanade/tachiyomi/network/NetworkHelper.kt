@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit
 import okhttp3.Cache
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
+import okhttp3.brotli.BrotliInterceptor
 import okhttp3.dnsoverhttps.DnsOverHttps
 import okhttp3.logging.HttpLoggingInterceptor
 import uy.kohesive.injekt.injectLazy
@@ -32,6 +33,7 @@ open class NetworkHelper(context: Context) {
             .cache(Cache(cacheDir, cacheSize))
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
+            .addInterceptor(BrotliInterceptor)
             .maybeInjectEHLogger()
 
         if (BuildConfig.DEBUG) {

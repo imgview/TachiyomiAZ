@@ -34,6 +34,7 @@ import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.ui.extension.ExtensionController
+import eu.kanade.tachiyomi.ui.extension.repos.RepoController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.recent.history.HistoryController
@@ -384,6 +385,15 @@ class MainActivity : BaseActivity<MainActivityBinding>() {
                         router.popToRoot()
                     }
                     router.pushController(GlobalSearchController(query, filter).withFadeTransaction())
+                }
+            }
+            Intent.ACTION_VIEW -> {
+                // Deep link to add extension repo
+                if (intent.scheme == "tachiyomi" && intent.data?.host == "add-repo") {
+                    intent.data?.getQueryParameter("url")?.let { repoUrl ->
+                        router.popToRoot()
+                        router.pushController(RepoController(repoUrl).withFadeTransaction())
+                    }
                 }
             }
             else -> return false

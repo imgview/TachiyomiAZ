@@ -24,7 +24,7 @@ import reactivecircus.flowbinding.android.view.clicks
 /**
  * Controller to manage the categories for the users' library.
  */
-class RepoController :
+class RepoController() :
     NucleusController<CategoriesControllerBinding, RepoPresenter>(),
     ActionMode.Callback,
     FlexibleAdapter.OnItemClickListener,
@@ -32,6 +32,9 @@ class RepoController :
     RepoCreateDialog.Listener,
     UndoHelper.OnActionListener {
 
+    constructor(repoUrl: String) : this() {
+        createRepo(repoUrl)
+    }
     /**
      * Object used to show ActionMode toolbar.
      */

@@ -3,9 +3,14 @@ package eu.kanade.tachiyomi.network
 import exh.util.withRootCause
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.okio.decodeFromBufferedSource
+import kotlinx.serialization.serializer
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
@@ -14,6 +19,8 @@ import okhttp3.Response
 import rx.Observable
 import rx.Producer
 import rx.Subscription
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 fun Call.asObservableWithAsyncStacktrace(): Observable<Pair<Exception, Response>> {
     // Record stacktrace at creation time for easier debugging
@@ -114,18 +121,30 @@ fun Call.asObservableSuccess(): Observable<Response> {
     }
 }
 
-fun OkHttpClient.newCallWithProgress(request: Request, listener: ProgressListener): Call {
+fun OkHttpClient.newCachelessCallWithProgress(request: Request, listener: ProgressListener): Call {
     val progressClient = newBuilder()
         .cache(null)
         .addNetworkInterceptor { chain ->
             val originalResponse = chain.proceed(chain.request())
             originalResponse.newBuilder()
-                .body(ProgressResponseBody(originalResponse.body!!, listener))
+                .body(ProgressResponseBody(originalResponse.body, listener))
                 .build()
         }
         .build()
 
     return progressClient.newCall(request)
+}
+
+inline fun <reified T> Response.parseAs(): T {
+    return internalParseAs(typeOf<T>(), this)
+}
+
+@Suppress("UNCHECKED_CAST")
+fun <T> internalParseAs(type: KType, response: Response): T {
+    val deserializer = serializer(type) as KSerializer<T>
+    return response.body.source().use {
+        Injekt.get<Json>().decodeFromBufferedSource(deserializer, it)
+    }
 }
 
 class HttpException(val code: Int) : IllegalStateException("HTTP error $code")

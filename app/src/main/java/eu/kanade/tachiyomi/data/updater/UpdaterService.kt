@@ -14,7 +14,7 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProgressListener
 import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.network.newCallWithProgress
+import eu.kanade.tachiyomi.network.newCachelessCallWithProgress
 import eu.kanade.tachiyomi.util.lang.launchIO
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.storage.saveTo
@@ -108,7 +108,7 @@ class UpdaterService : Service() {
 
         try {
             // Download the new update.
-            val response = network.client.newCallWithProgress(GET(url), progressListener).await()
+            val response = network.client.newCachelessCallWithProgress(GET(url), progressListener).await()
 
             // File where the apk will be saved.
             val apkFile = File(externalCacheDir, "update.apk")

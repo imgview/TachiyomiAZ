@@ -6,7 +6,7 @@ import eu.kanade.tachiyomi.network.AndroidCookieJar
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.asObservableSuccess
-import eu.kanade.tachiyomi.network.newCallWithProgress
+import eu.kanade.tachiyomi.network.newCachelessCallWithProgress
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
@@ -327,7 +327,7 @@ abstract class HttpSource : CatalogueSource {
      * @param page the page whose source image has to be downloaded.
      */
     open fun fetchImage(page: Page): Observable<Response> {
-        return client.newCallWithProgress(imageRequest(page), page)
+        return client.newCachelessCallWithProgress(imageRequest(page), page)
             .asObservableSuccess()
     }
 

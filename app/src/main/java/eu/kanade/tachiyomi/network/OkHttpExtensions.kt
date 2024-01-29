@@ -64,11 +64,11 @@ fun Call.asObservableWithAsyncStacktrace(): Observable<Pair<Exception, Response>
 fun Call.asObservable() = asObservableWithAsyncStacktrace().map { it.second }
 
 // Based on https://github.com/gildor/kotlin-coroutines-okhttp
-suspend fun Call.await(assertSuccess: Boolean = false): Response {
+suspend fun Call.await(): Response {
     return suspendCancellableCoroutine { continuation ->
         enqueue(object : Callback {
             override fun onResponse(call: Call, response: Response) {
-                if (assertSuccess && !response.isSuccessful) {
+                if (!response.isSuccessful) {
                     continuation.resumeWithException(Exception("HTTP error ${response.code}"))
                     return
                 }

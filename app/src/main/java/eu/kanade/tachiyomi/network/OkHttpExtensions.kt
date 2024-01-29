@@ -64,24 +64,22 @@ fun Call.asObservableWithAsyncStacktrace(): Observable<Pair<Exception, Response>
 fun Call.asObservable() = asObservableWithAsyncStacktrace().map { it.second }
 
 // Based on https://github.com/gildor/kotlin-coroutines-okhttp
-suspend fun Call.await(): Response {
+private suspend fun Call.await(callStack: Array<StackTraceElement>): Response {
     return suspendCancellableCoroutine { continuation ->
-        enqueue(object : Callback {
+        val callback = object : Callback {
             override fun onResponse(call: Call, response: Response) {
-                if (!response.isSuccessful) {
-                    continuation.resumeWithException(Exception("HTTP error ${response.code}"))
-                    return
-                }
-
-                continuation.resume(response)
+                continuation.resume(response) { response.body.close() }
             }
 
             override fun onFailure(call: Call, e: IOException) {
                 // Don't bother with resuming the continuation if it is already cancelled.
                 if (continuation.isCancelled) return
+                val exception = IOException(e).apply { stackTrace = callStack }
                 continuation.resumeWithException(e)
             }
-        })
+        }
+
+        enqueue(callback)
 
         continuation.invokeOnCancellation {
             try {
@@ -93,6 +91,20 @@ suspend fun Call.await(): Response {
     }
 }
 
+suspend fun Call.await(): Response {
+    val callStack = Exception().stackTrace.run { copyOfRange(1, size) }
+    return await(callStack)
+}
+
+suspend fun Call.awaitSuccess(): Response {
+    val callStack = Exception().stackTrace.run { copyOfRange(1, size) }
+    val response = await(callStack)
+    if (!response.isSuccessful) {
+        response.close()
+        throw HttpException(response.code).apply { stackTrace = callStack }
+    }
+    return response
+}
 fun Call.asObservableSuccess(): Observable<Response> {
     return asObservableWithAsyncStacktrace().map { (asyncStacktrace, response) ->
         if (!response.isSuccessful) {
@@ -115,3 +127,5 @@ fun OkHttpClient.newCallWithProgress(request: Request, listener: ProgressListene
 
     return progressClient.newCall(request)
 }
+
+class HttpException(val code: Int) : IllegalStateException("HTTP error $code")

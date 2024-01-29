@@ -13,6 +13,8 @@
 -keep,allowoptimization class androidx.preference.** { *; }
 -keep,allowoptimization class okio.** { *; }
 -keep,allowoptimization class kotlinx.serialization.** { *; }
+-keep,allowoptimization class kotlinx.coroutines.** { public protected *; }
+-keep,allowoptimization class kotlin.time.** { public protected *; }
 
 # === Keep EH classes
 -keep class exh.** { *; }

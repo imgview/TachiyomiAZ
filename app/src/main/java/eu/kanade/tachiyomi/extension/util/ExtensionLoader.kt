@@ -38,10 +38,13 @@ internal object ExtensionLoader {
 
     private const val PACKAGE_FLAGS = PackageManager.GET_CONFIGURATIONS or PackageManager.GET_SIGNATURES
 
+    // inorichi's key
+    val officialSignature = "7ce04da7773d41b489f4693a366c36bcd0a11fc39b547168553c285bd7348e23"
+
     /**
      * List of the trusted signatures.
      */
-    var trustedSignatures = mutableSetOf<String>() + preferences.trustedSignatures().get()
+    var trustedSignatures = mutableSetOf<String>() + preferences.trustedSignatures().get() + officialSignature
 
     /**
      * Return a list of all the installed extensions initialized concurrently.

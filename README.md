@@ -2,7 +2,7 @@
 the BEST fork - az4521 (unbiased)
   
 https://discord.gg/tachiyomi  
-https://discord.gg/avQ7rusM9m
+https://discord.gg/mihon
 
 ## features since tachiyomi.org yeeted /forks
 - more hentai (batch add etc)

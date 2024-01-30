@@ -19,8 +19,7 @@ abstract class Pager(var currentPage: Int = 1) {
         return results.asObservable()
     }
 
-    abstract fun requestNext(): Observable<MangasPage>
-
+    abstract suspend fun requestNextPage()
     open fun onPageReceived(mangasPage: MangasPage) {
         val page = currentPage
         currentPage++

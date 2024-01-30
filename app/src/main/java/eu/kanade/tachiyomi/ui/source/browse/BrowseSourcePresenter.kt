@@ -33,11 +33,13 @@ import eu.kanade.tachiyomi.ui.source.filter.TriStateSectionItem
 import eu.kanade.tachiyomi.util.lang.launchIO
 import eu.kanade.tachiyomi.util.lang.launchUI
 import eu.kanade.tachiyomi.util.removeCovers
+import eu.kanade.tachiyomi.util.system.withUIContext
 import exh.isEhBasedSource
 import exh.savedsearches.EXHSavedSearch
 import exh.savedsearches.JsonSavedSearch
 import java.lang.RuntimeException
 import java.util.Date
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.catch
@@ -49,7 +51,6 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
@@ -113,6 +114,7 @@ open class BrowseSourcePresenter(
      * Subscription for the pager.
      */
     private var pagerSubscription: Subscription? = null
+    private var nextPageJob: Job? = null
 
     /**
      * Subscription for one request from the pager.
@@ -184,14 +186,16 @@ open class BrowseSourcePresenter(
     fun requestNext() {
         if (!hasNextPage()) return
 
-        pageSubscription?.let { remove(it) }
-        pageSubscription = Observable.defer { pager.requestNext() }
-            .subscribeFirst(
-                { _, _ ->
-                    // Nothing to do when onNext is emitted.
-                },
-                BrowseSourceController::onAddPageError
-            )
+        nextPageJob?.cancel()
+        nextPageJob = launchIO {
+            try {
+                pager.requestNextPage()
+            } catch (e: Throwable) {
+                withUIContext {
+                    view().subscribe { view -> view?.onAddPageError(e) }
+                }
+            }
+        }
     }
 
     /**

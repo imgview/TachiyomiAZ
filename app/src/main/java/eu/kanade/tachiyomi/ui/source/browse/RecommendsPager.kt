@@ -27,7 +27,6 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import rx.Observable
 import timber.log.Timber
 
 abstract class API(_endpoint: String) {
@@ -248,7 +247,7 @@ class Anilist() : API("https://graphql.anilist.co/") {
 open class RecommendsPager(
     val manga: Manga,
     val smart: Boolean = true,
-    var preferredApi: API = API.MYANIMELIST
+    var preferredApi: API = API.ANILIST
 ) : Pager() {
     private val apiList = API_MAP.toMutableMap()
     private var currentApi: API? = null
@@ -292,7 +291,7 @@ open class RecommendsPager(
         }
     }
 
-    override fun requestNext(): Observable<MangasPage> {
+    override suspend fun requestNextPage() {
         if (smart) {
             preferredApi =
                 if (manga.mangaType() != MangaType.TYPE_MANGA) API.ANILIST else preferredApi
@@ -301,8 +300,6 @@ open class RecommendsPager(
         currentApi = preferredApi
 
         getRecs(currentApi!!)
-
-        return Observable.just(MangasPage(listOf(), false))
     }
 
     companion object {

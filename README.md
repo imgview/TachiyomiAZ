@@ -24,7 +24,7 @@ https://discord.gg/mihon
 - [ ] fix smart background (steal from j2k)
 - [ ] chapter list: current page progress same color as scanlator group
 - [ ] extension repo list: remove category icon, add left-right padding
-- [ ] rgb filter corrupted preview image (remove?)
+- [ ] rgb filter corrupted preview image ~~(remove?)~~ replace with fox girl drawing
 ### match stable/j2k
 - [ ] allow downloading in CBZ
 - [ ] re-order per-source downloads

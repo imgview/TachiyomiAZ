@@ -14,6 +14,11 @@ https://discord.gg/avQ7rusM9m
 > warning: the code is spaghetti  
 > if some of these sound interesting, feel free to open a pull request. thanks!
   
+### dead source removal + delegation
+- [ ] remove hbrowse (dead)
+- [ ] remove perveden (dead)
+- [ ] delegate 8muses
+- [ ] delegate hitomi
 ### fix
 - [ ] recognize CBZ downloads in UI, not only in badges
 - [ ] fix smart background (steal from j2k)

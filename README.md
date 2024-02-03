@@ -5,10 +5,10 @@ https://discord.gg/tachiyomi
 https://discord.gg/mihon
 
 ## features since tachiyomi.org yeeted /forks
-- more hentai (batch add etc)
 - more fumo (fumo theme)
 - material design 1 (sidebar + hamburger)
 - Get Recommendations From MyAnimeList And AniDB
+- best fork
 
 ## TODO
 > warning: the code is spaghetti  
@@ -24,7 +24,7 @@ https://discord.gg/mihon
 - [ ] fix smart background (steal from j2k)
 - [ ] chapter list: current page progress same color as scanlator group
 - [ ] extension repo list: remove category icon, add left-right padding
-- [ ] rgb filter corrupted preview image ~~(remove?)~~ replace with fox girl drawing
+- [x] rgb filter corrupted preview image ~~(remove?)~~ replace with fox girl drawing
 ### match stable/j2k
 - [ ] allow downloading in CBZ
 - [ ] re-order per-source downloads

@@ -29,6 +29,7 @@ https://discord.gg/mihon
 - [x] rgb filter corrupted preview image ~~(remove?)~~ replace with fox girl drawing
 ### match stable/j2k
 - [ ] allow downloading in CBZ
+- [ ] extlib 1.5 (migrate rx to coroutines)
 - [ ] re-order per-source downloads
 - [ ] j2k: ability to set custom cover - arbitrary file - [j2k commit](https://github.com/Jays2Kings/tachiyomiJ2K/commit/d3ec230d4baa8584118dc30807728305715db25b)
 - [ ] j2k: reader: add chapter list view

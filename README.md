@@ -33,3 +33,5 @@ https://discord.gg/mihon
 ### maybe
 - [ ] add quick shortcut to extension repos in "Extensions" tab
 - [ ] improve internals
+- [ ] https://github.com/mihonapp/mihon/commit/d6c4af89c4a2df213f06ed4c3d714a2608117afb
+- [ ] switch from glide to coil, and use tachiyomi's image decoder

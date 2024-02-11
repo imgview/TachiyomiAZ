@@ -84,8 +84,9 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
 
                     // Delete older backups
                     val numberOfBackups = numberOfBackups()
-                    val backupRegex = Regex("""tachiyomi_full_\d+-\d+-\d+_\d+-\d+.proto.gz""")
-                    dir.listFiles { _, filename -> backupRegex.matches(filename) }
+                    val oldBackupRegex = Regex("""tachiyomi_full_\d+-\d+-\d+_\d+-\d+.proto.gz""")
+                    val newBackupRegex = Regex("""tachiyomi_full_\d+-\d+-\d+_\d+-\d+.tachibk""")
+                    dir.listFiles { _, filename -> (oldBackupRegex.matches(filename) || newBackupRegex.matches(filename)) }
                         .orEmpty()
                         .sortedByDescending { it.name }
                         .drop(numberOfBackups - 1)

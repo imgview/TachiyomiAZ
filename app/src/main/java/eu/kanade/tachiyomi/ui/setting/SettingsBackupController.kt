@@ -205,7 +205,7 @@ class SettingsBackupController : SettingsController() {
                     uri?.path?.let {
                         val fileName = DocumentFile.fromSingleUri(activity, uri)?.name ?: uri.toString()
                         when {
-                            fileName.endsWith(".proto.gz") -> {
+                            fileName.endsWith(".proto.gz") || fileName.endsWith(".tachibk") -> {
                                 val options = arrayOf(
                                     R.string.full_restore_offline,
                                     R.string.full_restore_online

@@ -4,6 +4,7 @@ import android.content.Context
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.interceptor.CloudflareInterceptor
+import eu.kanade.tachiyomi.network.interceptor.IgnoreGzipInterceptor
 import eu.kanade.tachiyomi.network.interceptor.UserAgentInterceptor
 import exh.log.maybeInjectEHLogger
 import java.io.File
@@ -33,6 +34,7 @@ open class NetworkHelper(context: Context) {
             .cache(Cache(cacheDir, cacheSize))
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
+            .addNetworkInterceptor(IgnoreGzipInterceptor())
             .addInterceptor(BrotliInterceptor)
             .maybeInjectEHLogger()
 

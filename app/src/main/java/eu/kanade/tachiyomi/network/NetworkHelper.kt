@@ -35,7 +35,7 @@ open class NetworkHelper(context: Context) {
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .addNetworkInterceptor(IgnoreGzipInterceptor())
-            .addInterceptor(BrotliInterceptor)
+            .addNetworkInterceptor(BrotliInterceptor)
             .maybeInjectEHLogger()
 
         if (BuildConfig.DEBUG) {

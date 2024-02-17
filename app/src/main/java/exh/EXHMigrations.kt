@@ -98,7 +98,7 @@ object EXHMigrations {
                                 .query(
                                     """
                                     UPDATE ${MangaTable.TABLE}
-                                        SET ${MangaTable.COL_SOURCE} = $HBROWSE_SOURCE_ID
+                                        SET ${MangaTable.COL_SOURCE} = 6912
                                         WHERE ${MangaTable.COL_SOURCE} = 1401584337232758222
                                     """.trimIndent()
                                 )

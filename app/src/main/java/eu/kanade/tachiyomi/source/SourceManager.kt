@@ -15,7 +15,6 @@ import eu.kanade.tachiyomi.source.online.all.MergedSource
 import eu.kanade.tachiyomi.source.online.all.NHentai
 import eu.kanade.tachiyomi.source.online.all.PervEden
 import eu.kanade.tachiyomi.source.online.english.EightMuses
-import eu.kanade.tachiyomi.source.online.english.HBrowse
 import eu.kanade.tachiyomi.source.online.english.HentaiCafe
 import eu.kanade.tachiyomi.source.online.english.Pururin
 import eu.kanade.tachiyomi.source.online.english.Tsumino
@@ -125,7 +124,6 @@ open class SourceManager(private val context: Context) {
         exSrcs += NHentai(context)
         exSrcs += Hitomi()
         exSrcs += EightMuses()
-        exSrcs += HBrowse()
         return exSrcs
     }
 

@@ -15,7 +15,7 @@ https://discord.gg/mihon
 > if some of these sound interesting, feel free to open a pull request. thanks!
   
 ### dead source removal + delegation
-- [ ] remove hbrowse (dead)
+- [x] remove hbrowse (dead)
 - [ ] remove perveden (dead)
 - [ ] delegate 8muses
 - [ ] delegate hitomi

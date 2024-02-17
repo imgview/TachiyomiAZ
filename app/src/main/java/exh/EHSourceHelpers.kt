@@ -22,7 +22,6 @@ val PURURIN_SOURCE_ID = delegatedSourceId<Pururin>()
 val TSUMINO_SOURCE_ID = delegatedSourceId<Tsumino>()
 const val HITOMI_SOURCE_ID = LEWD_SOURCE_SERIES + 10
 const val EIGHTMUSES_SOURCE_ID = LEWD_SOURCE_SERIES + 11
-const val HBROWSE_SOURCE_ID = LEWD_SOURCE_SERIES + 12
 const val MERGED_SOURCE_ID = LEWD_SOURCE_SERIES + 69
 
 private val DELEGATED_LEWD_SOURCES = listOf(
@@ -58,4 +57,4 @@ fun isLewdSource(source: Long) = source in 6900..6999 ||
 
 fun Source.isEhBasedSource() = id == EH_SOURCE_ID || id == EXH_SOURCE_ID
 
-fun Source.isNamespaceSource() = id == EH_SOURCE_ID || id == EXH_SOURCE_ID || id == NHENTAI_SOURCE_ID || id == HITOMI_SOURCE_ID || id == PURURIN_SOURCE_ID || id == TSUMINO_SOURCE_ID || id == EIGHTMUSES_SOURCE_ID || id == HBROWSE_SOURCE_ID
+fun Source.isNamespaceSource() = id == EH_SOURCE_ID || id == EXH_SOURCE_ID || id == NHENTAI_SOURCE_ID || id == HITOMI_SOURCE_ID || id == PURURIN_SOURCE_ID || id == TSUMINO_SOURCE_ID || id == EIGHTMUSES_SOURCE_ID

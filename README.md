@@ -16,7 +16,7 @@ https://discord.gg/mihon
   
 ### dead source removal + delegation
 - [x] remove hbrowse (dead)
-- [ ] remove perveden (dead)
+- [x] remove perveden (dead)
 - [ ] delegate 8muses
 - [ ] delegate hitomi
 ### fix

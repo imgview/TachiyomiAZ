@@ -207,16 +207,6 @@ object EXHMigrations {
             manga.source = NHENTAI_SOURCE_ID
         }
 
-        // Allow importing of English PervEden extension backups
-        if (manga.source in BlacklistedSources.PERVEDEN_EN_EXT_SOURCES) {
-            manga.source = PERV_EDEN_EN_SOURCE_ID
-        }
-
-        // Allow importing of Italian PervEden extension backups
-        if (manga.source in BlacklistedSources.PERVEDEN_IT_EXT_SOURCES) {
-            manga.source = PERV_EDEN_IT_SOURCE_ID
-        }
-
         // Allow importing of EHentai extension backups
         if (manga.source in BlacklistedSources.EHENTAI_EXT_SOURCES) {
             manga.source = EH_SOURCE_ID

@@ -266,16 +266,6 @@
                     android:pathPrefix="/g/"
                     android:scheme="https" />
 
-                <!-- Perv Eden -->
-                <data
-                    android:host="www.perveden.com"
-                    android:pathPattern="/.*/.*-manga/.*"
-                    android:scheme="http" />
-                <data
-                    android:host="www.perveden.com"
-                    android:pathPattern="/.*/.*-manga/.*"
-                    android:scheme="https" />
-
                 <!-- Hentai Cafe -->
                 <data
                     android:host="hentai.cafe"

@@ -54,8 +54,6 @@ import exh.EXHMigrations
 import exh.EXH_SOURCE_ID
 import exh.HITOMI_SOURCE_ID
 import exh.NHENTAI_SOURCE_ID
-import exh.PERV_EDEN_EN_SOURCE_ID
-import exh.PERV_EDEN_IT_SOURCE_ID
 import exh.eh.EHentaiUpdateWorker
 import exh.source.BlacklistedSources
 import exh.uconfig.WarnConfigureDialogController
@@ -277,12 +275,6 @@ class MainActivity : BaseActivity<MainActivityBinding>() {
             }
             if (EXH_SOURCE_ID !in BlacklistedSources.HIDDEN_SOURCES) {
                 BlacklistedSources.HIDDEN_SOURCES += EXH_SOURCE_ID
-            }
-            if (PERV_EDEN_EN_SOURCE_ID !in BlacklistedSources.HIDDEN_SOURCES) {
-                BlacklistedSources.HIDDEN_SOURCES += PERV_EDEN_EN_SOURCE_ID
-            }
-            if (PERV_EDEN_IT_SOURCE_ID !in BlacklistedSources.HIDDEN_SOURCES) {
-                BlacklistedSources.HIDDEN_SOURCES += PERV_EDEN_IT_SOURCE_ID
             }
             if (NHENTAI_SOURCE_ID !in BlacklistedSources.HIDDEN_SOURCES) {
                 BlacklistedSources.HIDDEN_SOURCES += NHENTAI_SOURCE_ID

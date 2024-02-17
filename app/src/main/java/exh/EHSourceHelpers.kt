@@ -14,8 +14,6 @@ import eu.kanade.tachiyomi.source.online.english.Tsumino
 const val LEWD_SOURCE_SERIES = 6900L
 const val EH_SOURCE_ID = LEWD_SOURCE_SERIES + 1
 const val EXH_SOURCE_ID = LEWD_SOURCE_SERIES + 2
-const val PERV_EDEN_EN_SOURCE_ID = LEWD_SOURCE_SERIES + 5
-const val PERV_EDEN_IT_SOURCE_ID = LEWD_SOURCE_SERIES + 6
 const val NHENTAI_SOURCE_ID = LEWD_SOURCE_SERIES + 7
 val HENTAI_CAFE_SOURCE_ID = delegatedSourceId<HentaiCafe>()
 val PURURIN_SOURCE_ID = delegatedSourceId<Pururin>()

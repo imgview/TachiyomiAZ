@@ -13,16 +13,12 @@ import eu.kanade.tachiyomi.source.online.all.EHentai
 import eu.kanade.tachiyomi.source.online.all.Hitomi
 import eu.kanade.tachiyomi.source.online.all.MergedSource
 import eu.kanade.tachiyomi.source.online.all.NHentai
-import eu.kanade.tachiyomi.source.online.all.PervEden
 import eu.kanade.tachiyomi.source.online.english.EightMuses
 import eu.kanade.tachiyomi.source.online.english.HentaiCafe
 import eu.kanade.tachiyomi.source.online.english.Pururin
 import eu.kanade.tachiyomi.source.online.english.Tsumino
 import exh.EH_SOURCE_ID
 import exh.EXH_SOURCE_ID
-import exh.PERV_EDEN_EN_SOURCE_ID
-import exh.PERV_EDEN_IT_SOURCE_ID
-import exh.metadata.metadata.PervEdenLang
 import exh.source.BlacklistedSources
 import exh.source.DelegatedHttpSource
 import exh.source.EnhancedHttpSource
@@ -119,8 +115,6 @@ open class SourceManager(private val context: Context) {
         if (prefs.enableExhentai().get()) {
             exSrcs += EHentai(EXH_SOURCE_ID, true, context)
         }
-        exSrcs += PervEden(PERV_EDEN_EN_SOURCE_ID, PervEdenLang.en)
-        exSrcs += PervEden(PERV_EDEN_IT_SOURCE_ID, PervEdenLang.it)
         exSrcs += NHentai(context)
         exSrcs += Hitomi()
         exSrcs += EightMuses()

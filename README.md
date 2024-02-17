@@ -21,7 +21,8 @@ https://discord.gg/mihon
 - [ ] delegate hitomi
 ### fix
 - [ ] https://github.com/mihonapp/mihon/commit/d6c4af89c4a2df213f06ed4c3d714a2608117afb
-- [ ] switch from glide to coil, and use tachiyomi's image decoder
+~~- [ ] switch from glide to coil, and use tachiyomi's image decoder~~
+- [x] include tachiyomi's image decoder for exts to use, support AVIF and HEIC
 - [ ] recognize CBZ downloads in UI, not only in badges
 - [ ] fix smart background (steal from j2k)
 - [ ] chapter list: current page progress same color as scanlator group

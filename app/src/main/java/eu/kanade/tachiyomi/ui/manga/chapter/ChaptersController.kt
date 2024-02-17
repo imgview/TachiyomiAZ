@@ -117,7 +117,7 @@ class ChaptersController :
                 if (item != null) {
                     // Create animation listener
                     val revealAnimationListener: Animator.AnimatorListener = object : AnimatorListenerAdapter() {
-                        override fun onAnimationStart(animation: Animator?) {
+                        override fun onAnimationStart(animation: Animator) {
                             openChapter(item.chapter, true)
                         }
                     }
@@ -183,7 +183,7 @@ class ChaptersController :
 
         if (filterSet) {
             val filterColor = activity!!.getResourceColor(R.attr.colorFilterActive)
-            DrawableCompat.setTint(menu.findItem(R.id.action_filter).icon, filterColor)
+            menu.findItem(R.id.action_filter).icon?.let { DrawableCompat.setTint(it, filterColor) }
         }
 
         // Only show remove filter option if there's a filter set.

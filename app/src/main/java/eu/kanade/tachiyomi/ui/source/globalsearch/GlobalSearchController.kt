@@ -112,13 +112,13 @@ open class GlobalSearchController(
         searchView.maxWidth = Int.MAX_VALUE
 
         searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
-            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
                 searchView.onActionViewExpanded() // Required to show the query in the view
                 searchView.setQuery(presenter.query, false)
                 return true
             }
 
-            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
                 return true
             }
         })

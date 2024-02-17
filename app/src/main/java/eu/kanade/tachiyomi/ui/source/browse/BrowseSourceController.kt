@@ -376,13 +376,13 @@ open class BrowseSourceController(bundle: Bundle) :
 
         // Setup filters button
         menu.findItem(R.id.action_set_filter).apply {
-            icon.mutate()
+            icon?.mutate()
             if (presenter.sourceFilters.isEmpty()) {
 //                isEnabled = false [EXH]
-                icon.alpha = 128
+                icon?.alpha = 128
             } else {
 //                isEnabled = true [EXH]
-                icon.alpha = 255
+                icon?.alpha = 255
             }
         }
 

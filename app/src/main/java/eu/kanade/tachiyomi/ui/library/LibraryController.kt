@@ -415,7 +415,7 @@ class LibraryController(
         searchItem.fixExpand(onExpand = { invalidateMenuOnExpand() })
 
         // Mutate the filter icon because it needs to be tinted and the resource is shared.
-        menu.findItem(R.id.action_filter).icon.mutate()
+        menu.findItem(R.id.action_filter).icon?.mutate()
 
         menu.findItem(R.id.action_sync_favorites).isVisible = preferences.eh_isHentaiEnabled().get()
     }
@@ -432,7 +432,7 @@ class LibraryController(
         // Tint icon if there's a filter active
         if (navView.hasActiveFilters()) {
             val filterColor = activity!!.getResourceColor(R.attr.colorFilterActive)
-            DrawableCompat.setTint(filterItem.icon, filterColor)
+            filterItem.icon?.let { DrawableCompat.setTint(it, filterColor) }
         }
     }
 

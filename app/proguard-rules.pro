@@ -15,6 +15,7 @@
 -keep,allowoptimization class kotlinx.serialization.** { *; }
 -keep,allowoptimization class kotlinx.coroutines.** { public protected *; }
 -keep,allowoptimization class kotlin.time.** { public protected *; }
+-keep,allowoptimization class tachiyomi.decoder.** { *; }
 
 # === Keep EH classes
 -keep class exh.** { *; }

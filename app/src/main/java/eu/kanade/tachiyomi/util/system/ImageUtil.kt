@@ -53,18 +53,43 @@ object ImageUtil {
             if (bytes.compareWith("RIFF".toByteArray())) {
                 return ImageType.WEBP
             }
-        } catch (e: Exception) {
+            if (bytes.compareWith("ftyp".toByteArray(), 4)) {
+                if (bytes.compareWith("avi".toByteArray(), 8)) {
+                    return ImageType.AVIF
+                } else if (bytes.getSlice(8, 4).comparesWithAnyOf(
+                    listOf(
+                        "hei".toByteArray(),
+                        "mif1".toByteArray(),
+                        "hev".toByteArray()
+                    )
+                )
+                ) {
+                    return ImageType.HEIF
+                }
+            }
+        } catch (_: Exception) {
         }
         return null
     }
 
-    private fun ByteArray.compareWith(magic: ByteArray): Boolean {
+    private fun ByteArray.comparesWithAnyOf(magics: List<ByteArray>): Boolean {
+        for (x in magics) {
+            if (this.compareWith(x)) {
+                return true
+            }
+        }
+        return false
+    }
+    private fun ByteArray.compareWith(magic: ByteArray, offset: Int = 0): Boolean {
         for (i in magic.indices) {
-            if (this[i] != magic[i]) return false
+            if (this[i + offset] != magic[i]) return false
         }
         return true
     }
 
+    private fun ByteArray.getSlice(offset: Int, length: Int): ByteArray {
+        return this.slice(IntRange(offset, offset + length - 1)).toByteArray()
+    }
     private fun charByteArrayOf(vararg bytes: Int): ByteArray {
         return ByteArray(bytes.size).apply {
             for (i in bytes.indices) {
@@ -77,7 +102,9 @@ object ImageUtil {
         JPG("image/jpeg", "jpg"),
         PNG("image/png", "png"),
         GIF("image/gif", "gif"),
-        WEBP("image/webp", "webp")
+        WEBP("image/webp", "webp"),
+        HEIF("image/heif", "heif"),
+        AVIF("image/avif", "avif"),
     }
 
     // SY -->

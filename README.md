@@ -22,7 +22,8 @@ https://discord.gg/mihon
 ### fix
 - [x] https://github.com/mihonapp/mihon/commit/d6c4af89c4a2df213f06ed4c3d714a2608117afb
 - [x] ~~switch from glide to coil, and use tachiyomi's image decoder~~
-- [x] include tachiyomi's image decoder for exts to use, support AVIF and HEIC
+- [x] ~~include tachiyomi's image decoder for exts to use, support AVIF and HEIC~~
+- [x] include tachiyomi's image decoder as a decoder for glide, supporting AVIF, HEIC, and JXL!
 - [ ] recognize CBZ downloads in UI, not only in badges
 - [ ] fix smart background (steal from j2k)
 - [ ] chapter list: current page progress same color as scanlator group

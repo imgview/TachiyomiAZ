@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.glide
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import com.bumptech.glide.Glide
 import com.bumptech.glide.GlideBuilder
@@ -15,6 +16,7 @@ import com.bumptech.glide.module.AppGlideModule
 import com.bumptech.glide.request.RequestOptions
 import eu.kanade.tachiyomi.network.NetworkHelper
 import java.io.InputStream
+import java.nio.ByteBuffer
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -50,6 +52,18 @@ class TachiGlideModule : AppGlideModule() {
             InputStream::class.java,
             InputStream::class.java,
             PassthroughModelLoader.Factory()
+        )
+
+        registry.prepend(
+            ByteBuffer::class.java,
+            Bitmap::class.java,
+            TachiyomiImageDecoderGlideWrapper.ByteBufferDecoder(glide.bitmapPool)
+        )
+
+        registry.prepend(
+            InputStream::class.java,
+            Bitmap::class.java,
+            TachiyomiImageDecoderGlideWrapper.InputStreamDecoder(glide.bitmapPool)
         )
     }
 }

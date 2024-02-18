@@ -152,7 +152,7 @@ dependencies {
 
 
     // Modified dependencies
-    implementation 'com.github.tachiyomiorg:subsampling-scale-image-view:6caf219'
+    implementation 'com.github.tachiyomiorg:subsampling-scale-image-view:7e57335'
     implementation 'com.github.inorichi:junrar-android:634c1f5'
 
     // Android support library

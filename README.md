@@ -20,6 +20,7 @@ https://discord.gg/mihon
 - [ ] delegate 8muses
 - [ ] delegate hitomi
 ### fix
+- [ ] extension prefs are applied incorrectly in multi src exts
 - [x] https://github.com/mihonapp/mihon/commit/d6c4af89c4a2df213f06ed4c3d714a2608117afb
 - [x] ~~switch from glide to coil, and use tachiyomi's image decoder~~
 - [x] ~~include tachiyomi's image decoder for exts to use, support AVIF and HEIC~~

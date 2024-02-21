@@ -37,6 +37,7 @@ https://discord.gg/mihon
 - [ ] re-order per-source downloads
 - [ ] j2k: editing manga info - [j2k commit](https://github.com/Jays2Kings/tachiyomiJ2K/commit/d3ec230d4baa8584118dc30807728305715db25b)
 - [ ] j2k: reader: add chapter list view
+- [ ] [add comicinfo xml stuff](https://github.com/mihonapp/mihon/commit/1395343f116bfbc9c3ee04eed372299ea36aa22d)
 ### maybe
 - [ ] add quick shortcut to extension repos in "Extensions" tab
 - [ ] improve internals

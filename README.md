@@ -31,7 +31,7 @@ https://discord.gg/mihon
 - [ ] extension repo list: remove category icon, add left-right padding
 - [x] rgb filter corrupted preview image ~~(remove?)~~ replace with fox girl drawing
 ### match stable/j2k
-- [ ] change zip/rar stuff [mihon commit](https://github.com/mihonapp/mihon/commit/0da7ad6f1a15e8462d8270fc36ea9f135c3b8d290)
+- [ ] change zip/rar stuff [mihon commit](https://github.com/mihonapp/mihon/commit/0da7ad6f1a15e8462d8270fc36ea9f135c3b8d29)
 - [ ] allow downloading in CBZ
 - [x] ~~extlib 1.5 (migrate rx to coroutines)~~ 1.5 isn't happening, but I *did* migrate pagers to coroutine, fixing the pixiv ext
 - [ ] re-order per-source downloads

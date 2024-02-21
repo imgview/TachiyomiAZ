@@ -81,7 +81,7 @@ class SettingsAboutController : SettingsController() {
         }
         preference {
             titleRes = R.string.website
-            val url = "https://tachiyomi.org"
+            val url = "https://crafty.moe/tachiAZ.htm"
             summary = url
             onClick {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -90,7 +90,7 @@ class SettingsAboutController : SettingsController() {
         }
         preference {
             title = "Discord"
-            val url = "https://discord.gg/tachiyomi"
+            val url = "https://discord.gg/mihon"
             summary = url
             onClick {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))

@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
+import android.content.Context
+import android.os.Build
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -8,6 +10,8 @@ import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
+import eu.kanade.tachiyomi.util.storage.openReadOnlyChannel
+import eu.kanade.tachiyomi.util.storage.toInputStream
 import exh.debug.DebugFunctions.prefs
 import rx.Completable
 import rx.Observable
@@ -19,6 +23,7 @@ import timber.log.Timber
  * Loader used to retrieve the [PageLoader] for a given chapter.
  */
 class ChapterLoader(
+    private val context: Context,
     private val downloadManager: DownloadManager,
     private val manga: Manga,
     private val source: Source
@@ -99,9 +104,24 @@ class ChapterLoader(
             source is LocalSource -> source.getFormat(chapter.chapter).let { format ->
                 when (format) {
                     is LocalSource.Format.Directory -> DirectoryPageLoader(format.file)
-                    is LocalSource.Format.Zip -> ZipPageLoader(format.file)
-                    is LocalSource.Format.Rar -> RarPageLoader(format.file)
-                    is LocalSource.Format.Epub -> EpubPageLoader(format.file)
+                    is LocalSource.Format.Rar ->
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            RarPageLoader(format.file.openReadOnlyChannel(context).toInputStream())
+                        } else {
+                            RarPageLoader(format.file)
+                        }
+                    is LocalSource.Format.Zip ->
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            ZipPageLoader(format.file.openReadOnlyChannel(context))
+                        } else {
+                            ZipPageLoaderCompat(format.file)
+                        }
+                    is LocalSource.Format.Epub ->
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            EpubPageLoader(format.file.openReadOnlyChannel(context))
+                        } else {
+                            EpubPageLoaderCompat(format.file)
+                        }
                 }
             }
             else -> error("Loader not implemented")

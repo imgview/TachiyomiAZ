@@ -43,7 +43,7 @@
 -keep interface kotlinx.serialization.** { *; }
 
 -keepattributes *Annotation*, InnerClasses
--dontnote kotlinx.serialization.AnnotationsKt # core serialization annotations
+-dontnote kotlinx.serialization.** # core serialization annotations
 
 # kotlinx-serialization-json specific. Add this if you have java.lang.NoClassDefFoundError kotlinx.serialization.json.JsonObjectSerializer
 -keepclassmembers class kotlinx.serialization.json.** {
@@ -76,6 +76,10 @@
 -keepclasseswithmembers class xyz.nulldev.ts.api.http.serializer.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
+
+# Apache Commons Compress
+-keep class * extends org.apache.commons.compress.archivers.zip.ZipExtraField { <init>(); }
+-keep,allowoptimization class org.apache.compress.archivers.** { *; }
 
 # Madokami extension username and password crash fix
 -keepclassmembers class androidx.preference.EditTextPreference {

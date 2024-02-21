@@ -102,6 +102,7 @@ android {
     }
 
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility 1.8
         targetCompatibility 1.8
     }
@@ -146,6 +147,8 @@ kapt {
 }
 
 dependencies {
+    //desugaring
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs_nio:2.0.4'
 
     // Anime dependencies (AZ)
     //implementation 'com.google.android.exoplayer:exoplayer:2.12.2'
@@ -153,7 +156,13 @@ dependencies {
 
     // Modified dependencies
     implementation 'com.github.tachiyomiorg:subsampling-scale-image-view:7e57335'
-    implementation 'com.github.inorichi:junrar-android:634c1f5'
+
+    //compression dependencies
+    implementation 'com.github.junrar:junrar:7.5.5'
+    implementation ('org.apache.commons:commons-compress:1.24.0') {
+        //exclude module: 'commons-io'
+        //exclude module: 'commons-lang3'
+    }
 
     // Android support library
     implementation 'androidx.appcompat:appcompat:1.2.0'

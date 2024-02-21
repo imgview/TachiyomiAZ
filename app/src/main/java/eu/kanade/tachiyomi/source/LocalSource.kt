@@ -1,9 +1,10 @@
 package eu.kanade.tachiyomi.source
 
 import android.content.Context
+import android.os.Build
+import com.github.junrar.Archive
 import com.google.gson.JsonParser
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.toMangaInfo
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
@@ -17,22 +18,23 @@ import eu.kanade.tachiyomi.util.lang.compareToCaseInsensitiveNaturalOrder
 import eu.kanade.tachiyomi.util.lang.runAsObservable
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.EpubFile
+import eu.kanade.tachiyomi.util.storage.EpubFileCompat
+import eu.kanade.tachiyomi.util.storage.openReadOnlyChannel
+import eu.kanade.tachiyomi.util.storage.toInputStream
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.util.Locale
 import java.util.concurrent.TimeUnit
-import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
-import junrar.Archive
-import junrar.rarfile.FileHeader
+import java.util.zip.ZipFile as ZipFileCompat
+import org.apache.commons.compress.archivers.zip.ZipFile
 import rx.Observable
 import timber.log.Timber
 
 class LocalSource(private val context: Context) : CatalogueSource {
     companion object {
-        const val HELP_URL = "https://tachiyomi.org/help/guides/reading-local-manga/"
+        const val HELP_URL = "https://mihon.app/docs/guides/local-source/"
 
         private const val COVER_NAME = "cover.jpg"
         private val POPULAR_FILTERS = FilterList(OrderBy())
@@ -121,7 +123,11 @@ class LocalSource(private val context: Context) : CatalogueSource {
                     val chapter = chapters.last()
                     val format = getFormat(chapter)
                     if (format is Format.Epub) {
-                        EpubFile(format.file).use { epub ->
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            EpubFile(format.file.openReadOnlyChannel(context))
+                        } else {
+                            EpubFile(format.file)
+                        }.use { epub ->
                             epub.fillMangaMetadata(this)
                         }
                     }
@@ -181,7 +187,11 @@ class LocalSource(private val context: Context) : CatalogueSource {
 
                     val format = getFormat(this)
                     if (format is Format.Epub) {
-                        EpubFile(format.file).use { epub ->
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            EpubFile(format.file.openReadOnlyChannel(context))
+                        } else {
+                            EpubFile(format.file)
+                        }.use { epub ->
                             epub.fillChapterMetadata(this)
                         }
                     }
@@ -241,7 +251,7 @@ class LocalSource(private val context: Context) : CatalogueSource {
     }
 
     private fun isSupportedFile(extension: String): Boolean {
-        return extension.toLowerCase() in setOf("zip", "rar", "cbr", "cbz", "epub")
+        return extension.lowercase() in setOf("zip", "rar", "cbr", "cbz", "epub")
     }
 
     fun getFormat(chapter: SChapter): Format {
@@ -275,36 +285,56 @@ class LocalSource(private val context: Context) : CatalogueSource {
         return when (val format = getFormat(chapter)) {
             is Format.Directory -> {
                 val entry = format.file.listFiles()
-                    .sortedWith(Comparator<File> { f1, f2 -> f1.name.compareToCaseInsensitiveNaturalOrder(f2.name) })
-                    .find { !it.isDirectory && ImageUtil.isImage(it.name) { FileInputStream(it) } }
+                    ?.sortedWith { f1, f2 -> f1.name.compareToCaseInsensitiveNaturalOrder(f2.name) }
+                    ?.find { !it.isDirectory && ImageUtil.isImage(it.name) { FileInputStream(it) } }
 
                 entry?.let { updateCover(context, manga, it.inputStream()) }
             }
             is Format.Zip -> {
-                ZipFile(format.file).use { zip ->
-                    val entry = zip.entries().toList()
-                        .sortedWith(Comparator<ZipEntry> { f1, f2 -> f1.name.compareToCaseInsensitiveNaturalOrder(f2.name) })
-                        .find { !it.isDirectory && ImageUtil.isImage(it.name) { zip.getInputStream(it) } }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    ZipFile(format.file.openReadOnlyChannel(context)).use { zip ->
+                        val entry = zip.entries.toList()
+                            .sortedWith { f1, f2 -> f1.name.compareToCaseInsensitiveNaturalOrder(f2.name) }
+                            .find { !it.isDirectory && ImageUtil.isImage(it.name) { zip.getInputStream(it) } }
 
-                    entry?.let { updateCover(context, manga, zip.getInputStream(it)) }
+                        entry?.let { updateCover(context, manga, zip.getInputStream(it)) }
+                    }
+                } else {
+                    ZipFileCompat(format.file).use { zip ->
+                        val entry = zip.entries().toList()
+                            .sortedWith { f1, f2 -> f1.name.compareToCaseInsensitiveNaturalOrder(f2.name) }
+                            .find { !it.isDirectory && ImageUtil.isImage(it.name) { zip.getInputStream(it) } }
+
+                        entry?.let { updateCover(context, manga, zip.getInputStream(it)) }
+                    }
                 }
             }
             is Format.Rar -> {
-                Archive(format.file).use { archive ->
+                Archive(format.file.openReadOnlyChannel(context).toInputStream()).use { archive ->
                     val entry = archive.fileHeaders
-                        .sortedWith(Comparator<FileHeader> { f1, f2 -> f1.fileNameString.compareToCaseInsensitiveNaturalOrder(f2.fileNameString) })
-                        .find { !it.isDirectory && ImageUtil.isImage(it.fileNameString) { archive.getInputStream(it) } }
+                        .sortedWith { f1, f2 -> f1.fileName.compareToCaseInsensitiveNaturalOrder(f2.fileName) }
+                        .find { !it.isDirectory && ImageUtil.isImage(it.fileName) { archive.getInputStream(it) } }
 
                     entry?.let { updateCover(context, manga, archive.getInputStream(it)) }
                 }
             }
             is Format.Epub -> {
-                EpubFile(format.file).use { epub ->
-                    val entry = epub.getImagesFromPages()
-                        .firstOrNull()
-                        ?.let { epub.getEntry(it) }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    EpubFile(format.file.openReadOnlyChannel(context)).use { epub ->
+                        val entry = epub.getImagesFromPages()
+                            .firstOrNull()
+                            ?.let { epub.getEntry(it) }
 
-                    entry?.let { updateCover(context, manga, epub.getInputStream(it)) }
+                        entry?.let { updateCover(context, manga, epub.getInputStream(it)) }
+                    }
+                } else {
+                    EpubFileCompat(format.file).use { epub ->
+                        val entry = epub.getImagesFromPages()
+                            .firstOrNull()
+                            ?.let { epub.getEntry(it) }
+
+                        entry?.let { updateCover(context, manga, epub.getInputStream(it)) }
+                    }
                 }
             }
         }

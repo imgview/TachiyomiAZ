@@ -2,18 +2,16 @@ package eu.kanade.tachiyomi.ui.reader.loader
 
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
-import eu.kanade.tachiyomi.util.storage.EpubFile
+import eu.kanade.tachiyomi.util.storage.EpubFileCompat
 import java.io.File
-import java.nio.channels.SeekableByteChannel
 import rx.Observable
 
 /**
  * Loader used to load a chapter from a .epub file.
  */
-class EpubPageLoader(private val epub: EpubFile) : PageLoader() {
+class EpubPageLoaderCompat(private val epub: EpubFileCompat) : PageLoader() {
 
-    constructor(channel: SeekableByteChannel) : this(EpubFile(channel))
-    constructor(file: File) : this(EpubFile(file))
+    constructor(file: File) : this(EpubFileCompat(file))
 
     /**
      * Recycles this loader and the open zip.

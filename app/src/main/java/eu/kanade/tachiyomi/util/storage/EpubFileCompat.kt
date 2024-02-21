@@ -5,21 +5,18 @@ import eu.kanade.tachiyomi.source.model.SManga
 import java.io.Closeable
 import java.io.File
 import java.io.InputStream
-import java.nio.channels.SeekableByteChannel
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Locale
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
-import org.apache.commons.compress.archivers.zip.ZipFile
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
 /**
  * Wrapper over ZipFile to load files in epub format.
  */
-class EpubFile(private val zip: ZipFile) : Closeable {
-
-    constructor(channel: SeekableByteChannel) : this(ZipFile(channel))
+class EpubFileCompat(private val zip: ZipFile) : Closeable {
     constructor(file: File) : this(ZipFile(file))
 
     /**
@@ -37,14 +34,14 @@ class EpubFile(private val zip: ZipFile) : Closeable {
     /**
      * Returns an input stream for reading the contents of the specified zip file entry.
      */
-    fun getInputStream(entry: ZipArchiveEntry): InputStream {
+    fun getInputStream(entry: ZipEntry): InputStream {
         return zip.getInputStream(entry)
     }
 
     /**
      * Returns the zip file entry for the specified name, or null if not found.
      */
-    fun getEntry(name: String): ZipArchiveEntry? {
+    fun getEntry(name: String): ZipEntry? {
         return zip.getEntry(name)
     }
 

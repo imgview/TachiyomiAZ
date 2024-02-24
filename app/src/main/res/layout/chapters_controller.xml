@@ -28,15 +28,13 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:clipToPadding="false"
-            android:descendantFocusability="blocksDescendants"
+            android:descendantFocusability="afterDescendants"
             android:paddingBottom="@dimen/fab_list_padding"
             tools:listitem="@layout/chapters_item" />
 
     </eu.kanade.tachiyomi.widget.ThemedSwipeRefreshLayout>
 
     <eu.davidea.fastscroller.FastScroller
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/fast_scroller"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"

@@ -155,7 +155,9 @@ dependencies {
 
 
     // Modified dependencies
-    implementation 'com.github.tachiyomiorg:subsampling-scale-image-view:7e57335'
+    implementation ('com.github.tachiyomiorg:subsampling-scale-image-view:7e57335') {
+        exclude module: 'image-decoder'
+    }
 
     //compression dependencies
     implementation 'com.github.junrar:junrar:7.5.5'
@@ -269,7 +271,7 @@ dependencies {
     //implementation "com.github.bumptech.glide:avif-integration:$glide_version"
     implementation "com.github.bumptech.glide:okhttp3-integration:$glide_version"
     kapt "com.github.bumptech.glide:compiler:$glide_version"
-    implementation "com.github.tachiyomiorg:image-decoder:fbd6601290" //for some exts
+    implementation "com.github.az4521:tachiyomi-image-decoder:563006cf82"
 
     // Logging
     implementation 'com.jakewharton.timber:timber:4.7.1'

@@ -3,7 +3,6 @@ package exh.util
 import eu.kanade.tachiyomi.data.database.models.Manga
 import exh.EH_SOURCE_ID
 import exh.EXH_SOURCE_ID
-import exh.HITOMI_SOURCE_ID
 import exh.NHENTAI_SOURCE_ID
 import exh.PURURIN_SOURCE_ID
 import exh.TSUMINO_SOURCE_ID
@@ -12,11 +11,10 @@ import java.util.Locale
 
 class SourceTagsUtil {
     fun getWrappedTag(sourceId: Long, namespace: String? = null, tag: String? = null, fullTag: String? = null): String? {
-        return if (sourceId == EXH_SOURCE_ID || sourceId == EH_SOURCE_ID || sourceId == NHENTAI_SOURCE_ID || sourceId == HITOMI_SOURCE_ID) {
+        return if (sourceId == EXH_SOURCE_ID || sourceId == EH_SOURCE_ID || sourceId == NHENTAI_SOURCE_ID) {
             val parsed = if (fullTag != null) parseTag(fullTag) else if (namespace != null && tag != null) RaisedTag(namespace, tag, TAG_TYPE_DEFAULT) else null
             if (parsed?.namespace != null) {
                 when (sourceId) {
-                    HITOMI_SOURCE_ID -> wrapTagHitomi(parsed.namespace, parsed.name.substringBefore('|').trim())
                     NHENTAI_SOURCE_ID -> wrapTagNHentai(parsed.namespace, parsed.name.substringBefore('|').trim())
                     PURURIN_SOURCE_ID -> parsed.name.substringBefore('|').trim()
                     TSUMINO_SOURCE_ID -> parsed.name.substringBefore('|').trim()
@@ -31,13 +29,6 @@ class SourceTagsUtil {
     } else {
         "$namespace:$tag$"
     }
-
-    private fun wrapTagHitomi(namespace: String, tag: String) = if (tag.contains(' ')) {
-        "$namespace:$tag".replace("\\s".toRegex(), "_")
-    } else {
-        "$namespace:$tag"
-    }
-
     private fun wrapTagNHentai(namespace: String, tag: String) = if (tag.contains(' ')) {
         if (namespace == "tag") {
             "\"$tag\""

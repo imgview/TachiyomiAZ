@@ -190,6 +190,19 @@ object EXHMigrations {
                                 .affectsTables(MangaTable.TABLE)
                                 .build()
                         )
+                        // Migrate Hitomi source IDs
+                        db.lowLevel().executeSQL(
+                            RawQuery.builder()
+                                .query(
+                                    """
+                                    UPDATE ${MangaTable.TABLE}
+                                        SET ${MangaTable.COL_SOURCE} = $HITOMI_SOURCE_ID
+                                        WHERE ${MangaTable.COL_SOURCE} = 6910
+                                    """.trimIndent()
+                                )
+                                .affectsTables(MangaTable.TABLE)
+                                .build()
+                        )
                     }
                 }
 
@@ -214,6 +227,11 @@ object EXHMigrations {
         // Migrate Tsumino source IDs
         if (manga.source == 6909L) {
             manga.source = TSUMINO_SOURCE_ID
+        }
+
+        // Migrate Hitomi source IDs
+        if (manga.source == 6910L) {
+            manga.source = HITOMI_SOURCE_ID
         }
 
         // Migrate 8Muses source IDs

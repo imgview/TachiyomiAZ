@@ -19,7 +19,6 @@ import eu.kanade.tachiyomi.util.lang.launchNow
 import eu.kanade.tachiyomi.util.system.toast
 import exh.EH_SOURCE_ID
 import exh.EXH_SOURCE_ID
-import exh.HITOMI_SOURCE_ID
 import exh.MERGED_SOURCE_ID
 import exh.NHENTAI_SOURCE_ID
 import exh.source.BlacklistedSources
@@ -79,7 +78,6 @@ class ExtensionManager(
             EH_SOURCE_ID -> context.getDrawable(R.mipmap.ic_ehentai_source)
             EXH_SOURCE_ID -> context.getDrawable(R.mipmap.ic_exhentai_source)
             NHENTAI_SOURCE_ID -> context.getDrawable(R.mipmap.ic_nhentai_source)
-            HITOMI_SOURCE_ID -> context.getDrawable(R.mipmap.ic_hitomi_source)
             MERGED_SOURCE_ID -> context.getDrawable(R.mipmap.ic_merged_source)
             else -> null
         }

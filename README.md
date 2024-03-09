@@ -15,8 +15,8 @@ https://discord.gg/mihon
 ### dead source removal + delegation
 - [x] remove hbrowse (dead)
 - [x] remove perveden (dead)
-- [ ] migrate 8muses
-- [ ] migrate hitomi
+- [x] migrate 8muses
+- [x] migrate hitomi
 ### fix
 - [ ] extension prefs are applied incorrectly in multi src exts
 - [ ] smart background doesn't work

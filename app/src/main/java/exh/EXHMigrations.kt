@@ -216,6 +216,11 @@ object EXHMigrations {
             manga.source = TSUMINO_SOURCE_ID
         }
 
+        // Migrate 8Muses source IDs
+        if (manga.source == 6911L) {
+            manga.source = EIGHTMUSES_SOURCE_ID
+        }
+
         // Migrate nhentai URLs
         if (manga.source == NHENTAI_SOURCE_ID) {
             manga.url = getUrlWithoutDomain(manga.url)

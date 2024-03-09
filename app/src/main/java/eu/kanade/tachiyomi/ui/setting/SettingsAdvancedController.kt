@@ -42,7 +42,6 @@ import eu.kanade.tachiyomi.util.system.isPackageInstalled
 import eu.kanade.tachiyomi.util.system.powerManager
 import eu.kanade.tachiyomi.util.system.toast
 import exh.EH_SOURCE_ID
-import exh.EIGHTMUSES_SOURCE_ID
 import exh.EXH_SOURCE_ID
 import exh.HITOMI_SOURCE_ID
 import exh.NHENTAI_SOURCE_ID
@@ -247,9 +246,6 @@ class SettingsAdvancedController : SettingsController() {
                         if (HITOMI_SOURCE_ID !in BlacklistedSources.HIDDEN_SOURCES) {
                             BlacklistedSources.HIDDEN_SOURCES += HITOMI_SOURCE_ID
                         }
-                        if (EIGHTMUSES_SOURCE_ID !in BlacklistedSources.HIDDEN_SOURCES) {
-                            BlacklistedSources.HIDDEN_SOURCES += EIGHTMUSES_SOURCE_ID
-                        }
                     } else {
                         if (EH_SOURCE_ID in BlacklistedSources.HIDDEN_SOURCES) {
                             BlacklistedSources.HIDDEN_SOURCES -= EH_SOURCE_ID
@@ -262,9 +258,6 @@ class SettingsAdvancedController : SettingsController() {
                         }
                         if (HITOMI_SOURCE_ID in BlacklistedSources.HIDDEN_SOURCES) {
                             BlacklistedSources.HIDDEN_SOURCES -= HITOMI_SOURCE_ID
-                        }
-                        if (EIGHTMUSES_SOURCE_ID in BlacklistedSources.HIDDEN_SOURCES) {
-                            BlacklistedSources.HIDDEN_SOURCES -= EIGHTMUSES_SOURCE_ID
                         }
                     }
                     true

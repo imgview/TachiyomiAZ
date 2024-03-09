@@ -174,6 +174,25 @@ object EXHMigrations {
                         LibraryUpdateJob.setupTask(context)
                     }
                 }
+
+                if (oldVersion < 8810) {
+                    db.inTransaction {
+                        // Migrate 8Muses source IDs
+                        db.lowLevel().executeSQL(
+                            RawQuery.builder()
+                                .query(
+                                    """
+                                    UPDATE ${MangaTable.TABLE}
+                                        SET ${MangaTable.COL_SOURCE} = $EIGHTMUSES_SOURCE_ID
+                                        WHERE ${MangaTable.COL_SOURCE} = 6911
+                                    """.trimIndent()
+                                )
+                                .affectsTables(MangaTable.TABLE)
+                                .build()
+                        )
+                    }
+                }
+
                 // TODO BE CAREFUL TO NOT FUCK UP MergedSources IF CHANGING URLs
 
                 preferences.eh_lastVersionCode().set(BuildConfig.VERSION_CODE)

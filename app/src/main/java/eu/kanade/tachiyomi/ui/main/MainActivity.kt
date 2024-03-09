@@ -49,7 +49,6 @@ import eu.kanade.tachiyomi.util.system.vibrate
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 import exh.EH_SOURCE_ID
-import exh.EIGHTMUSES_SOURCE_ID
 import exh.EXHMigrations
 import exh.EXH_SOURCE_ID
 import exh.HITOMI_SOURCE_ID
@@ -281,9 +280,6 @@ class MainActivity : BaseActivity<MainActivityBinding>() {
             }
             if (HITOMI_SOURCE_ID !in BlacklistedSources.HIDDEN_SOURCES) {
                 BlacklistedSources.HIDDEN_SOURCES += HITOMI_SOURCE_ID
-            }
-            if (EIGHTMUSES_SOURCE_ID !in BlacklistedSources.HIDDEN_SOURCES) {
-                BlacklistedSources.HIDDEN_SOURCES += EIGHTMUSES_SOURCE_ID
             }
         }
         // EXH <--

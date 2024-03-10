@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
+import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.ExtensionDetailControllerBinding
 import eu.kanade.tachiyomi.source.ConfigurableSource
@@ -17,13 +19,19 @@ import kotlinx.coroutines.flow.onEach
 import reactivecircus.flowbinding.android.view.clicks
 
 class ExtensionDetailsController(bundle: Bundle? = null) :
-    NucleusController<ExtensionDetailControllerBinding, ExtensionDetailsPresenter>(bundle) {
+    NucleusController<ExtensionDetailControllerBinding, ExtensionDetailsPresenter>(bundle),
+    FlexibleAdapter.OnItemClickListener {
 
     constructor(pkgName: String) : this(
         Bundle().apply {
             putString(PKGNAME_KEY, pkgName)
         }
     )
+
+    /**
+     * Adapter containing repo items.
+     */
+    private var adapter: ExtensionDetailsPrefsButtonAdapter? = null
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
         binding = ExtensionDetailControllerBinding.inflate(inflater)
@@ -69,11 +77,31 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
             binding.extensionWarningBanner.setText(R.string.redundant_extension_message)
         }
 
-        if (presenter.extension?.sources?.find { it is ConfigurableSource } != null) {
+        adapter = ExtensionDetailsPrefsButtonAdapter(this@ExtensionDetailsController)
+        binding.extensionDetailsRecycler.layoutManager = LinearLayoutManager(context)
+        binding.extensionDetailsRecycler.adapter = adapter
+        binding.extensionDetailsRecycler.setHasFixedSize(true)
+
+        adapter!!.updateDataSet(
+            presenter.extension?.sources?.filterIsInstance<ConfigurableSource>()
+                ?.map { ExtensionDetailsPrefsButtonItem(it.toString()) }
+        )
+
+        /*presenter.extension?.sources?.filterIsInstance<ConfigurableSource>()?.forEach { source ->
             binding.extensionPrefs.visible()
             binding.extensionPrefs.clicks()
-                .onEach { openPreferences() }
+                .onEach { openPreferences(source.id) }
                 .launchIn(scope)
+        }*/
+    }
+
+    override fun onItemClick(view: View?, position: Int): Boolean {
+        val id = presenter.extension?.sources?.filterIsInstance<ConfigurableSource>()?.get(position)?.id
+        return if (id != null) {
+            openPreferences(id)
+            true
+        } else {
+            false
         }
     }
 
@@ -81,9 +109,9 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         router.popCurrentController()
     }
 
-    private fun openPreferences() {
+    private fun openPreferences(sourceId: Long) {
         router.pushController(
-            ExtensionPreferencesController(presenter.extension!!.pkgName).withFadeTransaction()
+            ExtensionPreferencesController(sourceId).withFadeTransaction()
         )
     }
 

@@ -1,14 +1,15 @@
 package eu.kanade.tachiyomi.ui.extension
 
-import eu.kanade.tachiyomi.extension.ExtensionManager
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class ExtensionPreferencesPresenter(
-    val pkgName: String,
-    extensionManager: ExtensionManager = Injekt.get()
+    val sourceId: Long
 ) : BasePresenter<ExtensionPreferencesController>() {
 
-    val extension = extensionManager.installedExtensions.find { it.pkgName == pkgName }
+    private val sourceManager: SourceManager = Injekt.get()
+
+    val source = sourceManager.get(sourceId)
 }

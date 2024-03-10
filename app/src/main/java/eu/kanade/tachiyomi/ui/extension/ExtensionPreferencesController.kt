@@ -26,7 +26,8 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.SharedPreferencesDataStore
 import eu.kanade.tachiyomi.databinding.ExtensionPreferencesControllerBinding
 import eu.kanade.tachiyomi.source.ConfigurableSource
-import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.preferenceKey
+import eu.kanade.tachiyomi.source.sourcePreferences
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.util.preference.preferenceCategory
 import timber.log.Timber
@@ -41,9 +42,9 @@ class ExtensionPreferencesController(bundle: Bundle? = null) :
 
     private var preferenceScreen: PreferenceScreen? = null
 
-    constructor(pkgName: String) : this(
+    constructor(sourceId: Long) : this(
         Bundle().apply {
-            putString(PKGNAME_KEY, pkgName)
+            putLong(SOURCE_KEY, sourceId)
         }
     )
 
@@ -54,7 +55,7 @@ class ExtensionPreferencesController(bundle: Bundle? = null) :
     }
 
     override fun createPresenter(): ExtensionPreferencesPresenter {
-        return ExtensionPreferencesPresenter(args.getString(PKGNAME_KEY)!!)
+        return ExtensionPreferencesPresenter(args.getLong(SOURCE_KEY)!!)
     }
 
     override fun getTitle(): String? {
@@ -65,7 +66,7 @@ class ExtensionPreferencesController(bundle: Bundle? = null) :
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
 
-        val extension = presenter.extension ?: return
+        val source = presenter.source ?: return
         val context = view.context
 
         val themedContext by lazy { getPreferenceThemeContext() }
@@ -74,23 +75,20 @@ class ExtensionPreferencesController(bundle: Bundle? = null) :
         val screen = manager.createPreferenceScreen(themedContext)
         preferenceScreen = screen
 
-        val multiSource = extension.sources.size > 1
+        if (source is ConfigurableSource) {
+            try {
+                val dataStore = SharedPreferencesDataStore(
+                    sourcePreferences(source.preferenceKey())
+                )
+                manager.preferenceDataStore = dataStore
 
-        for (source in extension.sources) {
-            if (source is ConfigurableSource) {
-                try {
-                    // TODO
-                    val dataStore = SharedPreferencesDataStore(/*if (source is HttpSource) {
-                        source.preferences
-                        } else {*/
-                        context.getSharedPreferences("source_${source.id}", Context.MODE_PRIVATE)
-                        /*}*/
-                    )
-                    manager.preferenceDataStore = dataStore
-                    addPreferencesForSource(screen, source, multiSource)
-                } catch (e: AbstractMethodError) {
-                    Timber.e("Source did not implement [addPreferencesForSource]: ${source.name}")
+                screen.preferenceCategory {
+                    title = source.toString()
                 }
+
+                source.setupPreferenceScreen(screen)
+            } catch (e: AbstractMethodError) {
+                Timber.e("Source did not implement [addPreferencesForSource]: ${source.name}")
             }
         }
 
@@ -118,30 +116,6 @@ class ExtensionPreferencesController(bundle: Bundle? = null) :
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         lastOpenPreferencePosition = savedInstanceState.get(LASTOPENPREFERENCE_KEY) as? Int
-    }
-
-    private fun addPreferencesForSource(screen: PreferenceScreen, source: Source, multiSource: Boolean) {
-        val context = screen.context
-        if (source is ConfigurableSource) {
-            if (multiSource) {
-                screen.preferenceCategory {
-                    title = source.toString()
-                }
-            }
-
-            val newScreen = screen.preferenceManager.createPreferenceScreen(context)
-            source.setupPreferenceScreen(newScreen)
-
-            // Reparent the preferences
-            while (newScreen.preferenceCount != 0) {
-                val pref = newScreen.getPreference(0)
-                pref.isIconSpaceReserved = false
-                pref.order = Int.MAX_VALUE // reset to default order
-
-                newScreen.removePreference(pref)
-                screen.addPreference(pref)
-            }
-        }
     }
 
     private fun getPreferenceThemeContext(): Context {
@@ -186,7 +160,7 @@ class ExtensionPreferencesController(bundle: Bundle? = null) :
     }
 
     private companion object {
-        const val PKGNAME_KEY = "pkg_name"
+        const val SOURCE_KEY = "src"
         const val LASTOPENPREFERENCE_KEY = "last_open_preference"
     }
 }

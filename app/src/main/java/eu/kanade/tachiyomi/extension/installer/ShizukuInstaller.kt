@@ -57,7 +57,7 @@ class ShizukuInstaller(private val service: Service) : Installer(service) {
                     } else {
                         "pm install-create -r -i ${service.packageName} -S $size"
                     }
-                    
+
                     val createResult = exec(createCommand)
                     sessionId = SESSION_ID_REGEX.find(createResult.out)?.value
                         ?: throw RuntimeException("Failed to create install session")

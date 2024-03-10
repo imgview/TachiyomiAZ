@@ -33,6 +33,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
      */
     private var adapter: ExtensionDetailsPrefsButtonAdapter? = null
 
+    private var sources: List<ConfigurableSource>? = null
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
         binding = ExtensionDetailControllerBinding.inflate(inflater)
         return binding.root
@@ -82,21 +83,21 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         binding.extensionDetailsRecycler.adapter = adapter
         binding.extensionDetailsRecycler.setHasFixedSize(true)
 
-        adapter!!.updateDataSet(
-            presenter.extension?.sources?.filterIsInstance<ConfigurableSource>()
-                ?.map { ExtensionDetailsPrefsButtonItem(it.toString()) }
-        )
+        sources = presenter.extension?.sources?.filterIsInstance<ConfigurableSource>()
 
-        /*presenter.extension?.sources?.filterIsInstance<ConfigurableSource>()?.forEach { source ->
-            binding.extensionPrefs.visible()
-            binding.extensionPrefs.clicks()
-                .onEach { openPreferences(source.id) }
-                .launchIn(scope)
-        }*/
+        adapter!!.updateDataSet(
+            sources?.map { ExtensionDetailsPrefsButtonItem(it.toString()) }
+        )
+    }
+
+    override fun onDestroyView(view: View) {
+        adapter = null
+        sources = null
+        super.onDestroyView(view)
     }
 
     override fun onItemClick(view: View?, position: Int): Boolean {
-        val id = presenter.extension?.sources?.filterIsInstance<ConfigurableSource>()?.get(position)?.id
+        val id = sources?.get(position)?.id
         return if (id != null) {
             openPreferences(id)
             true

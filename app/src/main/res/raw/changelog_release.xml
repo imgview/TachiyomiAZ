@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
+    <changelogversion versionName="v8.8.1-AZ" changeDate="">
+        <changelogtext>Remove dead built-in sources (hbrowse, perveden)</changelogtext>
+        <changelogtext>Remove broken built-in sources (hitomi.la, 8muses), please use extensions instead</changelogtext>
+        <changelogtext>fix crashes in many extensions (danbooru, pixiv, some chinese exts, etc)</changelogtext>
+        <changelogtext>support new image formats (AVIF, HEIF/HEIC, JXL)</changelogtext>
+        <changelogtext>fix corrupt reader filter test image (thanks kenry)</changelogtext>
+        <changelogtext>fix automatic backup not deleting old files</changelogtext>
+        <changelogtext>fix extension preferences not applying correctly in multi-lang or multi-source exts</changelogtext>
+        <changelogtext>fix shizuku installing extensions to the wrong user on multi-user devices (thanks redjard)</changelogtext>
+        <changelogtext>improved keyboard/dpad navigation in chapter select (for my flip phone)</changelogtext>
+        <changelogtext>use .tachibk extension for backups instead of .proto.gz</changelogtext>
+        <changelogtext>fix missing "last used source" display in sources screen</changelogtext>
+        <changelogtext>remove default tachiyomi extension repo (its extensions are only for self-hosting anyway)</changelogtext>
+        <changelogtext>add intent for adding ext repos (repos can now be added with a single click on a website)</changelogtext>
+        <changelogtext>add error handling to repos (no longer fails to load all repos if only one errors)</changelogtext>
+        <changelogtext>change ExH icon to a sad panda (it was always supposed to be this way but i forgot)</changelogtext>
+    </changelogversion>
     <changelogversion versionName="v8.8.0-AZ" changeDate="">
         <changelogtext>Support non-github extension repo urls (.min.json)</changelogtext>
     </changelogversion>

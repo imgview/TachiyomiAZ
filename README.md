@@ -26,6 +26,7 @@ https://discord.gg/mihon
 - [ ] [side padding thing](https://github.com/az4521/TachiyomiAZ/issues/86)
 - [ ] hide chapters in chapter list (alternative to filtering by uploaders cuz i think that doesn't work well when there's a brief period where two groups are scanlating the same manga before one drops it yknow)
 - [ ] [show newer exh galleries as already in library if older versions are](https://github.com/az4521/TachiyomiAZ/issues/91)
+- [ ] allow hiding the "last used source" in the sources menu
 - [ ] cookie login for eh/exh
 - [ ] search bar for settings
 - [ ] update translations

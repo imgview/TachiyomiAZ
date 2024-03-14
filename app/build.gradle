@@ -218,7 +218,7 @@ dependencies {
     implementation "com.squareup.retrofit2:adapter-rxjava:$retrofit_version"
 
     // JSON
-    final kotlin_serialization_version = '1.6.2'
+    final kotlin_serialization_version = '1.6.3'
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlin_serialization_version"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json-okio:$kotlin_serialization_version"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-protobuf:$kotlin_serialization_version"
@@ -418,9 +418,9 @@ tasks.withType(AbstractKotlinCompile).all {
     //kotlinOptions.freeCompilerArgs += ["-Xopt-in=kotlin.RequiresOptIn"]
     //kotlinOptions.freeCompilerArgs += ["-Xuse-experimental=kotlin.ExperimentalStdlibApi"]
     //kotlinOptions.freeCompilerArgs += ["-Xuse-experimental=kotlinx.coroutines.FlowPreview"]
-    //kotlinOptions.freeCompilerArgs += ["-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+    kotlinOptions.freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
     //kotlinOptions.freeCompilerArgs += ["-Xuse-experimental=kotlinx.coroutines.InternalCoroutinesApi"]
-    //kotlinOptions.freeCompilerArgs += ["-Xuse-experimental=kotlinx.serialization.ExperimentalSerializationApi"]
+    kotlinOptions.freeCompilerArgs += ["-opt-in=kotlinx.serialization.ExperimentalSerializationApi"]
     //kotlinOptions.freeCompilerArgs += ["-Xuse-experimental=coil.annotation.ExperimentalCoilApi"]
 }
 

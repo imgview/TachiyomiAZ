@@ -29,7 +29,12 @@ class AppModule(val app: Application) : InjektModule {
     override fun InjektRegistrar.registerInjectables() {
         addSingleton(app)
 
-        addSingletonFactory { Json { ignoreUnknownKeys = true } }
+        addSingletonFactory {
+            Json {
+                ignoreUnknownKeys = true
+                explicitNulls = false
+            }
+        }
 
         addSingletonFactory { PreferencesHelper(app) }
 
@@ -56,8 +61,6 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { EHentaiUpdateHelper(app) }
 
         addSingletonFactory { Markwon.create(app) }
-
-        addSingletonFactory { Json { ignoreUnknownKeys = true } }
 
         addSingletonFactory { DelayedTrackingStore(app) }
 

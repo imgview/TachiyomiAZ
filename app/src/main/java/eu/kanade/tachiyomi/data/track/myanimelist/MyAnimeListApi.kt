@@ -48,10 +48,12 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 .asObservable()
                 .flatMap { response ->
                     Observable.from(
-                        Jsoup.parse(response.consumeBody())
-                            .select("div.js-categories-seasonal.js-block-list.list")
-                            .select("table").select("tbody")
-                            .select("tr").drop(1)
+                        response.consumeBody().let {
+                            Jsoup.parse(it)
+                                .select("div.js-categories-seasonal.js-block-list.list")
+                                .select("table").select("tbody")
+                                .select("tr").drop(1)
+                        }
                     )
                 }
                 .filter { row ->
@@ -87,7 +89,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
             // Get track data
             val response = authClient.newCall(GET(url = editPageUrl(track.media_id))).execute()
             val editData = response.use {
-                val page = Jsoup.parse(it.consumeBody())
+                val page = it.consumeBody().let { it1 -> Jsoup.parse(it1) }
 
                 // Extract track data from MAL page
                 extractDataFromEditPage(page).apply {
@@ -112,16 +114,23 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 var libTrack: Track? = null
                 response.use {
                     if (it.priorResponse?.isRedirect != true) {
-                        val trackForm = Jsoup.parse(it.consumeBody())
+                        val trackForm = it.consumeBody().let { it1 -> Jsoup.parse(it1) }
 
                         libTrack = Track.create(TrackManager.MYANIMELIST).apply {
-                            last_chapter_read = trackForm.select("#add_manga_num_read_chapters").`val`().toInt()
+                            last_chapter_read =
+                                trackForm.select("#add_manga_num_read_chapters").`val`().toInt()
                             total_chapters = trackForm.select("#totalChap").text().toInt()
-                            status = trackForm.select("#add_manga_status > option[selected]").`val`().toInt()
-                            score = trackForm.select("#add_manga_score > option[selected]").`val`().toFloatOrNull()
+                            status =
+                                trackForm.select("#add_manga_status > option[selected]").`val`()
+                                    .toInt()
+                            score =
+                                trackForm.select("#add_manga_score > option[selected]").`val`()
+                                .toFloatOrNull()
                                 ?: 0f
-                            started_reading_date = trackForm.searchDatePicker("#add_manga_start_date")
-                            finished_reading_date = trackForm.searchDatePicker("#add_manga_finish_date")
+                            started_reading_date =
+                                trackForm.searchDatePicker("#add_manga_start_date")
+                            finished_reading_date =
+                                trackForm.searchDatePicker("#add_manga_finish_date")
                         }
                     }
                 }
@@ -162,10 +171,12 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         return authClient.newCall(POST(url = exportListUrl(), body = exportPostBody()))
             .asObservable()
             .map { response ->
-                baseUrl + Jsoup.parse(response.consumeBody())
-                    .select("div.goodresult")
-                    .select("a")
-                    .attr("href")
+                baseUrl + response.consumeBody().let {
+                    Jsoup.parse(it)
+                        .select("div.goodresult")
+                        .select("a")
+                        .attr("href")
+                }
             }
     }
 
@@ -177,17 +188,23 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
             }
     }
 
-    private fun Response.consumeBody(): String? {
+    private fun Response.consumeBody(): String {
         use {
             if (it.code != 200) throw Exception("HTTP error ${it.code}")
-            return it.body?.string()
+            return it.body.string()
         }
     }
 
-    private fun Response.consumeXmlBody(): String? {
+    private fun Response.consumeXmlBody(): String {
         use { res ->
             if (res.code != 200) throw Exception("Export list error")
-            BufferedReader(InputStreamReader(GZIPInputStream(res.body?.source()?.inputStream()))).use { reader ->
+            BufferedReader(
+                InputStreamReader(
+                    GZIPInputStream(
+                        res.body.source().inputStream()
+                    )
+                )
+            ).use { reader ->
                 val sb = StringBuilder()
                 reader.forEachLine { line ->
                     sb.append(line)
@@ -335,7 +352,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
             return GregorianCalendar(year, month - 1, day).timeInMillis
         }
 
-        private fun Element.searchTitle() = select("strong").text()!!
+        private fun Element.searchTitle() = select("strong").text()
 
         private fun Element.searchTotalChapters() = if (select(TD)[4].text() == "-") 0 else select(TD)[4].text().toInt()
 
@@ -351,13 +368,13 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
 
         private fun Element.searchSummary() = select("div.pt4")
             .first()!!
-            .ownText()!!
+            .ownText()
 
         private fun Element.searchPublishingStatus() = if (select(TD).last()!!.text() == "-") "Publishing" else "Finished"
 
-        private fun Element.searchPublishingType() = select(TD)[2].text()!!
+        private fun Element.searchPublishingType() = select(TD)[2].text()
 
-        private fun Element.searchStartDate() = select(TD)[6].text()!!
+        private fun Element.searchStartDate() = select(TD)[6].text()
 
         private fun getStatus(status: String) = when (status) {
             "Reading" -> 1

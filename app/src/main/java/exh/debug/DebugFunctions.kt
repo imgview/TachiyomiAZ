@@ -174,18 +174,18 @@ object DebugFunctions {
     fun clearSavedSearches() = prefs.eh_savedSearches().set(emptySet())
 
     fun listAllSources() = sourceManager.getCatalogueSources().joinToString("\n") {
-        "${it.id}: ${it.name} (${it.lang.toUpperCase()})"
+        "${it.id}: ${it.name} (${it.lang.uppercase()})"
     }
 
     fun listFilteredSources() = sourceManager.getVisibleCatalogueSources().joinToString("\n") {
-        "${it.id}: ${it.name} (${it.lang.toUpperCase()})"
+        "${it.id}: ${it.name} (${it.lang.uppercase()})"
     }
 
     fun listAllHttpSources() = sourceManager.getOnlineSources().joinToString("\n") {
-        "${it.id}: ${it.name} (${it.lang.toUpperCase()})"
+        "${it.id}: ${it.name} (${it.lang.uppercase()})"
     }
     fun listFilteredHttpSources() = sourceManager.getVisibleOnlineSources().joinToString("\n") {
-        "${it.id}: ${it.name} (${it.lang.toUpperCase()})"
+        "${it.id}: ${it.name} (${it.lang.uppercase()})"
     }
 
     fun convertAllEhentaiGalleriesToExhentai() = convertSources(EH_SOURCE_ID, EXH_SOURCE_ID)

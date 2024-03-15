@@ -74,10 +74,7 @@ class PreMigrationController(bundle: Bundle? = null) :
             v.post {
                 // offset the recycler by the fab's inset + some inset on top
                 v.updatePaddingRelative(
-                    bottom = insets.systemWindowInsetBottom + (
-                        binding.fab.marginBottom
-                            ?: 0
-                        ) + (binding.fab.height ?: 0)
+                    bottom = insets.systemWindowInsetBottom + binding.fab.marginBottom + binding.fab.height
                 )
             }
         }

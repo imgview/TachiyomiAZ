@@ -46,7 +46,7 @@ class LockController : NucleusController<ActivityLockBinding, LockPresenter>() {
                 override fun onEmpty() {}
 
                 override fun onComplete(pin: String) {
-                    if (sha512(pin, prefs.eh_lockSalt().get()!!) == prefs.eh_lockHash().get()) {
+                    if (sha512(pin, prefs.eh_lockSalt().get()) == prefs.eh_lockHash().get()) {
                         // Yay!
                         closeLock()
                     } else {

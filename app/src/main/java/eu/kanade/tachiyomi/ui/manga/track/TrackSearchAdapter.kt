@@ -11,10 +11,9 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.databinding.TrackSearchItemBinding
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
-import java.util.ArrayList
 
 class TrackSearchAdapter(context: Context) :
-    ArrayAdapter<TrackSearch>(context, R.layout.track_search_item, ArrayList<TrackSearch>()) {
+    ArrayAdapter<TrackSearch>(context, R.layout.track_search_item, ArrayList()) {
 
     override fun getView(position: Int, view: View?, parent: ViewGroup): View {
         var v = view
@@ -29,7 +28,7 @@ class TrackSearchAdapter(context: Context) :
         } else {
             holder = v.tag as TrackSearchHolder
         }
-        holder.onSetValues(track!!)
+        holder.onSetValues(track)
         return v
     }
 
@@ -46,7 +45,7 @@ class TrackSearchAdapter(context: Context) :
             binding.trackSearchTitle.text = track.title
             binding.trackSearchSummary.text = track.summary
             GlideApp.with(view.context).clear(binding.trackSearchCover)
-            if (!track.cover_url.isEmpty()) {
+            if (track.cover_url.isNotEmpty()) {
                 GlideApp.with(view.context)
                     .load(track.cover_url)
                     .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
@@ -58,14 +57,18 @@ class TrackSearchAdapter(context: Context) :
                 binding.trackSearchStatus.gone()
                 binding.trackSearchStatusResult.gone()
             } else {
-                binding.trackSearchStatusResult.text = track.publishing_status.capitalize()
+                binding.trackSearchStatusResult.text = track.publishing_status.replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase() else it.toString()
+                }
             }
 
             if (track.publishing_type.isBlank()) {
                 binding.trackSearchType.gone()
                 binding.trackSearchTypeResult.gone()
             } else {
-                binding.trackSearchTypeResult.text = track.publishing_type.capitalize()
+                binding.trackSearchTypeResult.text = track.publishing_type.replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase() else it.toString()
+                }
             }
 
             if (track.start_date.isBlank()) {

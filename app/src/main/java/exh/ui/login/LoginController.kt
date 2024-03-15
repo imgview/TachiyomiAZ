@@ -177,7 +177,7 @@ class LoginController : NucleusController<EhActivityLoginBinding, LoginPresenter
             var igneous: String? = null
 
             parsed.forEach {
-                when (it.name.toLowerCase()) {
+                when (it.name.lowercase()) {
                     MEMBER_ID_COOKIE -> memberId = it.value
                     PASS_HASH_COOKIE -> passHash = it.value
                     IGNEOUS_COOKIE -> igneous = this.igneous ?: it.value

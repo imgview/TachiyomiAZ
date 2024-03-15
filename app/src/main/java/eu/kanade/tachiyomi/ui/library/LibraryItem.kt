@@ -137,7 +137,7 @@ class LibraryItem(val manga: LibraryManga, private val libraryDisplayMode: Prefe
         return if (constraint.contains(" ") || constraint.contains("\"")) {
             var cleanConstraint = ""
             var ignoreSpace = false
-            for (i in constraint.trim().toLowerCase()) {
+            for (i in constraint.trim().lowercase()) {
                 when (i) {
                     ' ' -> {
                         cleanConstraint = if (!ignoreSpace) {
@@ -168,7 +168,7 @@ class LibraryItem(val manga: LibraryManga, private val libraryDisplayMode: Prefe
 
     private fun containsRaisedGenre(tag: RaisedTag, genres: List<RaisedTag>): Boolean {
         val genre = genres.find {
-            (it.namespace?.toLowerCase() == tag.namespace?.toLowerCase() && it.name.toLowerCase() == tag.name.toLowerCase())
+            (it.namespace?.lowercase() == tag.namespace?.lowercase() && it.name.lowercase() == tag.name.lowercase())
         }
         return if (tag.type == TAG_TYPE_EXCLUDE) {
             genre == null
@@ -181,11 +181,11 @@ class LibraryItem(val manga: LibraryManga, private val libraryDisplayMode: Prefe
     private fun containsGenre(tag: String, genres: List<String>?): Boolean {
         return if (tag.startsWith("-")) {
             genres?.find {
-                it.trim().toLowerCase() == tag.substringAfter("-").toLowerCase()
+                it.trim().lowercase() == tag.substringAfter("-").lowercase()
             } == null
         } else {
             genres?.find {
-                it.trim().toLowerCase() == tag.toLowerCase()
+                it.trim().lowercase() == tag.lowercase()
             } != null
         }
     }

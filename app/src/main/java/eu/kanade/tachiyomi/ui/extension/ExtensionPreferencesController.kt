@@ -55,7 +55,7 @@ class ExtensionPreferencesController(bundle: Bundle? = null) :
     }
 
     override fun createPresenter(): ExtensionPreferencesPresenter {
-        return ExtensionPreferencesPresenter(args.getLong(SOURCE_KEY)!!)
+        return ExtensionPreferencesPresenter(args.getLong(SOURCE_KEY))
     }
 
     override fun getTitle(): String? {

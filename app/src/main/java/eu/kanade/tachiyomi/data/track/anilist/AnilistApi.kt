@@ -51,7 +51,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         return authClient.newCall(request)
             .asObservableSuccess()
             .map { netResponse ->
-                val responseBody = netResponse.body?.string().orEmpty()
+                val responseBody = netResponse.body.string().orEmpty()
                 netResponse.close()
                 if (responseBody.isEmpty()) {
                     throw Exception("Null Response")
@@ -136,7 +136,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         return authClient.newCall(request)
             .asObservableSuccess()
             .map { netResponse ->
-                val responseBody = netResponse.body?.string().orEmpty()
+                val responseBody = netResponse.body.string().orEmpty()
                 if (responseBody.isEmpty()) {
                     throw Exception("Null Response")
                 }
@@ -197,7 +197,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         return authClient.newCall(request)
             .asObservableSuccess()
             .map { netResponse ->
-                val responseBody = netResponse.body?.string().orEmpty()
+                val responseBody = netResponse.body.string().orEmpty()
                 if (responseBody.isEmpty()) {
                     throw Exception("Null Response")
                 }
@@ -242,7 +242,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         return authClient.newCall(request)
             .asObservableSuccess()
             .map { netResponse ->
-                val responseBody = netResponse.body?.string().orEmpty()
+                val responseBody = netResponse.body.string().orEmpty()
                 if (responseBody.isEmpty()) {
                     throw Exception("Null Response")
                 }

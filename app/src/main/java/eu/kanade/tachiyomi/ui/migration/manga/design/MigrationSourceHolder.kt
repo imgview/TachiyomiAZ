@@ -20,7 +20,9 @@ class MigrationSourceHolder(view: View, val adapter: MigrationSourceAdapter) :
         val preferences by injectLazy<PreferencesHelper>()
         val isMultiLanguage = preferences.enabledLanguages().get().size > 1
         // Set capitalized title.
-        val sourceName = if (isMultiLanguage) source.toString() else source.name.capitalize()
+        val sourceName = if (isMultiLanguage) source.toString() else source.name.replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase() else it.toString()
+        }
         binding.title.text = sourceName
         // Update circle letter image.
         itemView.post {

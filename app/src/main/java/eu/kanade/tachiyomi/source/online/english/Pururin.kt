@@ -34,7 +34,7 @@ class Pururin(delegate: HttpSource) :
     // Support direct URL importing
     override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
         val trimmedIdQuery = query.trim().removePrefix("id:")
-        val newQuery = if (trimmedIdQuery.toIntOrNull() ?: -1 >= 0) {
+        val newQuery = if ((trimmedIdQuery.toIntOrNull() ?: -1) >= 0) {
             "$baseUrl/gallery/$trimmedIdQuery/-"
         } else query
 
@@ -62,13 +62,13 @@ class Pururin(delegate: HttpSource) :
 
             val contentWrapper = input.selectFirst(".content-wrapper")
             title = contentWrapper!!.selectFirst(".title h1")!!.text()
-            altTitle = contentWrapper!!.selectFirst(".alt-title")?.text()
+            altTitle = contentWrapper.selectFirst(".alt-title")?.text()
 
             thumbnailUrl = "https:" + input.selectFirst(".cover-wrapper v-lazy-image")!!.attr("src")
 
             tags.clear()
-            contentWrapper!!.select(".table-gallery-info > tbody > tr").forEach { ele ->
-                val key = ele.child(0).text().toLowerCase()
+            contentWrapper.select(".table-gallery-info > tbody > tr").forEach { ele ->
+                val key = ele.child(0).text().lowercase()
                 val value = ele.child(1)
                 when (key) {
                     "pages" -> {
@@ -105,7 +105,7 @@ class Pururin(delegate: HttpSource) :
         "www.pururin.io"
     )
 
-    override fun mapUrlToMangaUrl(uri: Uri): String? {
+    override fun mapUrlToMangaUrl(uri: Uri): String {
         return "${PururinSearchMetadata.BASE_URL}/gallery/${uri.pathSegments[1]}/${uri.lastPathSegment}"
     }
 }

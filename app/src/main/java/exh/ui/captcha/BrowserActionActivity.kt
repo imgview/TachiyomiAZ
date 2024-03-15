@@ -1,5 +1,6 @@
 package exh.ui.captcha
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -52,6 +53,7 @@ class BrowserActionActivity : AppCompatActivity() {
     lateinit var credentialsObservable: Observable<String>
 
     private lateinit var binding: EhActivityCaptchaBinding
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -152,7 +154,7 @@ class BrowserActionActivity : AppCompatActivity() {
                 .asObservableSuccess()
                 .subscribeOn(Schedulers.io())
                 .map {
-                    val json = JsonParser.parseString(it.body!!.string())
+                    val json = JsonParser.parseString(it.body.string())
                     it.close()
                     json["token"].string
                 }.melt()
@@ -288,7 +290,7 @@ class BrowserActionActivity : AppCompatActivity() {
                 token to it
             }
         }.flatMap { (token, response) ->
-            val audioFile = response.body!!.bytes()
+            val audioFile = response.body.bytes()
 
             httpClient.newCall(
                 Request.Builder()
@@ -312,7 +314,7 @@ class BrowserActionActivity : AppCompatActivity() {
                     .build()
             ).asObservableSuccess()
         }.map { response ->
-            JsonParser.parseString(response.body!!.string())["results"][0]["alternatives"][0]["transcript"].string.trim()
+            JsonParser.parseString(response.body.string())["results"][0]["alternatives"][0]["transcript"].string.trim()
         }.toSingle()
     }
 

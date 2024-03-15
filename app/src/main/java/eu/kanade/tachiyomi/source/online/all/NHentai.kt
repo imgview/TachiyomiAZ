@@ -58,7 +58,7 @@ class NHentai(context: Context) : HttpSource(), LewdSource<NHentaiSearchMetadata
     // Support direct URL importing
     override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
         val trimmedIdQuery = query.trim().removePrefix("id:")
-        val newQuery = if (trimmedIdQuery.toIntOrNull() ?: -1 >= 0) {
+        val newQuery = if ((trimmedIdQuery.toIntOrNull() ?: -1) >= 0) {
             "$baseUrl/g/$trimmedIdQuery/"
         } else query
 
@@ -183,7 +183,11 @@ class NHentai(context: Context) : HttpSource(), LewdSource<NHentaiSearchMetadata
     }
 
     override fun parseIntoMetadata(metadata: NHentaiSearchMetadata, input: Response) {
-        val json = GALLERY_JSON_REGEX.find(input.body!!.string())!!.groupValues[1].replace(UNICODE_ESCAPE_REGEX, { it.groupValues[1].toInt(radix = 16).toChar().toString() })
+        val json = GALLERY_JSON_REGEX.find(input.body.string())!!.groupValues[1].replace(UNICODE_ESCAPE_REGEX) {
+            it.groupValues[1].toInt(
+                radix = 16
+            ).toChar().toString()
+        }
         val obj = JsonParser.parseString(json).asJsonObject
 
         with(metadata) {
@@ -307,7 +311,7 @@ class NHentai(context: Context) : HttpSource(), LewdSource<NHentaiSearchMetadata
     )
 
     override fun mapUrlToMangaUrl(uri: Uri): String? {
-        if (uri.pathSegments.firstOrNull()?.toLowerCase() != "g") {
+        if (uri.pathSegments.firstOrNull()?.lowercase() != "g") {
             return null
         }
 

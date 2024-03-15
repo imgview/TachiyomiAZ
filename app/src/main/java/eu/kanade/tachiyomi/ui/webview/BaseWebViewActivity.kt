@@ -81,7 +81,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
     }
 
     override fun onDestroy() {
-        binding.webview?.destroy()
+        binding.webview.destroy()
         super.onDestroy()
     }
 

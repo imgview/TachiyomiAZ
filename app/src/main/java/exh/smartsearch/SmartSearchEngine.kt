@@ -105,7 +105,7 @@ class SmartSearchEngine(
     }
 
     private fun cleanSmartSearchTitle(title: String): String {
-        val preTitle = title.toLowerCase()
+        val preTitle = title.lowercase()
 
         // Remove text in brackets
         var cleanedTitle = removeTextInBrackets(preTitle, true)

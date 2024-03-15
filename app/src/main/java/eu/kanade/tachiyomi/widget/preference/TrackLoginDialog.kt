@@ -27,21 +27,21 @@ class TrackLoginDialog(
         this(R.string.login_title, service.name, usernameLabelRes, Bundle().apply { putInt("key", service.id) })
 
     override fun setCredentialsOnView(view: View) {
-        binding?.username?.setText(service.getUsername())
-        binding?.password?.setText(service.getPassword())
+        binding.username.setText(service.getUsername())
+        binding.password.setText(service.getPassword())
     }
 
     override fun checkLogin() {
         requestSubscription?.unsubscribe()
 
         v?.apply {
-            if (binding!!.username.text.isNullOrEmpty() || binding!!.password.text.isNullOrEmpty()) {
+            if (binding.username.text.isNullOrEmpty() || binding.password.text.isNullOrEmpty()) {
                 return
             }
 
-            binding!!.login.progress = 1
-            val user = binding!!.username.text.toString()
-            val pass = binding!!.password.text.toString()
+            binding.login.progress = 1
+            val user = binding.username.text.toString()
+            val pass = binding.password.text.toString()
 
             requestSubscription = service.login(user, pass)
                 .subscribeOn(Schedulers.io())

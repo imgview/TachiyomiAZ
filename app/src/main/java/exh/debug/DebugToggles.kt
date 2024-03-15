@@ -15,7 +15,7 @@ enum class DebugToggles(val default: Boolean) {
     // Pretend that all galleries only have a single version
     INCLUDE_ONLY_ROOT_WHEN_LOADING_EXH_VERSIONS(false);
 
-    val prefKey = "eh_debug_toggle_${name.toLowerCase()}"
+    val prefKey = "eh_debug_toggle_${name.lowercase()}"
 
     var enabled: Boolean
         get() = prefs.flowPrefs.getBoolean(prefKey, default).get()

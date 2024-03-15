@@ -61,7 +61,7 @@ class EHConfigurator {
         val hathPerks = EHHathPerksResponse()
 
         perksPage.select(".stuffbox tr").forEach {
-            val name = it.child(0).text().toLowerCase()
+            val name = it.child(0).text().lowercase()
             val purchased = it.child(2).getElementsByTag("form").isEmpty()
 
             when (name) {

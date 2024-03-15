@@ -33,7 +33,7 @@ class Tsumino(delegate: HttpSource) :
         }
 
     override fun mapUrlToMangaUrl(uri: Uri): String? {
-        val lcFirstPathSegment = uri.pathSegments.firstOrNull()?.toLowerCase() ?: return null
+        val lcFirstPathSegment = uri.pathSegments.firstOrNull()?.lowercase() ?: return null
         if (lcFirstPathSegment != "read" && lcFirstPathSegment != "book" && lcFirstPathSegment != "entry") {
             return null
         }

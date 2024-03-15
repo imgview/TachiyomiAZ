@@ -279,8 +279,9 @@ class SettingsAdvancedController : SettingsController() {
                 key = Keys.eh_logLevel
                 title = "Log level"
 
-                entries = EHLogLevel.values().map {
-                    "${it.name.toLowerCase().capitalize()} (${it.description})"
+                entries = EHLogLevel.values().map { ehLogLevel ->
+                    "${ehLogLevel.name.lowercase()
+                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }} (${ehLogLevel.description})"
                 }.toTypedArray()
                 entryValues = EHLogLevel.values().mapIndexed { index, _ -> "$index" }.toTypedArray()
                 defaultValue = "0"

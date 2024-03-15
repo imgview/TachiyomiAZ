@@ -62,7 +62,7 @@ class HentaiCafe(delegate: HttpSource) :
             val contentElement = input.select(".entry-content").first()
             thumbnailUrl = contentElement!!.child(0).child(0).attr("src")
 
-            fun filterableTagsOfType(type: String) = contentElement!!.select("a")
+            fun filterableTagsOfType(type: String) = contentElement.select("a")
                 .filter { "$baseUrl/hc.fyi/$type/" in it.attr("href") }
                 .map { it.text() }
 
@@ -102,7 +102,7 @@ class HentaiCafe(delegate: HttpSource) :
     )
 
     override fun mapUrlToMangaUrl(uri: Uri): String? {
-        val lcFirstPathSegment = uri.pathSegments.firstOrNull()?.toLowerCase() ?: return null
+        val lcFirstPathSegment = uri.pathSegments.firstOrNull()?.lowercase() ?: return null
 
         return if (lcFirstPathSegment == "manga") {
             "https://hentai.cafe/${uri.pathSegments[2]}"

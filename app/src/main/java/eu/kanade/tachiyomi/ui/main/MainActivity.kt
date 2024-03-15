@@ -44,7 +44,6 @@ import eu.kanade.tachiyomi.ui.source.SourceController
 import eu.kanade.tachiyomi.ui.source.globalsearch.GlobalSearchController
 import eu.kanade.tachiyomi.util.lang.launchIO
 import eu.kanade.tachiyomi.util.lang.launchUI
-import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.vibrate
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
@@ -384,8 +383,8 @@ class MainActivity : BaseActivity<MainActivityBinding>() {
     override fun onDestroy() {
         super.onDestroy()
         // Binding sometimes isn't actually instantiated yet somehow
-        binding?.navView?.setNavigationItemSelectedListener(null)
-        binding?.toolbar?.setNavigationOnClickListener(null)
+        binding.navView.setNavigationItemSelectedListener(null)
+        binding.toolbar.setNavigationOnClickListener(null)
     }
 
     override fun onBackPressed() {

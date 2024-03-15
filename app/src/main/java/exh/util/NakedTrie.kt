@@ -35,7 +35,7 @@ class NakedTrieNode<T>(val key: Int, var parent: NakedTrieNode<T>?) {
     fun getAsNode(key: String): NakedTrieNode<T>? {
         var current = this
         for (c in key) {
-            current = current.children.get(c.toInt()) ?: return null
+            current = current.children.get(c.code) ?: return null
             if (!current.hasData) return null
         }
         return current
@@ -74,7 +74,7 @@ class NakedTrie<T> : MutableMap<String, T> {
         // Traverse to node location in tree, making parent nodes if required
         var current = root
         for (c in key) {
-            val castedC = c.toInt()
+            val castedC = c.code
             var node = current.children.get(castedC)
             if (node == null) {
                 node = NakedTrieNode(castedC, current)
@@ -110,7 +110,7 @@ class NakedTrie<T> : MutableMap<String, T> {
     override fun containsKey(key: String): Boolean {
         var current = root
         for (c in key) {
-            current = current.children.get(c.toInt()) ?: return false
+            current = current.children.get(c.code) ?: return false
             if (!current.hasData) return false
         }
         return current.hasData
@@ -126,7 +126,7 @@ class NakedTrie<T> : MutableMap<String, T> {
         val nodeStack = LinkedList<NakedTrieNode<T>>()
         for (c in key) {
             val bottomOfStack = nodeStack.last
-            val current = bottomOfStack.children.get(c.toInt()) ?: return null
+            val current = bottomOfStack.children.get(c.code) ?: return null
             if (!current.hasData) return null
             nodeStack.add(bottomOfStack)
         }
@@ -178,7 +178,7 @@ class NakedTrie<T> : MutableMap<String, T> {
         // Traverse to node location in tree, making parent nodes if required
         var current = root
         for (c in key) {
-            val castedC = c.toInt()
+            val castedC = c.code
             var node = current.children.get(castedC)
             if (node == null) {
                 node = NakedTrieNode(castedC, current)

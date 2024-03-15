@@ -64,7 +64,7 @@ object LocaleHelper {
         return when (lang) {
             null -> ""
             "" -> {
-                systemLocale!!.getDisplayName(systemLocale).capitalize()
+                systemLocale!!.getDisplayName(systemLocale!!).capitalize()
             }
             else -> {
                 val locale = getLocale(lang)

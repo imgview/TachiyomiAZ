@@ -162,7 +162,7 @@ class SearchEngine {
             }
         }
 
-        query.toLowerCase().forEach { char ->
+        query.lowercase().forEach { char ->
             if (char == '"') {
                 inQuotes = !inQuotes
             } else if (enableWildcard && (char == '?' || char == '_')) {

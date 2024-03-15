@@ -46,7 +46,6 @@ import exh.util.UriGroup
 import exh.util.ignore
 import exh.util.urlImportFetchSearchManga
 import java.net.URLEncoder
-import java.util.ArrayList
 import kotlinx.coroutines.runBlocking
 import okhttp3.CacheControl
 import okhttp3.CookieJar
@@ -54,7 +53,7 @@ import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -181,7 +180,7 @@ class EHentai(
                         doc = resp.asJsoup()
 
                         val parentLink = doc!!.select("#gdd .gdt1").find { el ->
-                            el.text().toLowerCase() == "parent:"
+                            el.text().lowercase() == "parent:"
                         }!!.nextElementSibling()!!.selectFirst("a")?.attr("href")
 
                         if (parentLink != null) {
@@ -214,9 +213,9 @@ class EHentai(
                 chapter_number = 1f
                 date_upload = EX_DATE_FORMAT.parse(
                     d.select("#gdd .gdt1").find { el ->
-                        el.text().toLowerCase() == "posted:"
+                        el.text().lowercase() == "posted:"
                     }!!.nextElementSibling()!!.text()
-                ).time
+                )!!.time
             }
             // Build and append the rest of the galleries
             if (DebugToggles.INCLUDE_ONLY_ROOT_WHEN_LOADING_EXH_VERSIONS.enabled) listOf(self)
@@ -229,7 +228,7 @@ class EHentai(
                         this.url = EHentaiSearchMetadata.normalizeUrl(link)
                         this.name = "v${index + 2}: $name"
                         this.chapter_number = index + 2f
-                        this.date_upload = EX_DATE_FORMAT.parse(posted).time
+                        this.date_upload = EX_DATE_FORMAT.parse(posted)!!.time
                     }
                 }.reversed() + self
             }
@@ -438,14 +437,14 @@ class EHentai(
                         ignore {
                             when (
                                 left.removeSuffix(":")
-                                    .toLowerCase()
+                                    .lowercase()
                             ) {
-                                "posted" -> datePosted = EX_DATE_FORMAT.parse(right).time
+                                "posted" -> datePosted = EX_DATE_FORMAT.parse(right)!!.time
                                 // Example gallery with parent: https://e-hentai.org/g/1390451/7f181c2426/
                                 // Example JP gallery: https://exhentai.org/g/1375385/03519d541b/
                                 // Parent is older variation of the gallery
                                 "parent" -> parent = if (!right.equals("None", true)) {
-                                    rightElement!!.child(0).attr("href")
+                                    rightElement.child(0).attr("href")
                                 } else null
                                 "visible" -> visible = right.nullIfBlank()
                                 "language" -> {
@@ -579,9 +578,9 @@ class EHentai(
     fun rawCookies(sp: Int): Map<String, String> {
         val cookies: MutableMap<String, String> = mutableMapOf()
         if (prefs.enableExhentai().get()) {
-            cookies[LoginController.MEMBER_ID_COOKIE] = prefs.memberIdVal().get()!!
-            cookies[LoginController.PASS_HASH_COOKIE] = prefs.passHashVal().get()!!
-            cookies[LoginController.IGNEOUS_COOKIE] = prefs.igneousVal().get()!!
+            cookies[LoginController.MEMBER_ID_COOKIE] = prefs.memberIdVal().get()
+            cookies[LoginController.PASS_HASH_COOKIE] = prefs.passHashVal().get()
+            cookies[LoginController.IGNEOUS_COOKIE] = prefs.igneousVal().get()
             cookies["sp"] = sp.toString()
 
             val sessionKey = prefs.eh_settingsKey().get()
@@ -612,7 +611,7 @@ class EHentai(
     fun cookiesHeader(sp: Int = spPref().get()) = buildCookies(rawCookies(sp))
 
     // Headers
-    override fun headersBuilder() = super.headersBuilder().add("Cookie", cookiesHeader())!!
+    override fun headersBuilder() = super.headersBuilder().add("Cookie", cookiesHeader())
 
     fun addParam(url: String, param: String, value: String) = Uri.parse(url)
         .buildUpon()
@@ -630,7 +629,7 @@ class EHentai(
                 .build()
 
             chain.proceed(newReq)
-        }.build()!!
+        }.build()
 
     // Filters
     override fun getFilterList() = FilterList(
@@ -797,9 +796,9 @@ class EHentai(
             client.newCall(
                 Request.Builder()
                     .url(EH_API_BASE)
-                    .post(RequestBody.create(JSON, json.toString()))
+                    .post(json.toString().toRequestBody(JSON))
                     .build()
-            ).execute().body!!.string()
+            ).execute().body.string()
         ).obj
 
         val obj = outJson["tokenlist"].array.first()

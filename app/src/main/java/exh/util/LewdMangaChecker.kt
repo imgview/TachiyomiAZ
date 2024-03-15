@@ -14,7 +14,7 @@ import uy.kohesive.injekt.api.get
 fun Manga.isLewd(): Boolean {
     val sourceName = Injekt.get<SourceManager>().getOrStub(source).name
     val currentTags =
-        genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) } ?: emptyList()
+        genre?.split(",")?.map { it.trim().lowercase(Locale.US) } ?: emptyList()
     val meta =
 
         Log.d("Lewd", currentTags.joinToString(separator = "\n"))

@@ -57,7 +57,7 @@ open class LibraryGridHolder(
      * @param item the manga item to bind.
      */
     override fun onSetValues(item: LibraryItem) {
-        val binding = binding as SourceCompactGridItemBinding
+        val binding = binding
 
         // SY -->
         manga = item.manga

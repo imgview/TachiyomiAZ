@@ -66,7 +66,7 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
         return authClient.newCall(request)
             .asObservableSuccess()
             .map { netResponse ->
-                val responseBody = netResponse.body?.string().orEmpty()
+                val responseBody = netResponse.body.string()
                 if (responseBody.isEmpty()) {
                     throw Exception("Null Response")
                 }
@@ -122,13 +122,13 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
         return authClient.newCall(requestMangas)
             .asObservableSuccess()
             .map { netResponse ->
-                val responseBody = netResponse.body?.string().orEmpty()
+                val responseBody = netResponse.body.string()
                 JsonParser.parseString(responseBody).obj
             }.flatMap { mangas ->
                 authClient.newCall(request)
                     .asObservableSuccess()
                     .map { netResponse ->
-                        val responseBody = netResponse.body?.string().orEmpty()
+                        val responseBody = netResponse.body.string()
                         if (responseBody.isEmpty()) {
                             throw Exception("Null Response")
                         }
@@ -145,13 +145,13 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
     }
 
     fun getCurrentUser(): Int {
-        val user = authClient.newCall(GET("$apiUrl/users/whoami")).execute().body?.string()
+        val user = authClient.newCall(GET("$apiUrl/users/whoami")).execute().body.string()
         return JsonParser.parseString(user).obj["id"].asInt
     }
 
     fun accessToken(code: String): Observable<OAuth> {
         return client.newCall(accessTokenRequest(code)).asObservableSuccess().map { netResponse ->
-            val responseBody = netResponse.body?.string().orEmpty()
+            val responseBody = netResponse.body.string()
             if (responseBody.isEmpty()) {
                 throw Exception("Null Response")
             }
@@ -186,7 +186,7 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
             return "$baseMangaUrl/$remoteId"
         }
 
-        fun authUrl() =
+        fun authUrl(): Uri =
             Uri.parse(loginUrl).buildUpon()
                 .appendQueryParameter("client_id", clientId)
                 .appendQueryParameter("redirect_uri", redirectUrl)

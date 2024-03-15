@@ -68,7 +68,7 @@ class MyAnimeList() : API("https://api.jikan.moe/v3/") {
 
         scope.launch(handler) {
             val response = client.newCall(request).await()
-            val body = response.body?.string().orEmpty()
+            val body = response.body.string()
             if (body.isEmpty()) {
                 throw Exception("Null Response")
             }
@@ -116,7 +116,7 @@ class MyAnimeList() : API("https://api.jikan.moe/v3/") {
 
         scope.launch(handler) {
             val response = client.newCall(request).await()
-            val body = response.body?.string().orEmpty()
+            val body = response.body.string()
             if (body.isEmpty()) {
                 throw Exception("Null Response")
             }
@@ -206,7 +206,7 @@ class Anilist() : API("https://graphql.anilist.co/") {
 
         scope.launch(handler) {
             val response = client.newCall(request).await()
-            val body = response.body?.string().orEmpty()
+            val body = response.body.string()
             if (body.isEmpty()) {
                 throw Exception("Null Response")
             }

@@ -407,7 +407,7 @@ class MangaInfoController(private val fromSource: Boolean = false) :
             .centerCrop()
             .into(binding.mangaCover)
 
-        binding.backdrop?.let {
+        binding.backdrop.let {
             GlideApp.with(view.context)
                 .load(mangaThumbnail)
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)

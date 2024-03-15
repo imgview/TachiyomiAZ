@@ -28,6 +28,7 @@ import java.io.InputStream
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import java.util.zip.ZipFile as ZipFileCompat
+import kotlin.Comparator
 import org.apache.commons.compress.archivers.zip.ZipFile
 import rx.Observable
 import timber.log.Timber
@@ -90,9 +91,9 @@ class LocalSource(private val context: Context) : CatalogueSource {
         when (state?.index) {
             0 -> {
                 mangaDirs = if (state.ascending) {
-                    mangaDirs.sortedBy { it.name.toLowerCase(Locale.ENGLISH) }
+                    mangaDirs.sortedBy { it.name.lowercase(Locale.ENGLISH) }
                 } else {
-                    mangaDirs.sortedByDescending { it.name.toLowerCase(Locale.ENGLISH) }
+                    mangaDirs.sortedByDescending { it.name.lowercase(Locale.ENGLISH) }
                 }
             }
             1 -> {

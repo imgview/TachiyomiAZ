@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.lang.combineLatest
 import eu.kanade.tachiyomi.util.lang.runAsObservable
-import java.util.Locale
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
@@ -73,7 +72,7 @@ class MigrationPresenter(
         val header = SelectionHeader()
         return library.map { it.source }.toSet()
             .mapNotNull { if (it != LocalSource.ID) sourceManager.getOrStub(it) else null }
-            .sortedBy { it.name.toLowerCase(Locale.ROOT) }
+            .sortedBy { it.name.lowercase() }
             .map { SourceItem(it, header) }
     }
 

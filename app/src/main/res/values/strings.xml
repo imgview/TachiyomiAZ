@@ -354,6 +354,7 @@
     <string name="pref_allow_nsfw_sources_allowed_multisource">Block source but show in extensions list</string>
     <string name="pref_allow_nsfw_sources_blocked">Blocked</string>
     <string name="pref_search_pinned_sources_only">Only include pinned sources</string>
+    <string name="pref_hide_last_used_source">Hide Last Used Source</string>
 
     <!-- Backup section -->
     <string name="backup">Backup</string>

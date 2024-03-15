@@ -100,9 +100,13 @@ class SourcePresenter(
     }
 
     private fun updateLastUsedSource(sourceId: Long) {
-        val source = (sourceManager.get(sourceId) as? CatalogueSource)?.let { SourceItem(it, showButtons = controllerMode == SourceController.Mode.CATALOGUE) }
-        source?.let {
-            view().subscribe { view -> view?.setLastUsedSource(it) }
+        if (preferences.hideLastUsedSource().get()) {
+            view().subscribe { view -> view?.setLastUsedSource(null) }
+        } else {
+            val source = (sourceManager.get(sourceId) as? CatalogueSource)?.let { SourceItem(it, showButtons = controllerMode == SourceController.Mode.CATALOGUE) }
+            source?.let {
+                view().subscribe { view -> view?.setLastUsedSource(it) }
+            }
         }
     }
 

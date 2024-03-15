@@ -239,6 +239,7 @@ class PreferencesHelper(val context: Context) {
 
     fun enableDoh() = prefs.getBoolean(Keys.enableDoh, false)
 
+    fun hideLastUsedSource() = flowPrefs.getBoolean(Keys.hideLastUsedSource, false)
     fun extensionInstaller() = flowPrefs.getEnum(
         Keys.extensionInstaller,
         if (MiuiUtil.isMiui()) Values.ExtensionInstaller.LEGACY else Values.ExtensionInstaller.PACKAGEINSTALLER

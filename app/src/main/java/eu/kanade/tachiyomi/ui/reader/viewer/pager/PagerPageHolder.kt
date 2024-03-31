@@ -483,15 +483,16 @@ class PagerPageHolder(
      */
     private fun ImageView.setImage(stream: InputStream) {
         GlideApp.with(this)
+            .asGif()
             .load(stream)
             .skipMemoryCache(true)
             .diskCacheStrategy(DiskCacheStrategy.NONE)
             .transition(DrawableTransitionOptions.with(NoTransition.getFactory()))
-            .listener(object : RequestListener<Drawable> {
+            .listener(object : RequestListener<GifDrawable> {
                 override fun onLoadFailed(
                     e: GlideException?,
                     model: Any?,
-                    target: Target<Drawable>,
+                    target: Target<GifDrawable>,
                     isFirstResource: Boolean
                 ): Boolean {
                     onImageDecodeError()
@@ -499,15 +500,13 @@ class PagerPageHolder(
                 }
 
                 override fun onResourceReady(
-                    resource: Drawable,
+                    resource: GifDrawable,
                     model: Any,
-                    target: Target<Drawable>,
+                    target: Target<GifDrawable>,
                     dataSource: DataSource,
                     isFirstResource: Boolean
                 ): Boolean {
-                    if (resource is GifDrawable) {
-                        resource.setLoopCount(GifDrawable.LOOP_INTRINSIC)
-                    }
+                    resource.setLoopCount(GifDrawable.LOOP_INTRINSIC)
                     onImageDecoded()
                     return false
                 }

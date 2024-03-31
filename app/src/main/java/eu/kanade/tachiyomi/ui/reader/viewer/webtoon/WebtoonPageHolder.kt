@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
 import android.annotation.SuppressLint
 import android.content.res.Resources
-import android.graphics.drawable.Drawable
 import android.view.Gravity
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -489,15 +488,16 @@ class WebtoonPageHolder(
      */
     private fun ImageView.setImage(stream: InputStream) {
         GlideApp.with(this)
+            .asGif()
             .load(stream)
             .skipMemoryCache(true)
             .diskCacheStrategy(DiskCacheStrategy.NONE)
             .transition(DrawableTransitionOptions.with(NoTransition.getFactory()))
-            .listener(object : RequestListener<Drawable> {
+            .listener(object : RequestListener<GifDrawable> {
                 override fun onLoadFailed(
                     e: GlideException?,
                     model: Any?,
-                    target: Target<Drawable>,
+                    target: Target<GifDrawable>,
                     isFirstResource: Boolean
                 ): Boolean {
                     onImageDecodeError()
@@ -505,15 +505,13 @@ class WebtoonPageHolder(
                 }
 
                 override fun onResourceReady(
-                    resource: Drawable,
+                    resource: GifDrawable,
                     model: Any,
-                    target: Target<Drawable>?,
+                    target: Target<GifDrawable>?,
                     dataSource: DataSource,
                     isFirstResource: Boolean
                 ): Boolean {
-                    if (resource is GifDrawable) {
-                        resource.setLoopCount(GifDrawable.LOOP_INTRINSIC)
-                    }
+                    resource.setLoopCount(GifDrawable.LOOP_INTRINSIC)
                     onImageDecoded()
                     return false
                 }

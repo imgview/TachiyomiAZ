@@ -2,7 +2,8 @@ package exh.util
 
 // Zero-allocation-overhead mutable collection shims
 
-private inline class CollectionShim<E>(private val coll: Collection<E>) : FakeMutableCollection<E> {
+@JvmInline
+private value class CollectionShim<E>(private val coll: Collection<E>) : FakeMutableCollection<E> {
     override val size: Int get() = coll.size
 
     override fun contains(element: E) = coll.contains(element)
@@ -46,7 +47,8 @@ interface FakeMutableCollection<E> : MutableCollection<E>, FakeMutableIterable<E
     }
 }
 
-private inline class SetShim<E>(private val set: Set<E>) : FakeMutableSet<E> {
+@JvmInline
+private value class SetShim<E>(private val set: Set<E>) : FakeMutableSet<E> {
     override val size: Int get() = set.size
 
     override fun contains(element: E) = set.contains(element)
@@ -83,7 +85,8 @@ interface FakeMutableSet<E> : MutableSet<E>, FakeMutableCollection<E> {
     }
 }
 
-private inline class IterableShim<E>(private val iterable: Iterable<E>) : FakeMutableIterable<E> {
+@JvmInline
+private value class IterableShim<E>(private val iterable: Iterable<E>) : FakeMutableIterable<E> {
     override fun fakeIterator() = iterable.iterator()
 }
 
@@ -100,7 +103,8 @@ interface FakeMutableIterable<E> : MutableIterable<E> {
     }
 }
 
-private inline class IteratorShim<E>(private val iterator: Iterator<E>) : FakeMutableIterator<E> {
+@JvmInline
+private value class IteratorShim<E>(private val iterator: Iterator<E>) : FakeMutableIterator<E> {
     /**
      * Returns `true` if the iteration has more elements.
      */
@@ -125,7 +129,8 @@ interface FakeMutableIterator<E> : MutableIterator<E> {
     }
 }
 
-private inline class EntryShim<K, V>(private val entry: Map.Entry<K, V>) : FakeMutableEntry<K, V> {
+@JvmInline
+private value class EntryShim<K, V>(private val entry: Map.Entry<K, V>) : FakeMutableEntry<K, V> {
     /**
      * Returns the key of this key/value pair.
      */
@@ -138,7 +143,8 @@ private inline class EntryShim<K, V>(private val entry: Map.Entry<K, V>) : FakeM
         get() = entry.value
 }
 
-private inline class PairShim<K, V>(private val pair: Pair<K, V>) : FakeMutableEntry<K, V> {
+@JvmInline
+private value class PairShim<K, V>(private val pair: Pair<K, V>) : FakeMutableEntry<K, V> {
     /**
      * Returns the key of this key/value pair.
      */

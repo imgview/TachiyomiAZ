@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import io.github.mthli.slice.Slice
 
 interface SlicedHolder {
-
     val slice: Slice
 
     val adapter: FlexibleAdapter<IFlexible<*>>
@@ -58,7 +57,12 @@ interface SlicedHolder {
         setMargins(margin, if (topShadow) margin else 0, margin, if (bottomShadow) margin else 0)
     }
 
-    private fun setMargins(left: Int, top: Int, right: Int, bottom: Int) {
+    private fun setMargins(
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int
+    ) {
         if (viewToSlice.layoutParams is ViewGroup.MarginLayoutParams) {
             val p = viewToSlice.layoutParams as ViewGroup.MarginLayoutParams
             p.setMargins(left, top, right, bottom)

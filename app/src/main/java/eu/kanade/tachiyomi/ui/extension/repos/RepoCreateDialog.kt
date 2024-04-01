@@ -12,8 +12,7 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
  * Dialog to create a new repo for the library.
  */
 class RepoCreateDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
-        where T : Controller, T : RepoCreateDialog.Listener {
-
+    where T : Controller, T : RepoCreateDialog.Listener {
     /**
      * Name of the new repo. Value updated with each input from the user.
      */

@@ -11,7 +11,6 @@ import rx.Completable
 import rx.Observable
 
 class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
-
     companion object {
         const val READING = 1
         const val COMPLETED = 2
@@ -43,16 +42,17 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
         return listOf(READING, COMPLETED, ON_HOLD, DROPPED, PLAN_TO_READ)
     }
 
-    override fun getStatus(status: Int): String = with(context) {
-        when (status) {
-            READING -> getString(R.string.reading)
-            COMPLETED -> getString(R.string.completed)
-            ON_HOLD -> getString(R.string.on_hold)
-            DROPPED -> getString(R.string.dropped)
-            PLAN_TO_READ -> getString(R.string.plan_to_read)
-            else -> ""
+    override fun getStatus(status: Int): String =
+        with(context) {
+            when (status) {
+                READING -> getString(R.string.reading)
+                COMPLETED -> getString(R.string.completed)
+                ON_HOLD -> getString(R.string.on_hold)
+                DROPPED -> getString(R.string.dropped)
+                PLAN_TO_READ -> getString(R.string.plan_to_read)
+                else -> ""
+            }
         }
-    }
 
     override fun getCompletionStatus(): Int = COMPLETED
 
@@ -102,7 +102,10 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
 
     fun login(csrfToken: String): Completable = login("myanimelist", csrfToken)
 
-    override fun login(username: String, password: String): Completable {
+    override fun login(
+        username: String,
+        password: String
+    ): Completable {
         return Observable.fromCallable { saveCSRF(password) }
             .doOnNext { saveCredentials(username, password) }
             .doOnError { logout() }
@@ -121,9 +124,10 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
     }
 
     private val isAuthorized: Boolean
-        get() = super.isLogged &&
-            getCSRF().isNotEmpty() &&
-            checkCookies()
+        get() =
+            super.isLogged &&
+                getCSRF().isNotEmpty() &&
+                checkCookies()
 
     fun getCSRF(): String = preferences.trackToken(this).get()
 

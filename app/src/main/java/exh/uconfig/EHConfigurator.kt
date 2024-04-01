@@ -17,32 +17,33 @@ class EHConfigurator {
     private val prefs: PreferencesHelper by injectLazy()
     private val sources: SourceManager by injectLazy()
 
-    private val configuratorClient = OkHttpClient.Builder()
-        .maybeInjectEHLogger()
-        .build()
+    private val configuratorClient =
+        OkHttpClient.Builder()
+            .maybeInjectEHLogger()
+            .build()
 
-    private fun EHentai.requestWithCreds(sp: Int = 1) = Request.Builder()
-        .addHeader("Cookie", cookiesHeader(sp))
+    private fun EHentai.requestWithCreds(sp: Int = 1) =
+        Request.Builder()
+            .addHeader("Cookie", cookiesHeader(sp))
 
     private fun EHentai.execProfileActions(
         action: String,
         name: String,
         set: String,
         sp: Int
-    ) =
-        configuratorClient.newCall(
-            requestWithCreds(sp)
-                .url(uconfigUrl)
-                .post(
-                    FormBody.Builder()
-                        .add("profile_action", action)
-                        .add("profile_name", name)
-                        .add("profile_set", set)
-                        .build()
-                )
-                .build()
-        )
-            .execute()
+    ) = configuratorClient.newCall(
+        requestWithCreds(sp)
+            .url(uconfigUrl)
+            .post(
+                FormBody.Builder()
+                    .add("profile_action", action)
+                    .add("profile_name", name)
+                    .add("profile_set", set)
+                    .build()
+            )
+            .build()
+    )
+        .execute()
 
     private val EHentai.uconfigUrl get() = baseUrl + UCONFIG_URL
 
@@ -51,12 +52,13 @@ class EHConfigurator {
         val exhSource = sources.get(EXH_SOURCE_ID) as EHentai
 
         // Get hath perks
-        val perksPage = configuratorClient.newCall(
-            ehSource.requestWithCreds()
-                .url(HATH_PERKS_URL)
-                .build()
-        )
-            .execute().asJsoup()
+        val perksPage =
+            configuratorClient.newCall(
+                ehSource.requestWithCreds()
+                    .url(HATH_PERKS_URL)
+                    .build()
+            )
+                .execute().asJsoup()
 
         val hathPerks = EHHathPerksResponse()
 
@@ -83,7 +85,10 @@ class EHConfigurator {
         configure(exhSource, hathPerks)
     }
 
-    fun configure(source: EHentai, hathPerks: EHHathPerksResponse) {
+    fun configure(
+        source: EHentai,
+        hathPerks: EHHathPerksResponse
+    ) {
         // Delete old app profiles
         val scanReq = source.requestWithCreds().url(source.uconfigUrl).build()
         val resp = configuratorClient.newCall(scanReq).execute().asJsoup()
@@ -109,12 +114,13 @@ class EHConfigurator {
         // Create profile in available slot
 
         val slot = availableProfiles.first()
-        val response = source.execProfileActions(
-            "create",
-            PROFILE_NAME,
-            slot.toString(),
-            1
-        )
+        val response =
+            source.execProfileActions(
+                "create",
+                PROFILE_NAME,
+                slot.toString(),
+                1
+            )
 
         // Build new profile
         val form = EhUConfigBuilder().build(hathPerks)
@@ -130,15 +136,18 @@ class EHConfigurator {
         // Persist slot + sk
         source.spPref().set(slot)
 
-        val keyCookie = response.headers.toMultimap()["Set-Cookie"]?.find {
-            it.startsWith("sk=")
-        }?.removePrefix("sk=")?.substringBefore(';')
-        val sessionCookie = response.headers.toMultimap()["Set-Cookie"]?.find {
-            it.startsWith("s=")
-        }?.removePrefix("s=")?.substringBefore(';')
-        val hathPerksCookie = response.headers.toMultimap()["Set-Cookie"]?.find {
-            it.startsWith("hath_perks=")
-        }?.removePrefix("hath_perks=")?.substringBefore(';')
+        val keyCookie =
+            response.headers.toMultimap()["Set-Cookie"]?.find {
+                it.startsWith("sk=")
+            }?.removePrefix("sk=")?.substringBefore(';')
+        val sessionCookie =
+            response.headers.toMultimap()["Set-Cookie"]?.find {
+                it.startsWith("s=")
+            }?.removePrefix("s=")?.substringBefore(';')
+        val hathPerksCookie =
+            response.headers.toMultimap()["Set-Cookie"]?.find {
+                it.startsWith("hath_perks=")
+            }?.removePrefix("hath_perks=")?.substringBefore(';')
 
         if (keyCookie != null) {
             prefs.eh_settingsKey().set(keyCookie)
@@ -154,6 +163,7 @@ class EHConfigurator {
     companion object {
         private const val PROFILE_NAME = "TachiyomiEH App"
         private const val UCONFIG_URL = "/uconfig.php"
+
         // Always use E-H here as EXH does not have a perks page
         private const val HATH_PERKS_URL = "https://e-hentai.org/hathperks.php"
         private const val PROFILE_SELECTOR = "[name=profile_set] > option"

@@ -13,8 +13,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class SetTrackStatusDialog<T> : DialogController
-        where T : Controller, T : SetTrackStatusDialog.Listener {
-
+    where T : Controller, T : SetTrackStatusDialog.Listener {
     private val item: TrackItem
 
     constructor(target: T, item: TrackItem) : super(
@@ -53,7 +52,10 @@ class SetTrackStatusDialog<T> : DialogController
     }
 
     interface Listener {
-        fun setStatus(item: TrackItem, selection: Int)
+        fun setStatus(
+            item: TrackItem,
+            selection: Int
+        )
     }
 
     private companion object {

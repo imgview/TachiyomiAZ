@@ -5,9 +5,10 @@ import android.util.AttributeSet
 import android.widget.NumberPicker
 import eu.kanade.tachiyomi.R
 
-class MinMaxNumberPicker @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+class MinMaxNumberPicker
+@JvmOverloads
+constructor(context: Context, attrs: AttributeSet? = null) :
     NumberPicker(context, attrs) {
-
     init {
         if (attrs != null) {
             val ta = context.obtainStyledAttributes(attrs, R.styleable.MinMaxNumberPicker, 0, 0)

@@ -15,8 +15,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class SetTrackChaptersDialog<T> : DialogController
-        where T : Controller, T : SetTrackChaptersDialog.Listener {
-
+    where T : Controller, T : SetTrackChaptersDialog.Listener {
     private val item: TrackItem
 
     constructor(target: T, item: TrackItem) : super(
@@ -38,18 +37,19 @@ class SetTrackChaptersDialog<T> : DialogController
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val item = item
 
-        val dialog = MaterialDialog(activity!!)
-            .title(R.string.chapters)
-            .customView(R.layout.track_chapters_dialog, dialogWrapContent = false)
-            .positiveButton(android.R.string.ok) { dialog ->
-                val view = dialog.getCustomView()
-                // Remove focus to update selected number
-                val np: NumberPicker = view.findViewById(R.id.chapters_picker)
-                np.clearFocus()
+        val dialog =
+            MaterialDialog(activity!!)
+                .title(R.string.chapters)
+                .customView(R.layout.track_chapters_dialog, dialogWrapContent = false)
+                .positiveButton(android.R.string.ok) { dialog ->
+                    val view = dialog.getCustomView()
+                    // Remove focus to update selected number
+                    val np: NumberPicker = view.findViewById(R.id.chapters_picker)
+                    np.clearFocus()
 
-                (targetController as? Listener)?.setChaptersRead(item, np.value)
-            }
-            .negativeButton(android.R.string.cancel)
+                    (targetController as? Listener)?.setChaptersRead(item, np.value)
+                }
+                .negativeButton(android.R.string.cancel)
 
         val view = dialog.getCustomView()
         val np: NumberPicker = view.findViewById(R.id.chapters_picker)
@@ -68,7 +68,10 @@ class SetTrackChaptersDialog<T> : DialogController
     }
 
     interface Listener {
-        fun setChaptersRead(item: TrackItem, chaptersRead: Int)
+        fun setChaptersRead(
+            item: TrackItem,
+            chaptersRead: Int
+        )
     }
 
     private companion object {

@@ -22,7 +22,6 @@ class TrackPresenter(
     private val db: DatabaseHelper = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get()
 ) : BasePresenter<TrackController>() {
-
     private val context = preferences.context
 
     private var trackList: List<TrackItem> = emptyList()
@@ -42,49 +41,58 @@ class TrackPresenter(
 
     fun fetchTrackings() {
         trackSubscription?.let { remove(it) }
-        trackSubscription = db.getTracks(manga)
-            .asRxObservable()
-            .map { tracks ->
-                loggedServices.map { service ->
-                    TrackItem(tracks.find { it.sync_id == service.id }, service)
+        trackSubscription =
+            db.getTracks(manga)
+                .asRxObservable()
+                .map { tracks ->
+                    loggedServices.map { service ->
+                        TrackItem(tracks.find { it.sync_id == service.id }, service)
+                    }
                 }
-            }
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext { trackList = it }
-            .subscribeLatestCache(TrackController::onNextTrackings)
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext { trackList = it }
+                .subscribeLatestCache(TrackController::onNextTrackings)
     }
 
     fun refresh() {
         refreshSubscription?.let { remove(it) }
-        refreshSubscription = Observable.from(trackList)
-            .filter { it.track != null }
-            .concatMap { item ->
-                item.service.refresh(item.track!!)
-                    .flatMap { db.insertTrack(it).asRxObservable() }
-                    .map { item }
-                    .onErrorReturn { item }
-            }
-            .toList()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeFirst(
-                { view, _ -> view.onRefreshDone() },
-                TrackController::onRefreshError
-            )
+        refreshSubscription =
+            Observable.from(trackList)
+                .filter { it.track != null }
+                .concatMap { item ->
+                    item.service.refresh(item.track!!)
+                        .flatMap { db.insertTrack(it).asRxObservable() }
+                        .map { item }
+                        .onErrorReturn { item }
+                }
+                .toList()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeFirst(
+                    { view, _ -> view.onRefreshDone() },
+                    TrackController::onRefreshError
+                )
     }
 
-    fun search(query: String, service: TrackService) {
+    fun search(
+        query: String,
+        service: TrackService
+    ) {
         searchSubscription?.let { remove(it) }
-        searchSubscription = service.search(query)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeLatestCache(
-                TrackController::onSearchResults,
-                TrackController::onSearchResultsError
-            )
+        searchSubscription =
+            service.search(query)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeLatestCache(
+                    TrackController::onSearchResults,
+                    TrackController::onSearchResultsError
+                )
     }
 
-    fun registerTracking(item: Track?, service: TrackService) {
+    fun registerTracking(
+        item: Track?,
+        service: TrackService
+    ) {
         if (item != null) {
             item.manga_id = manga.id!!
             add(
@@ -106,7 +114,10 @@ class TrackPresenter(
         db.deleteTrackForManga(manga, service).executeAsBlocking()
     }
 
-    private fun updateRemote(track: Track, service: TrackService) {
+    private fun updateRemote(
+        track: Track,
+        service: TrackService
+    ) {
         service.update(track)
             .flatMap { db.insertTrack(track).asRxObservable() }
             .subscribeOn(Schedulers.io())
@@ -122,7 +133,10 @@ class TrackPresenter(
             )
     }
 
-    fun setStatus(item: TrackItem, index: Int) {
+    fun setStatus(
+        item: TrackItem,
+        index: Int
+    ) {
         val track = item.track!!
         track.status = item.service.getStatusList()[index]
         if (track.status == item.service.getCompletionStatus() && track.total_chapters != 0) {
@@ -131,13 +145,19 @@ class TrackPresenter(
         updateRemote(track, item.service)
     }
 
-    fun setScore(item: TrackItem, index: Int) {
+    fun setScore(
+        item: TrackItem,
+        index: Int
+    ) {
         val track = item.track!!
         track.score = item.service.indexToScore(index)
         updateRemote(track, item.service)
     }
 
-    fun setLastChapterRead(item: TrackItem, chapterNumber: Int) {
+    fun setLastChapterRead(
+        item: TrackItem,
+        chapterNumber: Int
+    ) {
         val track = item.track!!
         track.last_chapter_read = chapterNumber
         if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
@@ -146,13 +166,19 @@ class TrackPresenter(
         updateRemote(track, item.service)
     }
 
-    fun setStartDate(item: TrackItem, date: Long) {
+    fun setStartDate(
+        item: TrackItem,
+        date: Long
+    ) {
         val track = item.track!!
         track.started_reading_date = date
         updateRemote(track, item.service)
     }
 
-    fun setFinishDate(item: TrackItem, date: Long) {
+    fun setFinishDate(
+        item: TrackItem,
+        date: Long
+    ) {
         val track = item.track!!
         track.finished_reading_date = date
         updateRemote(track, item.service)

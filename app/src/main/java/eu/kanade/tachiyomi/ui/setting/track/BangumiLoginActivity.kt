@@ -14,7 +14,6 @@ import rx.schedulers.Schedulers
 import uy.kohesive.injekt.injectLazy
 
 class BangumiLoginActivity : AppCompatActivity() {
-
     private val trackManager: TrackManager by injectLazy()
 
     override fun onCreate(savedState: Bundle?) {

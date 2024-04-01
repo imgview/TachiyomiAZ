@@ -4,16 +4,15 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.util.lang.compareToCaseInsensitiveNaturalOrder
 import eu.kanade.tachiyomi.util.system.ImageUtil
-import java.io.File
-import java.nio.channels.SeekableByteChannel
 import org.apache.commons.compress.archivers.zip.ZipFile
 import rx.Observable
+import java.io.File
+import java.nio.channels.SeekableByteChannel
 
 /**
  * Loader used to load a chapter from a .zip or .cbz file.
  */
 class ZipPageLoader(private val zip: ZipFile) : PageLoader() {
-
     constructor(channel: SeekableByteChannel) : this(ZipFile(channel))
     constructor(file: File) : this(ZipFile(file))
 

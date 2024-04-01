@@ -9,11 +9,11 @@ import eu.kanade.tachiyomi.source.model.SManga
 import exh.metadata.metadata.RaisedSearchMetadata
 import exh.metadata.metadata.base.getFlatMetadataForManga
 import exh.metadata.metadata.base.insertFlatMetadata
-import kotlin.reflect.KClass
 import rx.Completable
 import rx.Single
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import kotlin.reflect.KClass
 
 /**
  * LEWD!
@@ -29,33 +29,41 @@ interface LewdSource<M : RaisedSearchMetadata, I> : CatalogueSource {
     /**
      * Parse the supplied input into the supplied metadata object
      */
-    fun parseIntoMetadata(metadata: M, input: I)
+    fun parseIntoMetadata(
+        metadata: M,
+        input: I
+    )
 
     /**
      * Use reflection to create a new instance of metadata
      */
-    private fun newMetaInstance() = metaClass.constructors.find {
-        it.parameters.isEmpty()
-    }?.call()
-        ?: error("Could not find no-args constructor for meta class: ${metaClass.qualifiedName}!")
+    private fun newMetaInstance() =
+        metaClass.constructors.find {
+            it.parameters.isEmpty()
+        }?.call()
+            ?: error("Could not find no-args constructor for meta class: ${metaClass.qualifiedName}!")
 
     /**
      * Parses metadata from the input and then copies it into the manga
      *
      * Will also save the metadata to the DB if possible
      */
-    fun parseToManga(manga: SManga, input: I): Completable {
+    fun parseToManga(
+        manga: SManga,
+        input: I
+    ): Completable {
         val mangaId = manga.id
-        val metaObservable = if (mangaId != null) {
-            // We have to use fromCallable because StorIO messes up the thread scheduling if we use their rx functions
-            Single.fromCallable {
-                db.getFlatMetadataForManga(mangaId).executeAsBlocking()
-            }.map {
-                it?.raise(metaClass) ?: newMetaInstance()
+        val metaObservable =
+            if (mangaId != null) {
+                // We have to use fromCallable because StorIO messes up the thread scheduling if we use their rx functions
+                Single.fromCallable {
+                    db.getFlatMetadataForManga(mangaId).executeAsBlocking()
+                }.map {
+                    it?.raise(metaClass) ?: newMetaInstance()
+                }
+            } else {
+                Single.just(newMetaInstance())
             }
-        } else {
-            Single.just(newMetaInstance())
-        }
 
         return metaObservable.map {
             parseIntoMetadata(it, input)
@@ -65,7 +73,9 @@ interface LewdSource<M : RaisedSearchMetadata, I> : CatalogueSource {
             if (mangaId != null) {
                 it.mangaId = mangaId
                 db.insertFlatMetadata(it.flatten())
-            } else Completable.complete()
+            } else {
+                Completable.complete()
+            }
         }
     }
 
@@ -76,15 +86,21 @@ interface LewdSource<M : RaisedSearchMetadata, I> : CatalogueSource {
      * If the metadata needs to be parsed from the input producer, the resulting parsed metadata will
      * also be saved to the DB.
      */
-    fun getOrLoadMetadata(mangaId: Long?, inputProducer: () -> Single<I>): Single<M> {
-        val metaObservable = if (mangaId != null) {
-            // We have to use fromCallable because StorIO messes up the thread scheduling if we use their rx functions
-            Single.fromCallable {
-                db.getFlatMetadataForManga(mangaId).executeAsBlocking()
-            }.map {
-                it?.raise(metaClass)
+    fun getOrLoadMetadata(
+        mangaId: Long?,
+        inputProducer: () -> Single<I>
+    ): Single<M> {
+        val metaObservable =
+            if (mangaId != null) {
+                // We have to use fromCallable because StorIO messes up the thread scheduling if we use their rx functions
+                Single.fromCallable {
+                    db.getFlatMetadataForManga(mangaId).executeAsBlocking()
+                }.map {
+                    it?.raise(metaClass)
+                }
+            } else {
+                Single.just(null)
             }
-        } else Single.just(null)
 
         return metaObservable.flatMap { existingMeta ->
             if (existingMeta == null) {
@@ -95,9 +111,13 @@ interface LewdSource<M : RaisedSearchMetadata, I> : CatalogueSource {
                     if (mangaId != null) {
                         newMeta.mangaId = mangaId
                         db.insertFlatMetadata(newMeta.flatten()).andThen(newMetaSingle)
-                    } else newMetaSingle
+                    } else {
+                        newMetaSingle
+                    }
                 }
-            } else Single.just(existingMeta)
+            } else {
+                Single.just(existingMeta)
+            }
         }
     }
 

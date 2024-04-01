@@ -6,11 +6,11 @@ import eu.kanade.tachiyomi.data.database.models.Manga
  * This class will provide various functions to rank manga to efficiently schedule manga to update.
  */
 object LibraryUpdateRanker {
-
-    val rankingScheme = listOf(
-        (this::lexicographicRanking)(),
-        (this::latestFirstRanking)()
-    )
+    val rankingScheme =
+        listOf(
+            (this::lexicographicRanking)(),
+            (this::latestFirstRanking)()
+        )
 
     /**
      * Provides a total ordering over all the [Manga]s.

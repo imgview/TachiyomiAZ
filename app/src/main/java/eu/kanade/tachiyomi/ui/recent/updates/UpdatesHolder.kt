@@ -23,7 +23,6 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
  */
 class UpdatesHolder(private val view: View, private val adapter: UpdatesAdapter) :
     BaseFlexibleViewHolder(view, adapter) {
-
     private val binding = UpdatesItemBinding.bind(view)
 
     private var readColor = view.context.getResourceColor(R.attr.colorOnSurface, 0.38f)
@@ -84,59 +83,61 @@ class UpdatesHolder(private val view: View, private val adapter: UpdatesAdapter)
      *
      * @param status download status
      */
-    fun notifyStatus(status: Int) = with(binding.downloadText) {
-        when (status) {
-            Download.QUEUE -> setText(R.string.chapter_queued)
-            Download.DOWNLOADING -> setText(R.string.chapter_downloading)
-            Download.DOWNLOADED -> setText(R.string.chapter_downloaded)
-            Download.ERROR -> setText(R.string.chapter_error)
-            else -> text = ""
+    fun notifyStatus(status: Int) =
+        with(binding.downloadText) {
+            when (status) {
+                Download.QUEUE -> setText(R.string.chapter_queued)
+                Download.DOWNLOADING -> setText(R.string.chapter_downloading)
+                Download.DOWNLOADED -> setText(R.string.chapter_downloaded)
+                Download.ERROR -> setText(R.string.chapter_error)
+                else -> text = ""
+            }
         }
-    }
 
     /**
      * Show pop up menu
      *
      * @param view view containing popup menu.
      */
-    private fun showPopupMenu(view: View) = item?.let { item ->
-        // Create a PopupMenu, giving it the clicked view for an anchor
-        val popup = PopupMenu(view.context, view)
+    private fun showPopupMenu(view: View) =
+        item?.let { item ->
+            // Create a PopupMenu, giving it the clicked view for an anchor
+            val popup = PopupMenu(view.context, view)
 
-        // Inflate our menu resource into the PopupMenu's Menu
-        popup.menuInflater.inflate(R.menu.chapter_recent, popup.menu)
+            // Inflate our menu resource into the PopupMenu's Menu
+            popup.menuInflater.inflate(R.menu.chapter_recent, popup.menu)
 
-        // Hide download and show delete if the chapter is downloaded and
-        if (item.isDownloaded) {
-            popup.menu.findItem(R.id.action_download).isVisible = false
-            popup.menu.findItem(R.id.action_delete).isVisible = true
-        }
-
-        // Hide mark as unread when the chapter is unread
-        if (!item.chapter.read /*&& mangaChapter.chapter.last_page_read == 0*/) {
-            popup.menu.findItem(R.id.action_mark_as_unread).isVisible = false
-        }
-
-        // Hide mark as read when the chapter is read
-        if (item.chapter.read) {
-            popup.menu.findItem(R.id.action_mark_as_read).isVisible = false
-        }
-
-        // Set a listener so we are notified if a menu item is clicked
-        popup.setOnMenuItemClickListener { menuItem ->
-            with(adapter.controller) {
-                when (menuItem.itemId) {
-                    R.id.action_download -> downloadChapter(item)
-                    R.id.action_delete -> deleteChapter(item)
-                    R.id.action_mark_as_read -> markAsRead(listOf(item))
-                    R.id.action_mark_as_unread -> markAsUnread(listOf(item))
-                }
+            // Hide download and show delete if the chapter is downloaded and
+            if (item.isDownloaded) {
+                popup.menu.findItem(R.id.action_download).isVisible = false
+                popup.menu.findItem(R.id.action_delete).isVisible = true
             }
 
-            true
-        }
+            // Hide mark as unread when the chapter is unread
+            if (!item.chapter.read /*&& mangaChapter.chapter.last_page_read == 0*/) {
+                popup.menu.findItem(R.id.action_mark_as_unread).isVisible = false
+            }
 
-        // Finally show the PopupMenu
-        popup.show()
-    }
+            // Hide mark as read when the chapter is read
+            if (item.chapter.read) {
+                popup.menu.findItem(R.id.action_mark_as_read).isVisible = false
+            }
+
+            // Set a listener so we are notified if a menu item is clicked
+            popup.setOnMenuItemClickListener { menuItem ->
+                with(adapter.controller) {
+                    when (menuItem.itemId) {
+                        R.id.action_download -> downloadChapter(item)
+                        R.id.action_delete -> deleteChapter(item)
+                        R.id.action_mark_as_read -> markAsRead(listOf(item))
+                        R.id.action_mark_as_unread -> markAsUnread(listOf(item))
+                    }
+                }
+
+                true
+            }
+
+            // Finally show the PopupMenu
+            popup.show()
+        }
 }

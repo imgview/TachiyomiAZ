@@ -28,7 +28,6 @@ class ChapterLoader(
     private val manga: Manga,
     private val source: Source
 ) {
-
     /**
      * Returns a completable that assigns the page loader and loads the its pages. It just
      * completes if the chapter is already loaded.
@@ -61,9 +60,10 @@ class ChapterLoader(
 
                 // If the chapter is partially read, set the starting page to the last the user read
                 // otherwise use the requested page.
-                if (!chapter.chapter.read /* --> EH */ || prefs
-                    .eh_preserveReadingPosition()
-                    .getOrDefault() /* <-- EH */
+                if (!chapter.chapter.read /* --> EH */ ||
+                    prefs
+                        .eh_preserveReadingPosition()
+                        .getOrDefault() // <-- EH
                 ) {
                     chapter.requestedPage = chapter.chapter.last_page_read
                 }
@@ -101,29 +101,30 @@ class ChapterLoader(
         return when {
             isDownloaded -> DownloadPageLoader(chapter, manga, source, downloadManager)
             source is HttpSource -> HttpPageLoader(chapter, source)
-            source is LocalSource -> source.getFormat(chapter.chapter).let { format ->
-                when (format) {
-                    is LocalSource.Format.Directory -> DirectoryPageLoader(format.file)
-                    is LocalSource.Format.Rar ->
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            RarPageLoader(format.file.openReadOnlyChannel(context).toInputStream())
-                        } else {
-                            RarPageLoader(format.file)
-                        }
-                    is LocalSource.Format.Zip ->
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            ZipPageLoader(format.file.openReadOnlyChannel(context))
-                        } else {
-                            ZipPageLoaderCompat(format.file)
-                        }
-                    is LocalSource.Format.Epub ->
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            EpubPageLoader(format.file.openReadOnlyChannel(context))
-                        } else {
-                            EpubPageLoaderCompat(format.file)
-                        }
+            source is LocalSource ->
+                source.getFormat(chapter.chapter).let { format ->
+                    when (format) {
+                        is LocalSource.Format.Directory -> DirectoryPageLoader(format.file)
+                        is LocalSource.Format.Rar ->
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                RarPageLoader(format.file.openReadOnlyChannel(context).toInputStream())
+                            } else {
+                                RarPageLoader(format.file)
+                            }
+                        is LocalSource.Format.Zip ->
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                ZipPageLoader(format.file.openReadOnlyChannel(context))
+                            } else {
+                                ZipPageLoaderCompat(format.file)
+                            }
+                        is LocalSource.Format.Epub ->
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                EpubPageLoader(format.file.openReadOnlyChannel(context))
+                            } else {
+                                EpubPageLoaderCompat(format.file)
+                            }
+                    }
                 }
-            }
             else -> error("Loader not implemented")
         }
     }

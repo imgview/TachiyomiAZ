@@ -32,12 +32,12 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
-import java.io.InputStream
-import java.util.concurrent.TimeUnit
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import java.io.InputStream
+import java.util.concurrent.TimeUnit
 
 /**
  * Holder of the webtoon reader for a single page of a chapter.
@@ -50,7 +50,6 @@ class WebtoonPageHolder(
     private val frame: FrameLayout,
     viewer: WebtoonViewer
 ) : WebtoonBaseHolder(frame, viewer) {
-
     /**
      * Loading progress bar to indicate the current progress.
      */
@@ -123,15 +122,16 @@ class WebtoonPageHolder(
     }
 
     private fun refreshLayoutParams() {
-        frame.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply {
-            if (!viewer.isContinuous) {
-                bottomMargin = 15.dpToPx
-            }
+        frame.layoutParams =
+            FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply {
+                if (!viewer.isContinuous) {
+                    bottomMargin = 15.dpToPx
+                }
 
-            val margin = Resources.getSystem().displayMetrics.widthPixels * (viewer.config.sidePadding / 100f)
-            marginEnd = margin.toInt()
-            marginStart = margin.toInt()
-        }
+                val margin = Resources.getSystem().displayMetrics.widthPixels * (viewer.config.sidePadding / 100f)
+                marginEnd = margin.toInt()
+                marginStart = margin.toInt()
+            }
     }
 
     /**
@@ -160,9 +160,10 @@ class WebtoonPageHolder(
 
         val page = page ?: return
         val loader = page.chapter.pageLoader ?: return
-        statusSubscription = loader.getPage(page)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { processStatus(it) }
+        statusSubscription =
+            loader.getPage(page)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { processStatus(it) }
 
         addSubscription(statusSubscription)
     }
@@ -175,12 +176,13 @@ class WebtoonPageHolder(
 
         val page = page ?: return
 
-        progressSubscription = Observable.interval(100, TimeUnit.MILLISECONDS)
-            .map { page.progress }
-            .distinctUntilChanged()
-            .onBackpressureLatest()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { value -> progressBar.setProgress(value) }
+        progressSubscription =
+            Observable.interval(100, TimeUnit.MILLISECONDS)
+                .map { page.progress }
+                .distinctUntilChanged()
+                .onBackpressureLatest()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { value -> progressBar.setProgress(value) }
 
         addSubscription(progressSubscription)
     }
@@ -277,30 +279,31 @@ class WebtoonPageHolder(
         val streamFn = page?.stream ?: return
 
         var openStream: InputStream? = null
-        readImageHeaderSubscription = Observable
-            .fromCallable {
-                val stream = streamFn().buffered(16)
-                openStream = stream
+        readImageHeaderSubscription =
+            Observable
+                .fromCallable {
+                    val stream = streamFn().buffered(16)
+                    openStream = stream
 
-                ImageUtil.findImageType(stream) == ImageUtil.ImageType.GIF
-            }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext { isAnimated ->
-                if (!isAnimated) {
-                    val subsamplingView = initSubsamplingImageView()
-                    subsamplingView.visible()
-                    subsamplingView.setImage(ImageSource.inputStream(openStream!!))
-                } else {
-                    val imageView = initImageView()
-                    imageView.visible()
-                    imageView.setImage(openStream!!)
+                    ImageUtil.findImageType(stream) == ImageUtil.ImageType.GIF
                 }
-            }
-            // Keep the Rx stream alive to close the input stream only when unsubscribed
-            .flatMap { Observable.never<Unit>() }
-            .doOnUnsubscribe { openStream?.close() }
-            .subscribe({}, {})
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext { isAnimated ->
+                    if (!isAnimated) {
+                        val subsamplingView = initSubsamplingImageView()
+                        subsamplingView.visible()
+                        subsamplingView.setImage(ImageSource.inputStream(openStream!!))
+                    } else {
+                        val imageView = initImageView()
+                        imageView.visible()
+                        imageView.setImage(openStream!!)
+                    }
+                }
+                // Keep the Rx stream alive to close the input stream only when unsubscribed
+                .flatMap { Observable.never<Unit>() }
+                .doOnUnsubscribe { openStream?.close() }
+                .subscribe({}, {})
 
         addSubscription(readImageHeaderSubscription)
     }
@@ -336,13 +339,15 @@ class WebtoonPageHolder(
         progressContainer = FrameLayout(context)
         frame.addView(progressContainer, MATCH_PARENT, parentHeight)
 
-        val progress = ReaderProgressBar(context).apply {
-            val size = 48.dpToPx
-            layoutParams = FrameLayout.LayoutParams(size, size).apply {
-                gravity = Gravity.CENTER_HORIZONTAL
-                setMargins(0, parentHeight / 4, 0, 0)
+        val progress =
+            ReaderProgressBar(context).apply {
+                val size = 48.dpToPx
+                layoutParams =
+                    FrameLayout.LayoutParams(size, size).apply {
+                        gravity = Gravity.CENTER_HORIZONTAL
+                        setMargins(0, parentHeight / 4, 0, 0)
+                    }
             }
-        }
         progressContainer.addView(progress)
         return progress
     }
@@ -355,23 +360,26 @@ class WebtoonPageHolder(
 
         val config = viewer.config
 
-        subsamplingImageView = WebtoonSubsamplingImageView(context).apply {
-            setMaxTileSize(viewer.activity.maxBitmapSize)
-            setPanLimit(SubsamplingScaleImageView.PAN_LIMIT_INSIDE)
-            setMinimumScaleType(SubsamplingScaleImageView.SCALE_TYPE_FIT_WIDTH)
-            setMinimumDpi(90)
-            setMinimumTileDpi(180)
-            setCropBorders(config.imageCropBorders)
-            setOnImageEventListener(object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
-                override fun onReady() {
-                    onImageDecoded()
-                }
+        subsamplingImageView =
+            WebtoonSubsamplingImageView(context).apply {
+                setMaxTileSize(viewer.activity.maxBitmapSize)
+                setPanLimit(SubsamplingScaleImageView.PAN_LIMIT_INSIDE)
+                setMinimumScaleType(SubsamplingScaleImageView.SCALE_TYPE_FIT_WIDTH)
+                setMinimumDpi(90)
+                setMinimumTileDpi(180)
+                setCropBorders(config.imageCropBorders)
+                setOnImageEventListener(
+                    object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
+                        override fun onReady() {
+                            onImageDecoded()
+                        }
 
-                override fun onImageLoadError(e: Exception) {
-                    onImageDecodeError()
-                }
-            })
-        }
+                        override fun onImageLoadError(e: Exception) {
+                            onImageDecodeError()
+                        }
+                    }
+                )
+            }
         frame.addView(subsamplingImageView, MATCH_PARENT, MATCH_PARENT)
         return subsamplingImageView!!
     }
@@ -382,9 +390,10 @@ class WebtoonPageHolder(
     private fun initImageView(): ImageView {
         if (imageView != null) return imageView!!
 
-        imageView = AppCompatImageView(context).apply {
-            adjustViewBounds = true
-        }
+        imageView =
+            AppCompatImageView(context).apply {
+                adjustViewBounds = true
+            }
         frame.addView(imageView, MATCH_PARENT, MATCH_PARENT)
         return imageView!!
     }
@@ -399,10 +408,11 @@ class WebtoonPageHolder(
         frame.addView(retryContainer, MATCH_PARENT, parentHeight)
 
         AppCompatButton(context).apply {
-            layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
-                gravity = Gravity.CENTER_HORIZONTAL
-                setMargins(0, parentHeight / 4, 0, 0)
-            }
+            layoutParams =
+                FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                    gravity = Gravity.CENTER_HORIZONTAL
+                    setMargins(0, parentHeight / 4, 0, 0)
+                }
             setText(R.string.action_retry)
             setOnClickListener {
                 page?.let { it.chapter.pageLoader?.retryPage(it) }
@@ -421,19 +431,22 @@ class WebtoonPageHolder(
 
         val margins = 8.dpToPx
 
-        val decodeLayout = LinearLayout(context).apply {
-            layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, parentHeight).apply {
-                setMargins(0, parentHeight / 6, 0, 0)
+        val decodeLayout =
+            LinearLayout(context).apply {
+                layoutParams =
+                    LinearLayout.LayoutParams(MATCH_PARENT, parentHeight).apply {
+                        setMargins(0, parentHeight / 6, 0, 0)
+                    }
+                gravity = Gravity.CENTER_HORIZONTAL
+                orientation = LinearLayout.VERTICAL
             }
-            gravity = Gravity.CENTER_HORIZONTAL
-            orientation = LinearLayout.VERTICAL
-        }
         decodeErrorLayout = decodeLayout
 
         TextView(context).apply {
-            layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
-                setMargins(0, margins, 0, margins)
-            }
+            layoutParams =
+                LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                    setMargins(0, margins, 0, margins)
+                }
             gravity = Gravity.CENTER
             setText(R.string.decode_image_error)
 
@@ -441,9 +454,10 @@ class WebtoonPageHolder(
         }
 
         AppCompatButton(context).apply {
-            layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
-                setMargins(0, margins, 0, margins)
-            }
+            layoutParams =
+                FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                    setMargins(0, margins, 0, margins)
+                }
             setText(R.string.action_retry)
             setOnClickListener {
                 page?.let { it.chapter.pageLoader?.retryPage(it) }
@@ -455,9 +469,10 @@ class WebtoonPageHolder(
         val imageUrl = page?.imageUrl
         if (imageUrl.orEmpty().startsWith("http", true)) {
             AppCompatButton(context).apply {
-                layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
-                    setMargins(0, margins, 0, margins)
-                }
+                layoutParams =
+                    FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                        setMargins(0, margins, 0, margins)
+                    }
                 setText(R.string.action_open_in_web_view)
                 setOnClickListener {
                     val intent = WebViewActivity.newIntent(context, imageUrl!!)
@@ -493,29 +508,31 @@ class WebtoonPageHolder(
             .skipMemoryCache(true)
             .diskCacheStrategy(DiskCacheStrategy.NONE)
             .transition(DrawableTransitionOptions.with(NoTransition.getFactory()))
-            .listener(object : RequestListener<GifDrawable> {
-                override fun onLoadFailed(
-                    e: GlideException?,
-                    model: Any?,
-                    target: Target<GifDrawable>,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    onImageDecodeError()
-                    return false
-                }
+            .listener(
+                object : RequestListener<GifDrawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<GifDrawable>,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        onImageDecodeError()
+                        return false
+                    }
 
-                override fun onResourceReady(
-                    resource: GifDrawable,
-                    model: Any,
-                    target: Target<GifDrawable>?,
-                    dataSource: DataSource,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    resource.setLoopCount(GifDrawable.LOOP_INTRINSIC)
-                    onImageDecoded()
-                    return false
+                    override fun onResourceReady(
+                        resource: GifDrawable,
+                        model: Any,
+                        target: Target<GifDrawable>?,
+                        dataSource: DataSource,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        resource.setLoopCount(GifDrawable.LOOP_INTRINSIC)
+                        onImageDecoded()
+                        return false
+                    }
                 }
-            })
+            )
             .into(this)
     }
 }

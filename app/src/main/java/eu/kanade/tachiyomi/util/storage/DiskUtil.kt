@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.util.lang.Hash
 import java.io.File
 
 object DiskUtil {
-
     fun hashKeyForDisk(key: String): String {
         return Hash.md5(key)
     }
@@ -46,17 +45,18 @@ object DiskUtil {
      */
     fun getExternalStorages(context: Context): Collection<File> {
         val directories = mutableSetOf<File>()
-        directories += ContextCompat.getExternalFilesDirs(context, null)
-            .filterNotNull()
-            .mapNotNull {
-                val file = File(it.absolutePath.substringBefore("/Android/"))
-                val state = EnvironmentCompat.getStorageState(file)
-                if (state == Environment.MEDIA_MOUNTED || state == Environment.MEDIA_MOUNTED_READ_ONLY) {
-                    file
-                } else {
-                    null
+        directories +=
+            ContextCompat.getExternalFilesDirs(context, null)
+                .filterNotNull()
+                .mapNotNull {
+                    val file = File(it.absolutePath.substringBefore("/Android/"))
+                    val state = EnvironmentCompat.getStorageState(file)
+                    if (state == Environment.MEDIA_MOUNTED || state == Environment.MEDIA_MOUNTED_READ_ONLY) {
+                        file
+                    } else {
+                        null
+                    }
                 }
-            }
 
         return directories
     }
@@ -64,7 +64,10 @@ object DiskUtil {
     /**
      * Don't display downloaded chapters in gallery apps creating `.nomedia`.
      */
-    fun createNoMediaFile(dir: UniFile?, context: Context?) {
+    fun createNoMediaFile(
+        dir: UniFile?,
+        context: Context?
+    ) {
         if (dir != null && dir.exists()) {
             val nomedia = dir.findFile(".nomedia")
             if (nomedia == null) {
@@ -77,14 +80,20 @@ object DiskUtil {
     /**
      * Scans the given file so that it can be shown in gallery apps, for example.
      */
-    fun scanMedia(context: Context, file: File) {
+    fun scanMedia(
+        context: Context,
+        file: File
+    ) {
         scanMedia(context, Uri.fromFile(file))
     }
 
     /**
      * Scans the given file so that it can be shown in gallery apps, for example.
      */
-    fun scanMedia(context: Context, uri: Uri) {
+    fun scanMedia(
+        context: Context,
+        uri: Uri
+    ) {
         val action = Intent.ACTION_MEDIA_SCANNER_SCAN_FILE
         val mediaScanIntent = Intent(action)
         mediaScanIntent.data = uri

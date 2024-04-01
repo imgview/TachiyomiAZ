@@ -8,8 +8,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 
 class DeleteChaptersDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
-        where T : Controller, T : DeleteChaptersDialog.Listener {
-
+    where T : Controller, T : DeleteChaptersDialog.Listener {
     constructor(target: T) : this() {
         targetController = target
     }

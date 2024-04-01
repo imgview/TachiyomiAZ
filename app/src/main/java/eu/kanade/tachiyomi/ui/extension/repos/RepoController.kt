@@ -31,10 +31,10 @@ class RepoController() :
     FlexibleAdapter.OnItemLongClickListener,
     RepoCreateDialog.Listener,
     UndoHelper.OnActionListener {
-
     constructor(repoUrl: String) : this() {
         createRepo(repoUrl)
     }
+
     /**
      * Object used to show ActionMode toolbar.
      */
@@ -68,7 +68,10 @@ class RepoController() :
      * @param inflater The layout inflater to create the view from XML.
      * @param container The parent view for this one.
      */
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = CategoriesControllerBinding.inflate(inflater)
         return binding.root
     }
@@ -136,7 +139,10 @@ class RepoController() :
      * @return true if the action mode should be created, false if entering this mode should be
      *              aborted.
      */
-    override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+    override fun onCreateActionMode(
+        mode: ActionMode,
+        menu: Menu
+    ): Boolean {
         // Inflate menu.
         mode.menuInflater.inflate(R.menu.category_selection, menu)
         // Enable adapter multi selection.
@@ -151,7 +157,10 @@ class RepoController() :
      * @param menu Menu used to populate action buttons.
      * @return true if the menu or action mode was updated, false otherwise.
      */
-    override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+    override fun onPrepareActionMode(
+        mode: ActionMode,
+        menu: Menu
+    ): Boolean {
         val adapter = adapter ?: return false
         val count = adapter.selectedItemCount
         mode.title = count.toString()
@@ -170,15 +179,21 @@ class RepoController() :
      * @return true if this callback handled the event, false if the standard MenuItem invocation
      *              should continue.
      */
-    override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+    override fun onActionItemClicked(
+        mode: ActionMode,
+        item: MenuItem
+    ): Boolean {
         val adapter = adapter ?: return false
 
         when (item.itemId) {
             R.id.action_delete -> {
                 undoHelper = UndoHelper(adapter, this)
                 undoHelper?.start(
-                    adapter.selectedPositions, view!!,
-                    R.string.snack_repo_deleted, R.string.action_undo, 3000
+                    adapter.selectedPositions,
+                    view!!,
+                    R.string.snack_repo_deleted,
+                    R.string.action_undo,
+                    3000
                 )
 
                 mode.finish()
@@ -206,7 +221,10 @@ class RepoController() :
      * @param position The position of the clicked item.
      * @return true if this click should enable selection mode.
      */
-    override fun onItemClick(view: View, position: Int): Boolean {
+    override fun onItemClick(
+        view: View,
+        position: Int
+    ): Boolean {
         // Check if action mode is initialized and selected item exist.
         return if (actionMode != null && position != RecyclerView.NO_POSITION) {
             toggleSelection(position)
@@ -258,7 +276,10 @@ class RepoController() :
      *
      * @param action The action performed.
      */
-    override fun onActionCanceled(action: Int, positions: MutableList<Int>?) {
+    override fun onActionCanceled(
+        action: Int,
+        positions: MutableList<Int>?
+    ) {
         adapter?.restoreDeletedItems()
         undoHelper = null
     }
@@ -269,7 +290,10 @@ class RepoController() :
      * @param action The action performed.
      * @param event The event that triggered the action
      */
-    override fun onActionConfirmed(action: Int, event: Int) {
+    override fun onActionConfirmed(
+        action: Int,
+        event: Int
+    ) {
         val adapter = adapter ?: return
         presenter.deleteRepos(adapter.deletedItems.map { it.repo })
         undoHelper = null

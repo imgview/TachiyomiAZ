@@ -14,30 +14,33 @@ import eu.kanade.tachiyomi.util.system.getUriSize
 import timber.log.Timber
 
 class PackageInstallerInstaller(private val service: Service) : Installer(service) {
-
     private val packageInstaller = service.packageManager.packageInstaller
 
-    private val packageActionReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)) {
-                PackageInstaller.STATUS_PENDING_USER_ACTION -> {
-                    val userAction = intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
-                    if (userAction == null) {
-                        Timber.e("Fatal error for $intent")
-                        continueQueue(InstallStep.Error)
-                        return
+    private val packageActionReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(
+                context: Context,
+                intent: Intent
+            ) {
+                when (intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)) {
+                    PackageInstaller.STATUS_PENDING_USER_ACTION -> {
+                        val userAction = intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
+                        if (userAction == null) {
+                            Timber.e("Fatal error for $intent")
+                            continueQueue(InstallStep.Error)
+                            return
+                        }
+                        userAction.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        service.startActivity(userAction)
                     }
-                    userAction.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    service.startActivity(userAction)
+                    PackageInstaller.STATUS_FAILURE_ABORTED -> {
+                        continueQueue(InstallStep.Idle)
+                    }
+                    PackageInstaller.STATUS_SUCCESS -> continueQueue(InstallStep.Installed)
+                    else -> continueQueue(InstallStep.Error)
                 }
-                PackageInstaller.STATUS_FAILURE_ABORTED -> {
-                    continueQueue(InstallStep.Idle)
-                }
-                PackageInstaller.STATUS_SUCCESS -> continueQueue(InstallStep.Installed)
-                else -> continueQueue(InstallStep.Error)
             }
         }
-    }
 
     private var activeSession: Pair<Entry, Int>? = null
 
@@ -65,12 +68,13 @@ class PackageInstallerInstaller(private val service: Service) : Installer(servic
                     session.fsync(outputStream)
                 }
 
-                val intentSender = PendingIntent.getBroadcast(
-                    service,
-                    activeSession!!.second,
-                    Intent(INSTALL_ACTION),
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE else 0
-                ).intentSender
+                val intentSender =
+                    PendingIntent.getBroadcast(
+                        service,
+                        activeSession!!.second,
+                        Intent(INSTALL_ACTION),
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE else 0
+                    ).intentSender
                 session.commit(intentSender)
             }
         } catch (e: Exception) {

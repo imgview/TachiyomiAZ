@@ -16,10 +16,6 @@ import eu.kanade.tachiyomi.source.model.SManga
 import exh.log.maybeInjectEHLogger
 import exh.patch.injectPatches
 import exh.source.DelegatedHttpSource
-import java.net.URI
-import java.net.URISyntaxException
-import java.security.MessageDigest
-import java.util.Locale
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -27,12 +23,15 @@ import okhttp3.Response
 import rx.Observable
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.net.URI
+import java.net.URISyntaxException
+import java.security.MessageDigest
+import java.util.Locale
 
 /**
  * A simple implementation for sources from a website.
  */
 abstract class HttpSource : CatalogueSource {
-
     /**
      * Network service.
      */
@@ -40,18 +39,20 @@ abstract class HttpSource : CatalogueSource {
         val original = Injekt.get<NetworkHelper>()
         object : NetworkHelper(Injekt.get<Application>()) {
             override val client: OkHttpClient
-                get() = delegate?.networkHttpClient ?: original.client
-                    .newBuilder()
-                    .injectPatches { id }
-                    .maybeInjectEHLogger()
-                    .build()
+                get() =
+                    delegate?.networkHttpClient ?: original.client
+                        .newBuilder()
+                        .injectPatches { id }
+                        .maybeInjectEHLogger()
+                        .build()
 
             override val cloudflareClient: OkHttpClient
-                get() = delegate?.networkCloudflareClient ?: original.cloudflareClient
-                    .newBuilder()
-                    .injectPatches { id }
-                    .maybeInjectEHLogger()
-                    .build()
+                get() =
+                    delegate?.networkCloudflareClient ?: original.cloudflareClient
+                        .newBuilder()
+                        .injectPatches { id }
+                        .maybeInjectEHLogger()
+                        .build()
 
             override val cookieManager: AndroidCookieJar
                 get() = original.cookieManager
@@ -101,9 +102,10 @@ abstract class HttpSource : CatalogueSource {
     /**
      * Headers builder for requests. Implementations can override this method for custom headers.
      */
-    protected open fun headersBuilder() = Headers.Builder().apply {
-        add("User-Agent", network.defaultUserAgent)
-    }
+    protected open fun headersBuilder() =
+        Headers.Builder().apply {
+            add("User-Agent", network.defaultUserAgent)
+        }
 
     /**
      * Visible name of the source.
@@ -146,7 +148,11 @@ abstract class HttpSource : CatalogueSource {
      * @param query the search query.
      * @param filters the list of filters to apply.
      */
-    override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
+    override fun fetchSearchManga(
+        page: Int,
+        query: String,
+        filters: FilterList
+    ): Observable<MangasPage> {
         return client.newCall(searchMangaRequest(page, query, filters))
             .asObservableSuccess()
             .map { response ->
@@ -161,7 +167,11 @@ abstract class HttpSource : CatalogueSource {
      * @param query the search query.
      * @param filters the list of filters to apply.
      */
-    protected abstract fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request
+    protected abstract fun searchMangaRequest(
+        page: Int,
+        query: String,
+        filters: FilterList
+    ): Request
 
     /**
      * Parses the response from the site and returns a [MangasPage] object.
@@ -412,7 +422,10 @@ abstract class HttpSource : CatalogueSource {
      * @param chapter the chapter to be added.
      * @param manga the manga of the chapter.
      */
-    open fun prepareNewChapter(chapter: SChapter, manga: SManga) {
+    open fun prepareNewChapter(
+        chapter: SChapter,
+        manga: SManga
+    ) {
     }
 
     /**
@@ -422,11 +435,12 @@ abstract class HttpSource : CatalogueSource {
 
     // EXH -->
     private var delegate: DelegatedHttpSource? = null
-        get() = if (Injekt.get<PreferencesHelper>().eh_delegateSources().get()) {
-            field
-        } else {
-            null
-        }
+        get() =
+            if (Injekt.get<PreferencesHelper>().eh_delegateSources().get()) {
+                field
+            } else {
+                null
+            }
 
     fun bindDelegate(delegate: DelegatedHttpSource) {
         this.delegate = delegate

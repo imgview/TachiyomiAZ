@@ -5,18 +5,20 @@ import android.util.Log
 import com.bumptech.glide.Priority
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.data.DataFetcher
+import timber.log.Timber
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
-import timber.log.Timber
 
 open class FileFetcher(private val filePath: String = "") : DataFetcher<InputStream> {
-
     private var data: InputStream? = null
 
-    override fun loadData(priority: Priority, callback: DataFetcher.DataCallback<in InputStream>) {
+    override fun loadData(
+        priority: Priority,
+        callback: DataFetcher.DataCallback<in InputStream>
+    ) {
         loadFromFile(callback)
     }
 
@@ -24,7 +26,10 @@ open class FileFetcher(private val filePath: String = "") : DataFetcher<InputStr
         loadFromFile(File(filePath), callback)
     }
 
-    protected fun loadFromFile(file: File, callback: DataFetcher.DataCallback<in InputStream>) {
+    protected fun loadFromFile(
+        file: File,
+        callback: DataFetcher.DataCallback<in InputStream>
+    ) {
         try {
             data = FileInputStream(file)
         } catch (e: FileNotFoundException) {

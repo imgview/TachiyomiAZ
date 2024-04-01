@@ -10,13 +10,12 @@ import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.backup.full.FullBackupManager
 import eu.kanade.tachiyomi.data.backup.legacy.LegacyBackupManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import java.util.concurrent.TimeUnit
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.concurrent.TimeUnit
 
 class BackupCreatorJob(private val context: Context, workerParams: WorkerParameters) :
     Worker(context, workerParams) {
-
     override fun doWork(): Result {
         val preferences = Injekt.get<PreferencesHelper>()
         val backupManager = FullBackupManager(context)
@@ -35,16 +34,22 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
     companion object {
         private const val TAG = "BackupCreator"
 
-        fun setupTask(context: Context, prefInterval: Int? = null) {
+        fun setupTask(
+            context: Context,
+            prefInterval: Int? = null
+        ) {
             val preferences = Injekt.get<PreferencesHelper>()
             val interval = prefInterval ?: preferences.backupInterval().get()
             if (interval > 0) {
-                val request = PeriodicWorkRequestBuilder<BackupCreatorJob>(
-                    interval.toLong(), TimeUnit.HOURS,
-                    10, TimeUnit.MINUTES
-                )
-                    .addTag(TAG)
-                    .build()
+                val request =
+                    PeriodicWorkRequestBuilder<BackupCreatorJob>(
+                        interval.toLong(),
+                        TimeUnit.HOURS,
+                        10,
+                        TimeUnit.MINUTES
+                    )
+                        .addTag(TAG)
+                        .build()
 
                 WorkManager.getInstance(context).enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
             } else {

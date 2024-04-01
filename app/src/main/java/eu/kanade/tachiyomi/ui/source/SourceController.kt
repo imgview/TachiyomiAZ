@@ -55,7 +55,6 @@ class SourceController(bundle: Bundle? = null) :
     FlexibleAdapter.OnItemLongClickListener,
     SourceAdapter.OnBrowseClickListener,
     SourceAdapter.OnLatestClickListener {
-
     private val preferences: PreferencesHelper = Injekt.get()
 
     /**
@@ -95,7 +94,10 @@ class SourceController(bundle: Bundle? = null) :
      * @param container containing parent views.
      * @return inflated view.
      */
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = SourceMainControllerBinding.inflate(inflater)
         return binding.root
     }
@@ -119,7 +121,10 @@ class SourceController(bundle: Bundle? = null) :
         super.onDestroyView(view)
     }
 
-    override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
+    override fun onChangeStarted(
+        handler: ControllerChangeHandler,
+        type: ControllerChangeType
+    ) {
         super.onChangeStarted(handler, type)
         if (!type.isPush && handler is SettingsSourcesFadeChangeHandler) {
             presenter.updateSources()
@@ -129,7 +134,10 @@ class SourceController(bundle: Bundle? = null) :
     /**
      * Called when item is clicked
      */
-    override fun onItemClick(view: View?, position: Int): Boolean {
+    override fun onItemClick(
+        view: View?,
+        position: Int
+    ): Boolean {
         val item = adapter?.getItem(position) as? SourceItem ?: return false
         val source = item.source
         when (mode) {
@@ -137,14 +145,15 @@ class SourceController(bundle: Bundle? = null) :
                 // Open the catalogue view.
                 openCatalogue(source, BrowseSourceController(source))
             }
-            Mode.SMART_SEARCH -> router.pushController(
-                SmartSearchController(
-                    Bundle().apply {
-                        putLong(SmartSearchController.ARG_SOURCE_ID, source.id)
-                        putParcelable(SmartSearchController.ARG_SMART_SEARCH_CONFIG, smartSearchConfig)
-                    }
-                ).withFadeTransaction()
-            )
+            Mode.SMART_SEARCH ->
+                router.pushController(
+                    SmartSearchController(
+                        Bundle().apply {
+                            putLong(SmartSearchController.ARG_SOURCE_ID, source.id)
+                            putParcelable(SmartSearchController.ARG_SMART_SEARCH_CONFIG, smartSearchConfig)
+                        }
+                    ).withFadeTransaction()
+                )
         }
         return false
     }
@@ -158,7 +167,8 @@ class SourceController(bundle: Bundle? = null) :
         MaterialDialog(activity)
             .title(text = item.source.name)
             .listItems(
-                items = listOf(
+                items =
+                listOf(
                     activity.getString(R.string.action_hide),
                     activity.getString(if (isPinned) R.string.action_unpin else R.string.action_pin)
                 ),
@@ -180,7 +190,10 @@ class SourceController(bundle: Bundle? = null) :
         presenter.updateSources()
     }
 
-    private fun pinCatalogue(source: Source, isPinned: Boolean) {
+    private fun pinCatalogue(
+        source: Source,
+        isPinned: Boolean
+    ) {
         val current = preferences.pinnedCatalogues().get()
         if (isPinned) {
             preferences.pinnedCatalogues().set(current - source.id.toString())
@@ -209,7 +222,10 @@ class SourceController(bundle: Bundle? = null) :
     /**
      * Opens a catalogue with the given controller.
      */
-    private fun openCatalogue(source: CatalogueSource, controller: BrowseSourceController) {
+    private fun openCatalogue(
+        source: CatalogueSource,
+        controller: BrowseSourceController
+    ) {
         preferences.lastUsedCatalogueSource().set(source.id)
         router.pushController(controller.withFadeTransaction())
     }
@@ -220,7 +236,10 @@ class SourceController(bundle: Bundle? = null) :
      * @param menu menu containing options.
      * @param inflater used to load the menu xml.
      */
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
         // Inflate menu
         inflater.inflate(R.menu.source_main, menu)
 

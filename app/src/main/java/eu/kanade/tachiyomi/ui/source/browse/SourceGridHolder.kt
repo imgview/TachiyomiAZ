@@ -23,7 +23,6 @@ import uy.kohesive.injekt.api.get
  */
 open class SourceGridHolder(private val view: View, private val adapter: FlexibleAdapter<*>) :
     SourceHolder<SourceCompactGridItemBinding>(view, adapter) {
-
     override val binding = SourceCompactGridItemBinding.bind(view)
     private val preferences: PreferencesHelper = Injekt.get()
 
@@ -46,11 +45,12 @@ open class SourceGridHolder(private val view: View, private val adapter: Flexibl
     override fun setImage(manga: Manga) {
         // Setting this via XML doesn't work
         binding.card.clipToOutline = true
-        binding.card.radius = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            preferences.eh_library_corner_radius().get().toFloat(),
-            view.context.resources.displayMetrics
-        )
+        binding.card.radius =
+            TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                preferences.eh_library_corner_radius().get().toFloat(),
+                view.context.resources.displayMetrics
+            )
 
         GlideApp.with(view.context).clear(binding.thumbnail)
         if (!manga.thumbnail_url.isNullOrEmpty()) {

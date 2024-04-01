@@ -13,7 +13,6 @@ import uy.kohesive.injekt.injectLazy
  * @param context the application context.
  */
 class DownloadPendingDeleter(context: Context) {
-
     /**
      * Gson instance to encode and decode chapters.
      */
@@ -36,36 +35,40 @@ class DownloadPendingDeleter(context: Context) {
      * @param manga the manga of the chapters.
      */
     @Synchronized
-    fun addChapters(chapters: List<Chapter>, manga: Manga) {
+    fun addChapters(
+        chapters: List<Chapter>,
+        manga: Manga
+    ) {
         val lastEntry = lastAddedEntry
 
-        val newEntry = if (lastEntry != null && lastEntry.manga.id == manga.id) {
-            // Append new chapters
-            val newChapters = lastEntry.chapters.addUniqueById(chapters)
-
-            // If no chapters were added, do nothing
-            if (newChapters.size == lastEntry.chapters.size) return
-
-            // Last entry matches the manga, reuse it to avoid decoding json from preferences
-            lastEntry.copy(chapters = newChapters)
-        } else {
-            val existingEntry = prefs.getString(manga.id!!.toString(), null)
-            if (existingEntry != null) {
-                // Existing entry found on preferences, decode json and add the new chapter
-                val savedEntry = gson.fromJson<Entry>(existingEntry)
-
+        val newEntry =
+            if (lastEntry != null && lastEntry.manga.id == manga.id) {
                 // Append new chapters
-                val newChapters = savedEntry.chapters.addUniqueById(chapters)
+                val newChapters = lastEntry.chapters.addUniqueById(chapters)
 
                 // If no chapters were added, do nothing
-                if (newChapters.size == savedEntry.chapters.size) return
+                if (newChapters.size == lastEntry.chapters.size) return
 
-                savedEntry.copy(chapters = newChapters)
+                // Last entry matches the manga, reuse it to avoid decoding json from preferences
+                lastEntry.copy(chapters = newChapters)
             } else {
-                // No entry has been found yet, create a new one
-                Entry(chapters.map { it.toEntry() }, manga.toEntry())
+                val existingEntry = prefs.getString(manga.id!!.toString(), null)
+                if (existingEntry != null) {
+                    // Existing entry found on preferences, decode json and add the new chapter
+                    val savedEntry = gson.fromJson<Entry>(existingEntry)
+
+                    // Append new chapters
+                    val newChapters = savedEntry.chapters.addUniqueById(chapters)
+
+                    // If no chapters were added, do nothing
+                    if (newChapters.size == savedEntry.chapters.size) return
+
+                    savedEntry.copy(chapters = newChapters)
+                } else {
+                    // No entry has been found yet, create a new one
+                    Entry(chapters.map { it.toEntry() }, manga.toEntry())
+                }
             }
-        }
 
         // Save current state
         val json = gson.toJson(newEntry)

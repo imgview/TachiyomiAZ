@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
  * Item that contains the selection header.
  */
 class SelectionHeader : AbstractHeaderItem<SelectionHeader.Holder>() {
-
     /**
      * Returns the layout resource of this item.
      */
@@ -24,7 +23,10 @@ class SelectionHeader : AbstractHeaderItem<SelectionHeader.Holder>() {
     /**
      * Creates a new view holder for this item.
      */
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): Holder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): Holder {
         return Holder(view, adapter)
     }
 
@@ -42,6 +44,7 @@ class SelectionHeader : AbstractHeaderItem<SelectionHeader.Holder>() {
 
     class Holder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) : BaseFlexibleViewHolder(view, adapter) {
         private val binding = SourceMainControllerCardBinding.bind(view)
+
         init {
             binding.title.text = view.context.getString(R.string.select_a_source_to_migrate_from)
         }

@@ -12,8 +12,8 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
-import java.util.regex.Pattern
 import uy.kohesive.injekt.injectLazy
+import java.util.regex.Pattern
 
 /**
  * DownloadNotifier is used to show notifications when downloading one or multiple chapters.
@@ -21,7 +21,6 @@ import uy.kohesive.injekt.injectLazy
  * @param context context of application
  */
 internal class DownloadNotifier(private val context: Context) {
-
     private val preferences: PreferencesHelper by injectLazy()
 
     private val progressNotificationBuilder by lazy {
@@ -106,11 +105,12 @@ internal class DownloadNotifier(private val context: Context) {
                 )
             }
 
-            val downloadingProgressText = context.getString(
-                R.string.chapter_downloading_progress,
-                download.downloadedImages,
-                download.pages!!.size
-            )
+            val downloadingProgressText =
+                context.getString(
+                    R.string.chapter_downloading_progress,
+                    download.downloadedImages,
+                    download.pages!!.size
+                )
 
             if (preferences.hideNotificationContent()) {
                 setContentTitle(downloadingProgressText)
@@ -214,7 +214,10 @@ internal class DownloadNotifier(private val context: Context) {
      * @param error string containing error information.
      * @param chapter string containing chapter title.
      */
-    fun onError(error: String? = null, chapter: String? = null) {
+    fun onError(
+        error: String? = null,
+        chapter: String? = null
+    ) {
         // Create notification
         with(errorNotificationBuilder) {
             setContentTitle(

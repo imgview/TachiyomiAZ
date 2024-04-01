@@ -4,7 +4,6 @@ import eu.kanade.tachiyomi.source.model.SManga
 import tachiyomi.source.model.MangaInfo
 
 interface Manga : SManga {
-
     var id: Long?
 
     var source: Long
@@ -25,7 +24,10 @@ interface Manga : SManga {
         setFlags(order, SORT_MASK)
     }
 
-    private fun setFlags(flag: Int, mask: Int) {
+    private fun setFlags(
+        flag: Int,
+        mask: Int
+    ) {
         chapter_flags = chapter_flags and mask.inv() or (flag and mask)
     }
 
@@ -59,7 +61,6 @@ interface Manga : SManga {
         set(sort) = setFlags(sort, SORTING_MASK)
 
     companion object {
-
         const val SORT_DESC = 0x00000000
         const val SORT_ASC = 0x00000001
         const val SORT_MASK = 0x00000001
@@ -88,15 +89,21 @@ interface Manga : SManga {
         const val DISPLAY_NUMBER = 0x00100000
         const val DISPLAY_MASK = 0x00100000
 
-        fun create(source: Long): Manga = MangaImpl().apply {
-            this.source = source
-        }
+        fun create(source: Long): Manga =
+            MangaImpl().apply {
+                this.source = source
+            }
 
-        fun create(pathUrl: String, title: String, source: Long = 0): Manga = MangaImpl().apply {
-            url = pathUrl
-            this.title = title
-            this.source = source
-        }
+        fun create(
+            pathUrl: String,
+            title: String,
+            source: Long = 0
+        ): Manga =
+            MangaImpl().apply {
+                url = pathUrl
+                this.title = title
+                this.source = source
+            }
     }
 }
 

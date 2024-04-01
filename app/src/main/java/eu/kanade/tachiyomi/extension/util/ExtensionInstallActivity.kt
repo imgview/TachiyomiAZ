@@ -14,14 +14,14 @@ import uy.kohesive.injekt.api.get
  * with [startActivityForResult], which we need to update the UI.
  */
 class ExtensionInstallActivity : Activity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val installIntent = Intent(Intent.ACTION_INSTALL_PACKAGE)
-            .setDataAndType(intent.data, intent.type)
-            .putExtra(Intent.EXTRA_RETURN_RESULT, true)
-            .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        val installIntent =
+            Intent(Intent.ACTION_INSTALL_PACKAGE)
+                .setDataAndType(intent.data, intent.type)
+                .putExtra(Intent.EXTRA_RETURN_RESULT, true)
+                .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
         try {
             startActivityForResult(installIntent, INSTALL_REQUEST_CODE)
@@ -32,7 +32,11 @@ class ExtensionInstallActivity : Activity() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
         if (requestCode == INSTALL_REQUEST_CODE) {
             checkInstallationResult(resultCode)
         }
@@ -42,11 +46,12 @@ class ExtensionInstallActivity : Activity() {
     private fun checkInstallationResult(resultCode: Int) {
         val downloadId = intent.extras!!.getLong(ExtensionInstaller.EXTRA_DOWNLOAD_ID)
         val extensionManager = Injekt.get<ExtensionManager>()
-        val newStep = when (resultCode) {
-            RESULT_OK -> InstallStep.Installed
-            RESULT_CANCELED -> InstallStep.Idle
-            else -> InstallStep.Error
-        }
+        val newStep =
+            when (resultCode) {
+                RESULT_OK -> InstallStep.Installed
+                RESULT_CANCELED -> InstallStep.Idle
+                else -> InstallStep.Error
+            }
         extensionManager.updateInstallStep(downloadId, newStep)
     }
 

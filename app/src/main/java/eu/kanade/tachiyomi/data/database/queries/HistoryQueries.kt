@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.data.database.tables.HistoryTable
 import java.util.Date
 
 interface HistoryQueries : DbProvider {
-
     /**
      * Insert history into database
      * @param history object containing history information
@@ -22,7 +21,11 @@ interface HistoryQueries : DbProvider {
      * Returns history of recent manga containing last read chapter
      * @param date recent date range
      */
-    fun getRecentManga(date: Date, offset: Int = 0, search: String = "") = db.get()
+    fun getRecentManga(
+        date: Date,
+        offset: Int = 0,
+        search: String = ""
+    ) = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(
             RawQuery.builder()
@@ -39,7 +42,11 @@ interface HistoryQueries : DbProvider {
      * @param date recent date range
      * @offset offset the db by
      */
-    fun getRecentMangaLimit(date: Date, limit: Int = 0, search: String = "") = db.get()
+    fun getRecentMangaLimit(
+        date: Date,
+        limit: Int = 0,
+        search: String = ""
+    ) = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(
             RawQuery.builder()
@@ -51,63 +58,69 @@ interface HistoryQueries : DbProvider {
         .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
         .prepare()
 
-    fun getHistoryByMangaId(mangaId: Long) = db.get()
-        .listOfObjects(History::class.java)
-        .withQuery(
-            RawQuery.builder()
-                .query(getHistoryByMangaId())
-                .args(mangaId)
-                .observesTables(HistoryTable.TABLE)
-                .build()
-        )
-        .prepare()
+    fun getHistoryByMangaId(mangaId: Long) =
+        db.get()
+            .listOfObjects(History::class.java)
+            .withQuery(
+                RawQuery.builder()
+                    .query(getHistoryByMangaId())
+                    .args(mangaId)
+                    .observesTables(HistoryTable.TABLE)
+                    .build()
+            )
+            .prepare()
 
-    fun getHistoryByChapterUrl(chapterUrl: String) = db.get()
-        .`object`(History::class.java)
-        .withQuery(
-            RawQuery.builder()
-                .query(getHistoryByChapterUrl())
-                .args(chapterUrl)
-                .observesTables(HistoryTable.TABLE)
-                .build()
-        )
-        .prepare()
+    fun getHistoryByChapterUrl(chapterUrl: String) =
+        db.get()
+            .`object`(History::class.java)
+            .withQuery(
+                RawQuery.builder()
+                    .query(getHistoryByChapterUrl())
+                    .args(chapterUrl)
+                    .observesTables(HistoryTable.TABLE)
+                    .build()
+            )
+            .prepare()
 
     /**
      * Updates the history last read.
      * Inserts history object if not yet in database
      * @param history history object
      */
-    fun updateHistoryLastRead(history: History) = db.put()
-        .`object`(history)
-        .withPutResolver(HistoryLastReadPutResolver())
-        .prepare()
+    fun updateHistoryLastRead(history: History) =
+        db.put()
+            .`object`(history)
+            .withPutResolver(HistoryLastReadPutResolver())
+            .prepare()
 
     /**
      * Updates the history last read.
      * Inserts history object if not yet in database
      * @param historyList history object list
      */
-    fun updateHistoryLastRead(historyList: List<History>) = db.put()
-        .objects(historyList)
-        .withPutResolver(HistoryLastReadPutResolver())
-        .prepare()
+    fun updateHistoryLastRead(historyList: List<History>) =
+        db.put()
+            .objects(historyList)
+            .withPutResolver(HistoryLastReadPutResolver())
+            .prepare()
 
-    fun deleteHistory() = db.delete()
-        .byQuery(
-            DeleteQuery.builder()
-                .table(HistoryTable.TABLE)
-                .build()
-        )
-        .prepare()
+    fun deleteHistory() =
+        db.delete()
+            .byQuery(
+                DeleteQuery.builder()
+                    .table(HistoryTable.TABLE)
+                    .build()
+            )
+            .prepare()
 
-    fun deleteHistoryNoLastRead() = db.delete()
-        .byQuery(
-            DeleteQuery.builder()
-                .table(HistoryTable.TABLE)
-                .where("${HistoryTable.COL_LAST_READ} = ?")
-                .whereArgs(0)
-                .build()
-        )
-        .prepare()
+    fun deleteHistoryNoLastRead() =
+        db.delete()
+            .byQuery(
+                DeleteQuery.builder()
+                    .table(HistoryTable.TABLE)
+                    .where("${HistoryTable.COL_LAST_READ} = ?")
+                    .whereArgs(0)
+                    .build()
+            )
+            .prepare()
 }

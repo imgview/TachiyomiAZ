@@ -13,8 +13,7 @@ import eu.kanade.tachiyomi.widget.DialogCustomDownloadView
  * Dialog used to let user select amount of chapters to download.
  */
 class DownloadCustomChaptersDialog<T> : DialogController
-        where T : Controller, T : DownloadCustomChaptersDialog.Listener {
-
+    where T : Controller, T : DownloadCustomChaptersDialog.Listener {
     /**
      * Maximum number of chapters to download in download chooser.
      */
@@ -52,9 +51,10 @@ class DownloadCustomChaptersDialog<T> : DialogController
         val activity = activity!!
 
         // Initialize view that lets user select number of chapters to download.
-        val view = DialogCustomDownloadView(activity).apply {
-            setMinMax(0, maxChapters)
-        }
+        val view =
+            DialogCustomDownloadView(activity).apply {
+                setMinMax(0, maxChapters)
+            }
 
         // Build dialog.
         // when positive dialog is pressed call custom listener.

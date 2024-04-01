@@ -18,9 +18,10 @@ import timber.log.Timber
 /**
  * Custom dialog to select how many chapters to download.
  */
-class DialogCustomDownloadView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+class DialogCustomDownloadView
+@JvmOverloads
+constructor(context: Context, attrs: AttributeSet? = null) :
     LinearLayout(context, attrs) {
-
     private val scope = CoroutineScope(Job() + Dispatchers.Main)
 
     /**
@@ -40,6 +41,7 @@ class DialogCustomDownloadView @JvmOverloads constructor(context: Context, attrs
     private var max = 0
 
     private val binding: DownloadCustomAmountBinding
+
     init {
         // Add view to stack
         binding = DownloadCustomAmountBinding.inflate(LayoutInflater.from(context), this, false)
@@ -95,7 +97,10 @@ class DialogCustomDownloadView @JvmOverloads constructor(context: Context, attrs
      * @param min minimal downloads
      * @param max maximal downloads
      */
-    fun setMinMax(min: Int, max: Int) {
+    fun setMinMax(
+        min: Int,
+        max: Int
+    ) {
         this.min = min
         this.max = max
     }

@@ -10,15 +10,16 @@ import eu.kanade.tachiyomi.ui.base.holder.SlicedHolder
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 import io.github.mthli.slice.Slice
+
 class SourceHolder(view: View, override val adapter: SourceAdapter, val showButtons: Boolean) :
     BaseFlexibleViewHolder(view, adapter),
     SlicedHolder {
-
     private val binding = SourceMainControllerCardItemBinding.bind(view)
 
-    override val slice = Slice(binding.card).apply {
-        setColor(adapter.cardBackground)
-    }
+    override val slice =
+        Slice(binding.card).apply {
+            setColor(adapter.cardBackground)
+        }
 
     override val viewToSlice: View
         get() = binding.card

@@ -13,7 +13,6 @@ class DownloadAdapter(controller: DownloadController) : FlexibleAdapter<Download
     controller,
     true
 ) {
-
     /**
      * Listener called when an item of the list is released.
      */
@@ -21,6 +20,10 @@ class DownloadAdapter(controller: DownloadController) : FlexibleAdapter<Download
 
     interface DownloadItemListener {
         fun onItemReleased(position: Int)
-        fun onMenuItemClick(position: Int, menuItem: MenuItem)
+
+        fun onMenuItemClick(
+            position: Int,
+            menuItem: MenuItem
+        )
     }
 }

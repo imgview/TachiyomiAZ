@@ -18,7 +18,10 @@ class FullBackupRestoreValidator : AbstractBackupRestoreValidator() {
      * @throws Exception if manga cannot be found.
      * @return List of missing sources or missing trackers.
      */
-    override fun validate(context: Context, uri: Uri): Results {
+    override fun validate(
+        context: Context,
+        uri: Uri
+    ): Results {
         val backupManager = FullBackupManager(context)
 
         val backupString = context.contentResolver.openInputStream(uri)!!.source().gzip().buffer().use { it.readByteArray() }
@@ -29,20 +32,23 @@ class FullBackupRestoreValidator : AbstractBackupRestoreValidator() {
         }
 
         val sources = backup.backupSources.map { it.sourceId to it.name }.toMap()
-        val missingSources = sources
-            .filter { sourceManager.get(it.key) == null }
-            .values
-            .sorted()
+        val missingSources =
+            sources
+                .filter { sourceManager.get(it.key) == null }
+                .values
+                .sorted()
 
-        val trackers = backup.backupManga
-            .flatMap { it.tracking }
-            .map { it.syncId }
-            .distinct()
-        val missingTrackers = trackers
-            .mapNotNull { trackManager.getService(it) }
-            .filter { !it.isLogged }
-            .map { it.name }
-            .sorted()
+        val trackers =
+            backup.backupManga
+                .flatMap { it.tracking }
+                .map { it.syncId }
+                .distinct()
+        val missingTrackers =
+            trackers
+                .mapNotNull { trackManager.getService(it) }
+                .filter { !it.isLogged }
+                .map { it.name }
+                .sorted()
 
         return Results(missingSources, missingTrackers)
     }

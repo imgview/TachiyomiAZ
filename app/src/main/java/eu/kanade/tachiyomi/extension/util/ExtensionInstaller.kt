@@ -16,13 +16,13 @@ import eu.kanade.tachiyomi.extension.installer.Installer
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.util.storage.getUriCompat
-import java.io.File
-import java.util.concurrent.TimeUnit
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.File
+import java.util.concurrent.TimeUnit
 
 /**
  * The installer which installs, updates and uninstalls the extensions.
@@ -30,7 +30,6 @@ import uy.kohesive.injekt.api.get
  * @param context The application context.
  */
 internal class ExtensionInstaller(private val context: Context) {
-
     /**
      * The system's download manager
      */
@@ -61,7 +60,10 @@ internal class ExtensionInstaller(private val context: Context) {
      * @param url The url of the apk.
      * @param extension The extension to install.
      */
-    fun downloadAndInstall(url: String, extension: Extension) = Observable.defer {
+    fun downloadAndInstall(
+        url: String,
+        extension: Extension
+    ) = Observable.defer {
         val pkgName = extension.pkgName
 
         val oldDownload = activeDownloads[pkgName]
@@ -73,11 +75,12 @@ internal class ExtensionInstaller(private val context: Context) {
         downloadReceiver.register()
 
         val downloadUri = Uri.parse(url)
-        val request = DownloadManager.Request(downloadUri)
-            .setTitle(extension.name)
-            .setMimeType(APK_MIME)
-            .setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, downloadUri.lastPathSegment)
-            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        val request =
+            DownloadManager.Request(downloadUri)
+                .setTitle(extension.name)
+                .setMimeType(APK_MIME)
+                .setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, downloadUri.lastPathSegment)
+                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
 
         val id = downloadManager.enqueue(request)
         activeDownloads[pkgName] = id
@@ -130,13 +133,17 @@ internal class ExtensionInstaller(private val context: Context) {
      *
      * @param uri The uri of the extension to install.
      */
-    fun installApk(downloadId: Long, uri: Uri) {
+    fun installApk(
+        downloadId: Long,
+        uri: Uri
+    ) {
         when (val installer = installerPref.get()) {
             PreferenceValues.ExtensionInstaller.LEGACY -> {
-                val intent = Intent(context, ExtensionInstallActivity::class.java)
-                    .setDataAndType(uri, APK_MIME)
-                    .putExtra(EXTRA_DOWNLOAD_ID, downloadId)
-                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                val intent =
+                    Intent(context, ExtensionInstallActivity::class.java)
+                        .setDataAndType(uri, APK_MIME)
+                        .putExtra(EXTRA_DOWNLOAD_ID, downloadId)
+                        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
                 context.startActivity(intent)
             }
@@ -163,8 +170,9 @@ internal class ExtensionInstaller(private val context: Context) {
      */
     fun uninstallApk(pkgName: String) {
         val packageUri = Uri.parse("package:$pkgName")
-        val intent = Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri)
-            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val intent =
+            Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
         context.startActivity(intent)
     }
@@ -175,7 +183,10 @@ internal class ExtensionInstaller(private val context: Context) {
      * @param downloadId The id of the download.
      * @param step New install step.
      */
-    fun updateInstallStep(downloadId: Long, step: InstallStep) {
+    fun updateInstallStep(
+        downloadId: Long,
+        step: InstallStep
+    ) {
         downloadsRelay.call(downloadId to step)
     }
 
@@ -198,7 +209,6 @@ internal class ExtensionInstaller(private val context: Context) {
      * Receiver that listens to download status events.
      */
     private inner class DownloadCompletionReceiver : BroadcastReceiver() {
-
         /**
          * Whether this receiver is currently registered.
          */
@@ -229,7 +239,10 @@ internal class ExtensionInstaller(private val context: Context) {
          * Called when a download event is received. It looks for the download in the current active
          * downloads and notifies its installation step.
          */
-        override fun onReceive(context: Context, intent: Intent?) {
+        override fun onReceive(
+            context: Context,
+            intent: Intent?
+        ) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0) ?: return
 
             // Avoid events for downloads we didn't request
@@ -247,9 +260,10 @@ internal class ExtensionInstaller(private val context: Context) {
             val query = DownloadManager.Query().setFilterById(id)
             downloadManager.query(query).use { cursor ->
                 if (cursor.moveToFirst()) {
-                    val localUri = cursor.getString(
-                        cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)
-                    ).removePrefix(FILE_SCHEME)
+                    val localUri =
+                        cursor.getString(
+                            cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)
+                        ).removePrefix(FILE_SCHEME)
 
                     installApk(id, File(localUri).getUriCompat(context))
                 }

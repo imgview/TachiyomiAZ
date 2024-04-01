@@ -12,15 +12,14 @@ import com.google.gson.JsonParser
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.asObservableSuccess
-import java.util.Calendar
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import rx.Observable
+import java.util.Calendar
 
 class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
-
     private val jsonMime = "application/json; charset=utf-8".toMediaTypeOrNull()
     private val authClient = client.newBuilder().addInterceptor(interceptor).build()
 
@@ -33,21 +32,25 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                 |   status 
                 |} 
             |}
-            |""".trimMargin()
-        val variables = jsonObject(
-            "mangaId" to track.media_id,
-            "progress" to track.last_chapter_read,
-            "status" to track.toAnilistStatus()
-        )
-        val payload = jsonObject(
-            "query" to query,
-            "variables" to variables
-        )
+            |
+            """.trimMargin()
+        val variables =
+            jsonObject(
+                "mangaId" to track.media_id,
+                "progress" to track.last_chapter_read,
+                "status" to track.toAnilistStatus()
+            )
+        val payload =
+            jsonObject(
+                "query" to query,
+                "variables" to variables
+            )
         val body = payload.toString().toRequestBody(jsonMime)
-        val request = Request.Builder()
-            .url(apiUrl)
-            .post(body)
-            .build()
+        val request =
+            Request.Builder()
+                .url(apiUrl)
+                .post(body)
+                .build()
         return authClient.newCall(request)
             .asObservableSuccess()
             .map { netResponse ->
@@ -72,22 +75,26 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     |progress
                 |}
             |}
-            |""".trimMargin()
-        val variables = jsonObject(
-            "listId" to track.library_id,
-            "progress" to track.last_chapter_read,
-            "status" to track.toAnilistStatus(),
-            "score" to track.score.toInt()
-        )
-        val payload = jsonObject(
-            "query" to query,
-            "variables" to variables
-        )
+            |
+            """.trimMargin()
+        val variables =
+            jsonObject(
+                "listId" to track.library_id,
+                "progress" to track.last_chapter_read,
+                "status" to track.toAnilistStatus(),
+                "score" to track.score.toInt()
+            )
+        val payload =
+            jsonObject(
+                "query" to query,
+                "variables" to variables
+            )
         val body = payload.toString().toRequestBody(jsonMime)
-        val request = Request.Builder()
-            .url(apiUrl)
-            .post(body)
-            .build()
+        val request =
+            Request.Builder()
+                .url(apiUrl)
+                .post(body)
+                .build()
         return authClient.newCall(request)
             .asObservableSuccess()
             .map {
@@ -120,19 +127,23 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     |}
                 |}
             |}
-            |""".trimMargin()
-        val variables = jsonObject(
-            "query" to search
-        )
-        val payload = jsonObject(
-            "query" to query,
-            "variables" to variables
-        )
+            |
+            """.trimMargin()
+        val variables =
+            jsonObject(
+                "query" to search
+            )
+        val payload =
+            jsonObject(
+                "query" to query,
+                "variables" to variables
+            )
         val body = payload.toString().toRequestBody(jsonMime)
-        val request = Request.Builder()
-            .url(apiUrl)
-            .post(body)
-            .build()
+        val request =
+            Request.Builder()
+                .url(apiUrl)
+                .post(body)
+                .build()
         return authClient.newCall(request)
             .asObservableSuccess()
             .map { netResponse ->
@@ -149,7 +160,10 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
             }
     }
 
-    fun findLibManga(track: Track, userid: Int): Observable<Track?> {
+    fun findLibManga(
+        track: Track,
+        userid: Int
+    ): Observable<Track?> {
         val query =
             """
             |query (${'$'}id: Int!, ${'$'}manga_id: Int!) {
@@ -180,20 +194,24 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     |}
                 |}
             |}
-            |""".trimMargin()
-        val variables = jsonObject(
-            "id" to userid,
-            "manga_id" to track.media_id
-        )
-        val payload = jsonObject(
-            "query" to query,
-            "variables" to variables
-        )
+            |
+            """.trimMargin()
+        val variables =
+            jsonObject(
+                "id" to userid,
+                "manga_id" to track.media_id
+            )
+        val payload =
+            jsonObject(
+                "query" to query,
+                "variables" to variables
+            )
         val body = payload.toString().toRequestBody(jsonMime)
-        val request = Request.Builder()
-            .url(apiUrl)
-            .post(body)
-            .build()
+        val request =
+            Request.Builder()
+                .url(apiUrl)
+                .post(body)
+                .build()
         return authClient.newCall(request)
             .asObservableSuccess()
             .map { netResponse ->
@@ -210,7 +228,10 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
             }
     }
 
-    fun getLibManga(track: Track, userid: Int): Observable<Track> {
+    fun getLibManga(
+        track: Track,
+        userid: Int
+    ): Observable<Track> {
         return findLibManga(track, userid)
             .map { it ?: throw Exception("Could not find manga") }
     }
@@ -230,15 +251,18 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     |}
                 |}
             |}
-            |""".trimMargin()
-        val payload = jsonObject(
-            "query" to query
-        )
+            |
+            """.trimMargin()
+        val payload =
+            jsonObject(
+                "query" to query
+            )
         val body = payload.toString().toRequestBody(jsonMime)
-        val request = Request.Builder()
-            .url(apiUrl)
-            .post(body)
-            .build()
+        val request =
+            Request.Builder()
+                .url(apiUrl)
+                .post(body)
+                .build()
         return authClient.newCall(request)
             .asObservableSuccess()
             .map { netResponse ->
@@ -254,30 +278,42 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
     }
 
     private fun jsonToALManga(struct: JsonObject): ALManga {
-        val date = try {
-            val date = Calendar.getInstance()
-            date.set(
-                struct["startDate"]["year"].nullInt ?: 0,
-                (
-                    struct["startDate"]["month"].nullInt
-                        ?: 0
-                    ) - 1,
-                struct["startDate"]["day"].nullInt ?: 0
-            )
-            date.timeInMillis
-        } catch (_: Exception) {
-            0L
-        }
+        val date =
+            try {
+                val date = Calendar.getInstance()
+                date.set(
+                    struct["startDate"]["year"].nullInt ?: 0,
+                    (
+                        struct["startDate"]["month"].nullInt
+                            ?: 0
+                        ) - 1,
+                    struct["startDate"]["day"].nullInt ?: 0
+                )
+                date.timeInMillis
+            } catch (_: Exception) {
+                0L
+            }
 
         return ALManga(
-            struct["id"].asInt, struct["title"]["romaji"].asString, struct["coverImage"]["large"].asString,
-            struct["description"].nullString.orEmpty(), struct["type"].asString, struct["status"].nullString.orEmpty(),
-            date, struct["chapters"].nullInt ?: 0
+            struct["id"].asInt,
+            struct["title"]["romaji"].asString,
+            struct["coverImage"]["large"].asString,
+            struct["description"].nullString.orEmpty(),
+            struct["type"].asString,
+            struct["status"].nullString.orEmpty(),
+            date,
+            struct["chapters"].nullInt ?: 0
         )
     }
 
     private fun jsonToALUserManga(struct: JsonObject): ALUserManga {
-        return ALUserManga(struct["id"].asLong, struct["status"].asString, struct["scoreRaw"].asInt, struct["progress"].asInt, jsonToALManga(struct["media"].obj))
+        return ALUserManga(
+            struct["id"].asLong,
+            struct["status"].asString,
+            struct["scoreRaw"].asInt,
+            struct["progress"].asInt,
+            jsonToALManga(struct["media"].obj)
+        )
     }
 
     companion object {
@@ -291,9 +327,10 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
             return baseMangaUrl + mediaId
         }
 
-        fun authUrl() = Uri.parse("${baseUrl}oauth/authorize").buildUpon()
-            .appendQueryParameter("client_id", clientId)
-            .appendQueryParameter("response_type", "token")
-            .build()
+        fun authUrl() =
+            Uri.parse("${baseUrl}oauth/authorize").buildUpon()
+                .appendQueryParameter("client_id", clientId)
+                .appendQueryParameter("response_type", "token")
+                .build()
     }
 }

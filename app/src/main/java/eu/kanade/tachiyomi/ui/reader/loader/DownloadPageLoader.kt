@@ -20,7 +20,6 @@ class DownloadPageLoader(
     private val source: Source,
     private val downloadManager: DownloadManager
 ) : PageLoader() {
-
     /**
      * The application context. Needed to open input streams.
      */

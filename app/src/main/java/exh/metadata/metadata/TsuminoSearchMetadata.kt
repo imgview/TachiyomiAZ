@@ -4,8 +4,8 @@ import android.net.Uri
 import eu.kanade.tachiyomi.source.model.SManga
 import exh.metadata.EX_DATE_FORMAT
 import exh.plusAssign
-import java.util.Date
 import kotlinx.serialization.Serializable
+import java.util.Date
 
 @Serializable
 class TsuminoSearchMetadata : RaisedSearchMetadata() {
@@ -65,9 +65,10 @@ class TsuminoSearchMetadata : RaisedSearchMetadata() {
 
         val tagsDesc = tagsToDescription()
 
-        manga.description = listOf(titleDesc, detailsDesc.toString(), tagsDesc.toString())
-            .filter(String::isNotBlank)
-            .joinToString(separator = "\n")
+        manga.description =
+            listOf(titleDesc, detailsDesc.toString(), tagsDesc.toString())
+                .filter(String::isNotBlank)
+                .joinToString(separator = "\n")
     }
 
     companion object {
@@ -77,8 +78,7 @@ class TsuminoSearchMetadata : RaisedSearchMetadata() {
 
         val BASE_URL = "https://www.tsumino.com"
 
-        fun tmIdFromUrl(url: String) =
-            Uri.parse(url).lastPathSegment
+        fun tmIdFromUrl(url: String) = Uri.parse(url).lastPathSegment
 
         fun mangaUrlFromId(id: String) = "/Book/Info/$id"
 

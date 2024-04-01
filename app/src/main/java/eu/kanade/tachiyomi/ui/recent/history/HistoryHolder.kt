@@ -24,8 +24,8 @@ class HistoryHolder(
     view: View,
     val adapter: HistoryAdapter
 ) : BaseFlexibleViewHolder(view, adapter) {
-
     private val binding = HistoryItemBinding.bind(view)
+
     init {
         binding.holder.setOnClickListener {
             adapter.itemClickListener.onItemClick(bindingAdapterPosition)
@@ -54,8 +54,9 @@ class HistoryHolder(
 
         // Set source + chapter title
         val formattedNumber = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
-        binding.mangaSource.text = itemView.context.getString(R.string.recent_manga_source)
-            .format(adapter.sourceManager.getOrStub(manga.source).toString(), formattedNumber)
+        binding.mangaSource.text =
+            itemView.context.getString(R.string.recent_manga_source)
+                .format(adapter.sourceManager.getOrStub(manga.source).toString(), formattedNumber)
 
         // Set last read timestamp title
         binding.lastRead.text = Date(history.last_read).toTimestampString()

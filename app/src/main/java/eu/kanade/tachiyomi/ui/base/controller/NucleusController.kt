@@ -14,7 +14,6 @@ import nucleus.presenter.Presenter
 abstract class NucleusController<VB : ViewBinding, P : Presenter<*>>(val bundle: Bundle? = null) :
     RxController<VB>(bundle),
     PresenterFactory<P> {
-
     private val delegate = NucleusConductorDelegate(this)
 
     val scope = CoroutineScope(Job() + Dispatchers.Main)

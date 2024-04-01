@@ -13,7 +13,6 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class DevRepoUpdateChecker : UpdateChecker() {
-
     private val client: OkHttpClient by lazy {
         Injekt.get<NetworkHelper>().client.newBuilder()
             .followRedirects(false)
@@ -25,9 +24,10 @@ class DevRepoUpdateChecker : UpdateChecker() {
     }
 
     override suspend fun checkForUpdate(): UpdateResult {
-        val response = withContext(Dispatchers.IO) {
-            client.newCall(GET(DevRepoRelease.LATEST_URL)).await()
-        }
+        val response =
+            withContext(Dispatchers.IO) {
+                client.newCall(GET(DevRepoRelease.LATEST_URL)).await()
+            }
 
         // Get latest repo version number from header in format "Location: tachiyomi-r1512.apk"
         val latestVersionNumber: String = versionRegex.find(response.header("Location")!!)!!.groupValues[1]

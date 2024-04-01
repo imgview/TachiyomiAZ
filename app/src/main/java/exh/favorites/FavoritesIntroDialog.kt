@@ -9,14 +9,15 @@ import uy.kohesive.injekt.injectLazy
 class FavoritesIntroDialog {
     private val prefs: PreferencesHelper by injectLazy()
 
-    fun show(context: Context) = MaterialDialog(context)
-        .title(text = "IMPORTANT FAVORITES SYNC NOTES")
-        .message(text = HtmlCompat.fromHtml(FAVORITES_INTRO_TEXT, HtmlCompat.FROM_HTML_MODE_LEGACY))
-        .positiveButton(android.R.string.ok) {
-            prefs.eh_showSyncIntro().set(false)
-        }
-        .cancelable(false)
-        .show()
+    fun show(context: Context) =
+        MaterialDialog(context)
+            .title(text = "IMPORTANT FAVORITES SYNC NOTES")
+            .message(text = HtmlCompat.fromHtml(FAVORITES_INTRO_TEXT, HtmlCompat.FROM_HTML_MODE_LEGACY))
+            .positiveButton(android.R.string.ok) {
+                prefs.eh_showSyncIntro().set(false)
+            }
+            .cancelable(false)
+            .show()
 
     private val FAVORITES_INTRO_TEXT =
         """

@@ -7,11 +7,10 @@ import eu.kanade.tachiyomi.databinding.TrackItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseViewHolder
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visibleIf
-import java.text.DateFormat
 import uy.kohesive.injekt.injectLazy
+import java.text.DateFormat
 
 class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
-
     val binding = TrackItemBinding.bind(view)
 
     private val preferences: PreferencesHelper by injectLazy()

@@ -45,12 +45,13 @@ object DebugFunctions {
         runBlocking {
             val metadataManga = db.getFavoriteMangaWithMetadata().await()
 
-            val allManga = metadataManga.asFlow().cancellable().mapNotNull { manga ->
-                if (manga.source != EH_SOURCE_ID && manga.source != EXH_SOURCE_ID) {
-                    return@mapNotNull null
-                }
-                manga
-            }.toList()
+            val allManga =
+                metadataManga.asFlow().cancellable().mapNotNull { manga ->
+                    if (manga.source != EH_SOURCE_ID && manga.source != EXH_SOURCE_ID) {
+                        return@mapNotNull null
+                    }
+                    manga
+                }.toList()
 
             for (manga in allManga) {
                 val meta = db.getFlatMetadataForManga(manga.id!!).await()?.raise<EHentaiSearchMetadata>()
@@ -62,6 +63,7 @@ object DebugFunctions {
             }
         }
     }
+
     private val throttleManager = EHentaiThrottleManager()
 
     fun ResetEHGalleriesForUpdater() {
@@ -69,12 +71,13 @@ object DebugFunctions {
         runBlocking {
             val metadataManga = db.getFavoriteMangaWithMetadata().await()
 
-            val allManga = metadataManga.asFlow().cancellable().mapNotNull { manga ->
-                if (manga.source != EH_SOURCE_ID && manga.source != EXH_SOURCE_ID) {
-                    return@mapNotNull null
-                }
-                manga
-            }.toList()
+            val allManga =
+                metadataManga.asFlow().cancellable().mapNotNull { manga ->
+                    if (manga.source != EH_SOURCE_ID && manga.source != EXH_SOURCE_ID) {
+                        return@mapNotNull null
+                    }
+                    manga
+                }.toList()
             val eh = sourceManager.getOrStub(EH_SOURCE_ID)
             val ex = sourceManager.getOrStub(EXH_SOURCE_ID)
 
@@ -102,12 +105,13 @@ object DebugFunctions {
         runBlocking {
             val metadataManga = db.getFavoriteMangaWithMetadata().await()
 
-            val allManga = metadataManga.asFlow().cancellable().mapNotNull { manga ->
-                if (manga.source != EH_SOURCE_ID && manga.source != EXH_SOURCE_ID) {
-                    return@mapNotNull null
-                }
-                manga
-            }.toList()
+            val allManga =
+                metadataManga.asFlow().cancellable().mapNotNull { manga ->
+                    if (manga.source != EH_SOURCE_ID && manga.source != EXH_SOURCE_ID) {
+                        return@mapNotNull null
+                    }
+                    manga
+                }.toList()
 
             for (manga in allManga) {
                 val meta = db.getFlatMetadataForManga(manga.id!!).await()?.raise<EHentaiSearchMetadata>()
@@ -125,12 +129,13 @@ object DebugFunctions {
         runBlocking {
             val metadataManga = db.getFavoriteMangaWithMetadata().await()
 
-            val allManga = metadataManga.asFlow().cancellable().mapNotNull { manga ->
-                if (manga.source != EH_SOURCE_ID && manga.source != EXH_SOURCE_ID) {
-                    return@mapNotNull null
-                }
-                manga
-            }.toList()
+            val allManga =
+                metadataManga.asFlow().cancellable().mapNotNull { manga ->
+                    if (manga.source != EH_SOURCE_ID && manga.source != EXH_SOURCE_ID) {
+                        return@mapNotNull null
+                    }
+                    manga
+                }.toList()
 
             for (manga in allManga) {
                 val meta = db.getFlatMetadataForManga(manga.id!!).await()?.raise<EHentaiSearchMetadata>()
@@ -167,26 +172,32 @@ object DebugFunctions {
 
     fun countMetadataInDatabase() = db.getSearchMetadata().executeAsBlocking().size
 
-    fun countMangaInLibraryWithMissingMetadata() = db.getMangas().executeAsBlocking().count {
-        it.favorite && db.getSearchMetadataForManga(it.id!!).executeAsBlocking() == null
-    }
+    fun countMangaInLibraryWithMissingMetadata() =
+        db.getMangas().executeAsBlocking().count {
+            it.favorite && db.getSearchMetadataForManga(it.id!!).executeAsBlocking() == null
+        }
 
     fun clearSavedSearches() = prefs.eh_savedSearches().set(emptySet())
 
-    fun listAllSources() = sourceManager.getCatalogueSources().joinToString("\n") {
-        "${it.id}: ${it.name} (${it.lang.uppercase()})"
-    }
+    fun listAllSources() =
+        sourceManager.getCatalogueSources().joinToString("\n") {
+            "${it.id}: ${it.name} (${it.lang.uppercase()})"
+        }
 
-    fun listFilteredSources() = sourceManager.getVisibleCatalogueSources().joinToString("\n") {
-        "${it.id}: ${it.name} (${it.lang.uppercase()})"
-    }
+    fun listFilteredSources() =
+        sourceManager.getVisibleCatalogueSources().joinToString("\n") {
+            "${it.id}: ${it.name} (${it.lang.uppercase()})"
+        }
 
-    fun listAllHttpSources() = sourceManager.getOnlineSources().joinToString("\n") {
-        "${it.id}: ${it.name} (${it.lang.uppercase()})"
-    }
-    fun listFilteredHttpSources() = sourceManager.getVisibleOnlineSources().joinToString("\n") {
-        "${it.id}: ${it.name} (${it.lang.uppercase()})"
-    }
+    fun listAllHttpSources() =
+        sourceManager.getOnlineSources().joinToString("\n") {
+            "${it.id}: ${it.name} (${it.lang.uppercase()})"
+        }
+
+    fun listFilteredHttpSources() =
+        sourceManager.getVisibleOnlineSources().joinToString("\n") {
+            "${it.id}: ${it.name} (${it.lang.uppercase()})"
+        }
 
     fun convertAllEhentaiGalleriesToExhentai() = convertSources(EH_SOURCE_ID, EXH_SOURCE_ID)
 
@@ -200,20 +211,24 @@ object DebugFunctions {
         EHentaiUpdateWorker.scheduleBackground(app)
     }
 
-    fun listScheduledJobs() = app.jobScheduler.allPendingJobs.map { j ->
-        """
-        {
-            info: ${j.id},
-            isPeriod: ${j.isPeriodic},
-            isPersisted: ${j.isPersisted},
-            intervalMillis: ${j.intervalMillis},
-        }
-        """.trimIndent()
-    }.joinToString(",\n")
+    fun listScheduledJobs() =
+        app.jobScheduler.allPendingJobs.map { j ->
+            """
+            {
+                info: ${j.id},
+                isPeriod: ${j.isPeriodic},
+                isPersisted: ${j.isPersisted},
+                intervalMillis: ${j.intervalMillis},
+            }
+            """.trimIndent()
+        }.joinToString(",\n")
 
     fun cancelAllScheduledJobs() = app.jobScheduler.cancelAll()
 
-    private fun convertSources(from: Long, to: Long) {
+    private fun convertSources(
+        from: Long,
+        to: Long
+    ) {
         db.lowLevel().executeSQL(
             RawQuery.builder()
                 .query(

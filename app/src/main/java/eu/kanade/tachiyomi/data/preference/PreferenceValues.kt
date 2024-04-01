@@ -4,12 +4,11 @@ package eu.kanade.tachiyomi.data.preference
  * This class stores the values for the preferences in the application.
  */
 object PreferenceValues {
-
     // Keys are lowercase to match legacy string values
     enum class ThemeMode {
         light,
         dark,
-        system,
+        system
     }
 
     // Keys are lowercase to match legacy string values
@@ -17,7 +16,7 @@ object PreferenceValues {
         default,
         blue,
         smoothie,
-        fumo,
+        fumo
     }
 
     // Keys are lowercase to match legacy string values
@@ -25,13 +24,13 @@ object PreferenceValues {
         default,
         blue,
         amoled,
-        red,
+        red
     }
 
     enum class DisplayMode {
         COMPACT_GRID,
         COMFORTABLE_GRID,
-        LIST,
+        LIST
     }
 
     enum class NsfwAllowance {

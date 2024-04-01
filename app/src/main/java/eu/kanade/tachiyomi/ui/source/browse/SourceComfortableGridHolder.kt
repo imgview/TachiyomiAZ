@@ -19,8 +19,8 @@ import eu.kanade.tachiyomi.widget.StateImageViewTarget
  */
 class SourceComfortableGridHolder(private val view: View, private val adapter: FlexibleAdapter<*>) :
     SourceHolder<SourceComfortableGridItemBinding>(view, adapter) {
-
     override val binding = SourceComfortableGridItemBinding.bind(view)
+
     /**
      * Method called from [CatalogueAdapter.onBindViewHolder]. It updates the data for this
      * holder with the given manga.

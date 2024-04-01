@@ -58,16 +58,15 @@ import exh.ui.batchadd.BatchAddController
 import exh.ui.lock.LockActivityDelegate
 import exh.ui.lock.LockController
 import exh.ui.lock.lockEnabled
-import java.util.Date
-import java.util.LinkedList
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
+import java.util.Date
+import java.util.LinkedList
+import java.util.concurrent.TimeUnit
 
 class MainActivity : BaseActivity<MainActivityBinding>() {
-
     private lateinit var router: Router
 
     private var drawerArrow: DrawerArrowDrawable? = null
@@ -166,7 +165,7 @@ class MainActivity : BaseActivity<MainActivityBinding>() {
                     R.id.nav_drawer_extensions -> setRoot(ExtensionController(), id)
                     // --> EXH
                     R.id.nav_drawer_batch_add -> setRoot(BatchAddController(), id)
-                    // <-- EHX 
+                    // <-- EHX
                     R.id.nav_drawer_downloads -> {
                         router.pushController(DownloadController().withFadeTransaction())
                     }
@@ -197,26 +196,28 @@ class MainActivity : BaseActivity<MainActivityBinding>() {
             }
         }
 
-        router.addChangeListener(object : ControllerChangeHandler.ControllerChangeListener {
-            override fun onChangeStarted(
-                to: Controller?,
-                from: Controller?,
-                isPush: Boolean,
-                container: ViewGroup,
-                handler: ControllerChangeHandler
-            ) {
-                syncActivityViewWithController(to, from)
-            }
+        router.addChangeListener(
+            object : ControllerChangeHandler.ControllerChangeListener {
+                override fun onChangeStarted(
+                    to: Controller?,
+                    from: Controller?,
+                    isPush: Boolean,
+                    container: ViewGroup,
+                    handler: ControllerChangeHandler
+                ) {
+                    syncActivityViewWithController(to, from)
+                }
 
-            override fun onChangeCompleted(
-                to: Controller?,
-                from: Controller?,
-                isPush: Boolean,
-                container: ViewGroup,
-                handler: ControllerChangeHandler
-            ) {
+                override fun onChangeCompleted(
+                    to: Controller?,
+                    from: Controller?,
+                    isPush: Boolean,
+                    container: ViewGroup,
+                    handler: ControllerChangeHandler
+                ) {
+                }
             }
-        })
+        )
 
         // --> EH
         initWhenIdle {
@@ -226,7 +227,9 @@ class MainActivity : BaseActivity<MainActivityBinding>() {
                     LockActivityDelegate.doLock(router, true)
                     vibrate(50)
                     true
-                } else false
+                } else {
+                    false
+                }
             }
         }
 
@@ -292,9 +295,10 @@ class MainActivity : BaseActivity<MainActivityBinding>() {
     }
 
     private fun setExtensionsBadge() {
-        val extUpdateText: TextView = binding.navView.menu.findItem(
-            R.id.nav_drawer_extensions
-        )?.actionView as? TextView ?: return
+        val extUpdateText: TextView =
+            binding.navView.menu.findItem(
+                R.id.nav_drawer_extensions
+            )?.actionView as? TextView ?: return
 
         val updates = preferences.extensionUpdatesCount().get()
         if (updates > 0) {
@@ -427,7 +431,10 @@ class MainActivity : BaseActivity<MainActivityBinding>() {
         }
     }
 
-    private fun setRoot(controller: Controller, id: Int) {
+    private fun setRoot(
+        controller: Controller,
+        id: Int
+    ) {
         router.setRoot(controller.withFadeTransaction().tag(id.toString()))
     }
 
@@ -457,7 +464,10 @@ class MainActivity : BaseActivity<MainActivityBinding>() {
         }
     }
 
-    private fun syncActivityViewWithController(to: Controller?, from: Controller? = null) {
+    private fun syncActivityViewWithController(
+        to: Controller?,
+        from: Controller? = null
+    ) {
         if (from is DialogController || to is DialogController) {
             return
         }

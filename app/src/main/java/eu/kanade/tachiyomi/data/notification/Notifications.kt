@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.util.system.notificationManager
  * Class to manage the basic information of all the notifications used in the app.
  */
 object Notifications {
-
     /**
      * Common notification channel and ids used anywhere.
      */
@@ -69,10 +68,11 @@ object Notifications {
     const val CHANNEL_CRASH_LOGS = "crash_logs_channel"
     const val ID_CRASH_LOGS = -601
 
-    private val deprecatedChannels = listOf(
-        "downloader_channel",
-        "backup_restore_complete_channel"
-    )
+    private val deprecatedChannels =
+        listOf(
+            "downloader_channel",
+            "backup_restore_complete_channel"
+        )
 
     /**
      * Creates the notification channels introduced in Android Oreo.

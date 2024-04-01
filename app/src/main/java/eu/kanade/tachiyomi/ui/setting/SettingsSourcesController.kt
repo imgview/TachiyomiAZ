@@ -17,16 +17,15 @@ import eu.kanade.tachiyomi.util.preference.switchPreferenceCategory
 import eu.kanade.tachiyomi.util.preference.titleRes
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.widget.preference.SwitchPreferenceCategory
-import java.util.TreeMap
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import reactivecircus.flowbinding.appcompat.queryTextChanges
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.TreeMap
 
 class SettingsSourcesController : SettingsController() {
-
     init {
         setHasOptionsMenu(true)
     }
@@ -42,55 +41,56 @@ class SettingsSourcesController : SettingsController() {
     private var sourcesByLang: TreeMap<String, MutableList<HttpSource>> = TreeMap()
     private var sorting = SourcesSort.Alpha
 
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        titleRes = R.string.action_filter
+    override fun setupPreferenceScreen(screen: PreferenceScreen) =
+        with(screen) {
+            titleRes = R.string.action_filter
 
-        sorting = SourcesSort.from(preferences.sourceSorting().get()) ?: SourcesSort.Alpha
-        activity?.invalidateOptionsMenu()
+            sorting = SourcesSort.from(preferences.sourceSorting().get()) ?: SourcesSort.Alpha
+            activity?.invalidateOptionsMenu()
 
-        // Get the list of active language codes.
-        val activeLangsCodes = preferences.enabledLanguages().get()
+            // Get the list of active language codes.
+            val activeLangsCodes = preferences.enabledLanguages().get()
 
-        // Get a map of sources grouped by language.
-        sourcesByLang = onlineSources.groupByTo(TreeMap(), { it.lang })
+            // Get a map of sources grouped by language.
+            sourcesByLang = onlineSources.groupByTo(TreeMap(), { it.lang })
 
-        // Order first by active languages, then inactive ones
-        orderedLangs = sourcesByLang.keys.filter { it in activeLangsCodes } +
-            sourcesByLang.keys.filterNot { it in activeLangsCodes }
+            // Order first by active languages, then inactive ones
+            orderedLangs = sourcesByLang.keys.filter { it in activeLangsCodes } +
+                sourcesByLang.keys.filterNot { it in activeLangsCodes }
 
-        orderedLangs.forEach { lang ->
-            val sources = sourcesByLang[lang].orEmpty().sortedBy { it.name }
+            orderedLangs.forEach { lang ->
+                val sources = sourcesByLang[lang].orEmpty().sortedBy { it.name }
 
-            // Create a preference group and set initial state and change listener
-            langPrefs.add(
-                Pair(
-                    lang,
-                    switchPreferenceCategory {
-                        preferenceScreen.addPreference(this)
-                        title = LocaleHelper.getSourceDisplayName(lang, context)
-                        isPersistent = false
-                        if (lang in activeLangsCodes) {
-                            setChecked(true)
-                            addLanguageSources(this, sortedSources(sourcesByLang[lang]))
-                        }
-
-                        onChange { newValue ->
-                            val checked = newValue as Boolean
-                            val current = preferences.enabledLanguages().get()
-                            if (!checked) {
-                                preferences.enabledLanguages().set(current - lang)
-                                removeAll()
-                            } else {
-                                preferences.enabledLanguages().set(current + lang)
+                // Create a preference group and set initial state and change listener
+                langPrefs.add(
+                    Pair(
+                        lang,
+                        switchPreferenceCategory {
+                            preferenceScreen.addPreference(this)
+                            title = LocaleHelper.getSourceDisplayName(lang, context)
+                            isPersistent = false
+                            if (lang in activeLangsCodes) {
+                                setChecked(true)
                                 addLanguageSources(this, sortedSources(sourcesByLang[lang]))
                             }
-                            true
+
+                            onChange { newValue ->
+                                val checked = newValue as Boolean
+                                val current = preferences.enabledLanguages().get()
+                                if (!checked) {
+                                    preferences.enabledLanguages().set(current - lang)
+                                    removeAll()
+                                } else {
+                                    preferences.enabledLanguages().set(current + lang)
+                                    addLanguageSources(this, sortedSources(sourcesByLang[lang]))
+                                }
+                                true
+                            }
                         }
-                    }
+                    )
                 )
-            )
+            }
         }
-    }
 
     override fun setDivider(divider: Drawable?) {
         super.setDivider(null)
@@ -101,63 +101,68 @@ class SettingsSourcesController : SettingsController() {
      *
      * @param group the language category.
      */
-    private fun addLanguageSources(group: PreferenceGroup, sources: List<HttpSource>) {
+    private fun addLanguageSources(
+        group: PreferenceGroup,
+        sources: List<HttpSource>
+    ) {
         val hiddenCatalogues = preferences.hiddenCatalogues().get()
 
-        val selectAllPreference = CheckBoxPreference(group.context).apply {
-            title = "\t\t${context.getString(R.string.pref_category_all_sources)}"
-            key = "all_${sources.first().lang}"
-            isPersistent = false
-            isChecked = sources.all { it.id.toString() !in hiddenCatalogues }
-            isVisible = query.isEmpty()
-
-            onChange { newValue ->
-                val checked = newValue as Boolean
-                val current = preferences.hiddenCatalogues().get() as MutableSet? ?: mutableSetOf()
-                if (checked) {
-                    current.removeAll(sources.map { it.id.toString() })
-                } else {
-                    current.addAll(sources.map { it.id.toString() })
-                }
-                preferences.hiddenCatalogues().set(current)
-                group.removeAll()
-                addLanguageSources(group, sortedSources(sources))
-                true
-            }
-        }
-        group.addPreference(selectAllPreference)
-
-        sources.forEach { source ->
-            val sourcePreference = CheckBoxPreference(group.context).apply {
-                val id = source.id.toString()
-                title = source.name
-                key = getSourceKey(source.id)
+        val selectAllPreference =
+            CheckBoxPreference(group.context).apply {
+                title = "\t\t${context.getString(R.string.pref_category_all_sources)}"
+                key = "all_${sources.first().lang}"
                 isPersistent = false
-                isChecked = id !in hiddenCatalogues
-                isVisible = query.isEmpty() || source.name.contains(query, ignoreCase = true)
-
-                val sourceIcon = source.icon()
-                if (sourceIcon != null) {
-                    icon = sourceIcon
-                }
+                isChecked = sources.all { it.id.toString() !in hiddenCatalogues }
+                isVisible = query.isEmpty()
 
                 onChange { newValue ->
                     val checked = newValue as Boolean
-                    val current = preferences.hiddenCatalogues().get()
-
-                    preferences.hiddenCatalogues().set(
-                        if (checked) {
-                            current - id
-                        } else {
-                            current + id
-                        }
-                    )
-
+                    val current = preferences.hiddenCatalogues().get() as MutableSet? ?: mutableSetOf()
+                    if (checked) {
+                        current.removeAll(sources.map { it.id.toString() })
+                    } else {
+                        current.addAll(sources.map { it.id.toString() })
+                    }
+                    preferences.hiddenCatalogues().set(current)
                     group.removeAll()
                     addLanguageSources(group, sortedSources(sources))
                     true
                 }
             }
+        group.addPreference(selectAllPreference)
+
+        sources.forEach { source ->
+            val sourcePreference =
+                CheckBoxPreference(group.context).apply {
+                    val id = source.id.toString()
+                    title = source.name
+                    key = getSourceKey(source.id)
+                    isPersistent = false
+                    isChecked = id !in hiddenCatalogues
+                    isVisible = query.isEmpty() || source.name.contains(query, ignoreCase = true)
+
+                    val sourceIcon = source.icon()
+                    if (sourceIcon != null) {
+                        icon = sourceIcon
+                    }
+
+                    onChange { newValue ->
+                        val checked = newValue as Boolean
+                        val current = preferences.hiddenCatalogues().get()
+
+                        preferences.hiddenCatalogues().set(
+                            if (checked) {
+                                current - id
+                            } else {
+                                current + id
+                            }
+                        )
+
+                        group.removeAll()
+                        addLanguageSources(group, sortedSources(sources))
+                        true
+                    }
+                }
 
             group.addPreference(sourcePreference)
         }
@@ -173,10 +178,16 @@ class SettingsSourcesController : SettingsController() {
      * @param menu menu containing options.
      * @param inflater used to load the menu xml.
      */
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
         inflater.inflate(R.menu.settings_sources, menu)
-        if (sorting == SourcesSort.Alpha) menu.findItem(R.id.action_sort_alpha).isChecked = true
-        else menu.findItem(R.id.action_sort_enabled).isChecked = true
+        if (sorting == SourcesSort.Alpha) {
+            menu.findItem(R.id.action_sort_alpha).isChecked = true
+        } else {
+            menu.findItem(R.id.action_sort_enabled).isChecked = true
+        }
 
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
@@ -197,16 +208,18 @@ class SettingsSourcesController : SettingsController() {
             .launchIn(scope)
 
         // Fixes problem with the overflow icon showing up in lieu of search
-        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
-            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
-                return true
-            }
+        searchItem.setOnActionExpandListener(
+            object : MenuItem.OnActionExpandListener {
+                override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                    return true
+                }
 
-            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
-                activity?.invalidateOptionsMenu()
-                return true
+                override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                    activity?.invalidateOptionsMenu()
+                    return true
+                }
             }
-        })
+        )
     }
 
     private fun drawSources() {
@@ -237,11 +250,12 @@ class SettingsSourcesController : SettingsController() {
      * @return True if this event has been consumed, false if it has not.
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        sorting = when (item.itemId) {
-            R.id.action_sort_alpha -> SourcesSort.Alpha
-            R.id.action_sort_enabled -> SourcesSort.Enabled
-            else -> return super.onOptionsItemSelected(item)
-        }
+        sorting =
+            when (item.itemId) {
+                R.id.action_sort_alpha -> SourcesSort.Alpha
+                R.id.action_sort_enabled -> SourcesSort.Enabled
+                else -> return super.onOptionsItemSelected(item)
+            }
         item.isChecked = true
         preferences.sourceSorting().set(sorting.value)
         drawSources()
@@ -249,7 +263,9 @@ class SettingsSourcesController : SettingsController() {
     }
 
     enum class SourcesSort(val value: Int) {
-        Alpha(0), Enabled(1);
+        Alpha(0),
+        Enabled(1)
+        ;
 
         companion object {
             fun from(i: Int): SourcesSort? = values().find { it.value == i }

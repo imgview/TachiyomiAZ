@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 
 class DownloadItem(val download: Download) : AbstractFlexibleItem<DownloadHolder>() {
-
     override fun getLayoutRes(): Int {
         return R.layout.download_item
     }

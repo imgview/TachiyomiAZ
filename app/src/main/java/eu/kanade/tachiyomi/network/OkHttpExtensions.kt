@@ -1,11 +1,6 @@
 package eu.kanade.tachiyomi.network
 
 import exh.util.withRootCause
-import java.io.IOException
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.coroutines.resumeWithException
-import kotlin.reflect.KType
-import kotlin.reflect.typeOf
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
@@ -21,6 +16,11 @@ import rx.Producer
 import rx.Subscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.IOException
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.coroutines.resumeWithException
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 fun Call.asObservableWithAsyncStacktrace(): Observable<Pair<Exception, Response>> {
     // Record stacktrace at creation time for easier debugging
@@ -32,36 +32,37 @@ fun Call.asObservableWithAsyncStacktrace(): Observable<Pair<Exception, Response>
         val call = clone()
 
         // Wrap the call in a helper which handles both unsubscription and backpressure.
-        val requestArbiter = object : AtomicBoolean(), Producer, Subscription {
-            val executed = AtomicBoolean(false)
+        val requestArbiter =
+            object : AtomicBoolean(), Producer, Subscription {
+                val executed = AtomicBoolean(false)
 
-            override fun request(n: Long) {
-                if (n == 0L || !compareAndSet(false, true)) return
+                override fun request(n: Long) {
+                    if (n == 0L || !compareAndSet(false, true)) return
 
-                try {
-                    val response = call.execute()
-                    executed.set(true)
-                    if (!subscriber.isUnsubscribed) {
-                        subscriber.onNext(asyncStackTrace to response)
-                        subscriber.onCompleted()
-                    }
-                } catch (error: Throwable) {
-                    if (!subscriber.isUnsubscribed) {
-                        subscriber.onError(error.withRootCause(asyncStackTrace))
+                    try {
+                        val response = call.execute()
+                        executed.set(true)
+                        if (!subscriber.isUnsubscribed) {
+                            subscriber.onNext(asyncStackTrace to response)
+                            subscriber.onCompleted()
+                        }
+                    } catch (error: Throwable) {
+                        if (!subscriber.isUnsubscribed) {
+                            subscriber.onError(error.withRootCause(asyncStackTrace))
+                        }
                     }
                 }
-            }
 
-            override fun unsubscribe() {
-                if (!executed.get()) {
-                    call.cancel()
+                override fun unsubscribe() {
+                    if (!executed.get()) {
+                        call.cancel()
+                    }
+                }
+
+                override fun isUnsubscribed(): Boolean {
+                    return call.isCanceled()
                 }
             }
-
-            override fun isUnsubscribed(): Boolean {
-                return call.isCanceled()
-            }
-        }
 
         subscriber.add(requestArbiter)
         subscriber.setProducer(requestArbiter)
@@ -73,18 +74,25 @@ fun Call.asObservable() = asObservableWithAsyncStacktrace().map { it.second }
 // Based on https://github.com/gildor/kotlin-coroutines-okhttp
 private suspend fun Call.await(callStack: Array<StackTraceElement>): Response {
     return suspendCancellableCoroutine { continuation ->
-        val callback = object : Callback {
-            override fun onResponse(call: Call, response: Response) {
-                continuation.resume(response) { response.body.close() }
-            }
+        val callback =
+            object : Callback {
+                override fun onResponse(
+                    call: Call,
+                    response: Response
+                ) {
+                    continuation.resume(response) { response.body.close() }
+                }
 
-            override fun onFailure(call: Call, e: IOException) {
-                // Don't bother with resuming the continuation if it is already cancelled.
-                if (continuation.isCancelled) return
-                val exception = IOException(e).apply { stackTrace = callStack }
-                continuation.resumeWithException(e)
+                override fun onFailure(
+                    call: Call,
+                    e: IOException
+                ) {
+                    // Don't bother with resuming the continuation if it is already cancelled.
+                    if (continuation.isCancelled) return
+                    val exception = IOException(e).apply { stackTrace = callStack }
+                    continuation.resumeWithException(e)
+                }
             }
-        }
 
         enqueue(callback)
 
@@ -112,25 +120,32 @@ suspend fun Call.awaitSuccess(): Response {
     }
     return response
 }
+
 fun Call.asObservableSuccess(): Observable<Response> {
     return asObservableWithAsyncStacktrace().map { (asyncStacktrace, response) ->
         if (!response.isSuccessful) {
             response.close()
             throw Exception("HTTP error ${response.code}", asyncStacktrace)
-        } else response
+        } else {
+            response
+        }
     }
 }
 
-fun OkHttpClient.newCachelessCallWithProgress(request: Request, listener: ProgressListener): Call {
-    val progressClient = newBuilder()
-        .cache(null)
-        .addNetworkInterceptor { chain ->
-            val originalResponse = chain.proceed(chain.request())
-            originalResponse.newBuilder()
-                .body(ProgressResponseBody(originalResponse.body, listener))
-                .build()
-        }
-        .build()
+fun OkHttpClient.newCachelessCallWithProgress(
+    request: Request,
+    listener: ProgressListener
+): Call {
+    val progressClient =
+        newBuilder()
+            .cache(null)
+            .addNetworkInterceptor { chain ->
+                val originalResponse = chain.proceed(chain.request())
+                originalResponse.newBuilder()
+                    .body(ProgressResponseBody(originalResponse.body, listener))
+                    .build()
+            }
+            .build()
 
     return progressClient.newCall(request)
 }
@@ -140,7 +155,10 @@ inline fun <reified T> Response.parseAs(): T {
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <T> internalParseAs(type: KType, response: Response): T {
+fun <T> internalParseAs(
+    type: KType,
+    response: Response
+): T {
     val deserializer = serializer(type) as KSerializer<T>
     return response.body.source().use {
         Injekt.get<Json>().decodeFromBufferedSource(deserializer, it)

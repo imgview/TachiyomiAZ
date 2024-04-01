@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.data.download.model.Download
 class ChapterItem(val chapter: Chapter, val manga: Manga) :
     AbstractFlexibleItem<ChapterHolder>(),
     Chapter by chapter {
-
     private var _status: Int = 0
 
     var status: Int
@@ -31,7 +30,10 @@ class ChapterItem(val chapter: Chapter, val manga: Manga) :
         return R.layout.chapters_item
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<androidx.recyclerview.widget.RecyclerView.ViewHolder>>): ChapterHolder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<androidx.recyclerview.widget.RecyclerView.ViewHolder>>
+    ): ChapterHolder {
         return ChapterHolder(view, adapter as ChaptersAdapter)
     }
 

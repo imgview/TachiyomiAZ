@@ -14,7 +14,10 @@ import kotlinx.parcelize.Parcelize
 class MigrationSourceItem(val source: HttpSource, var sourceEnabled: Boolean) : AbstractFlexibleItem<MigrationSourceHolder>() {
     override fun getLayoutRes() = R.layout.migration_source_item
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): MigrationSourceHolder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): MigrationSourceHolder {
         return MigrationSourceHolder(view, adapter as MigrationSourceAdapter)
     }
 
@@ -62,7 +65,10 @@ class MigrationSourceItem(val source: HttpSource, var sourceEnabled: Boolean) : 
     }
 
     companion object {
-        fun fromParcelable(sourceManager: SourceManager, si: ParcelableSI): MigrationSourceItem? {
+        fun fromParcelable(
+            sourceManager: SourceManager,
+            si: ParcelableSI
+        ): MigrationSourceItem? {
             val source = sourceManager.get(si.sourceId) as? HttpSource ?: return null
 
             return MigrationSourceItem(

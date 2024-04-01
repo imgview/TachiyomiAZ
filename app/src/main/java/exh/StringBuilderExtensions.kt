@@ -1,3 +1,5 @@
 package exh
 
-operator fun StringBuilder.plusAssign(other: String) { append(other) }
+operator fun StringBuilder.plusAssign(other: String) {
+    append(other)
+}

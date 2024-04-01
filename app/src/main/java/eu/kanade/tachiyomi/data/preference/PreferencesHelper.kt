@@ -4,25 +4,25 @@ import android.content.Context
 import android.os.Environment
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
-import com.f2prateek.rx.preferences.Preference as RxPreference
 import com.f2prateek.rx.preferences.RxSharedPreferences
 import com.tfcporciuncula.flow.FlowSharedPreferences
 import com.tfcporciuncula.flow.Preference
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
-import eu.kanade.tachiyomi.data.preference.PreferenceValues as Values
 import eu.kanade.tachiyomi.data.preference.PreferenceValues.DisplayMode
 import eu.kanade.tachiyomi.data.preference.PreferenceValues.NsfwAllowance
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.anilist.Anilist
 import eu.kanade.tachiyomi.util.system.MiuiUtil
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.onEach
 import java.io.File
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.onEach
+import com.f2prateek.rx.preferences.Preference as RxPreference
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
+import eu.kanade.tachiyomi.data.preference.PreferenceValues as Values
 
 fun <T> RxPreference<T>.getOrDefault(): T = get() ?: defaultValue()!!
 
@@ -35,22 +35,23 @@ fun <T> Preference<T>.asImmediateFlow(block: (value: T) -> Unit): Flow<T> {
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PreferencesHelper(val context: Context) {
-
     private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
     private val rxPrefs = RxSharedPreferences.create(prefs)
     val flowPrefs = FlowSharedPreferences(prefs)
 
-    private val defaultDownloadsDir = File(
-        Environment.getExternalStorageDirectory().absolutePath + File.separator +
-            context.getString(R.string.app_name),
-        "downloads"
-    ).toURI()
+    private val defaultDownloadsDir =
+        File(
+            Environment.getExternalStorageDirectory().absolutePath + File.separator +
+                context.getString(R.string.app_name),
+            "downloads"
+        ).toURI()
 
-    private val defaultBackupDir = File(
-        Environment.getExternalStorageDirectory().absolutePath + File.separator +
-            context.getString(R.string.app_name),
-        "backup"
-    ).toURI()
+    private val defaultBackupDir =
+        File(
+            Environment.getExternalStorageDirectory().absolutePath + File.separator +
+                context.getString(R.string.app_name),
+            "backup"
+        ).toURI()
 
     fun startScreen() = prefs.getInt(Keys.startScreen, 1)
 
@@ -146,7 +147,11 @@ class PreferencesHelper(val context: Context) {
 
     fun trackPassword(sync: TrackService) = prefs.getString(Keys.trackPassword(sync.id), "")
 
-    fun setTrackCredentials(sync: TrackService, username: String, password: String) {
+    fun setTrackCredentials(
+        sync: TrackService,
+        username: String,
+        password: String
+    ) {
         prefs.edit()
             .putString(Keys.trackUsername(sync.id), username)
             .putString(Keys.trackPassword(sync.id), password)
@@ -159,10 +164,11 @@ class PreferencesHelper(val context: Context) {
 
     fun backupsDirectory() = flowPrefs.getString(Keys.backupDirectory, defaultBackupDir.toString())
 
-    fun dateFormat(format: String = flowPrefs.getString(Keys.dateFormat, "").get()): DateFormat = when (format) {
-        "" -> DateFormat.getDateInstance(DateFormat.SHORT)
-        else -> SimpleDateFormat(format, Locale.getDefault())
-    }
+    fun dateFormat(format: String = flowPrefs.getString(Keys.dateFormat, "").get()): DateFormat =
+        when (format) {
+            "" -> DateFormat.getDateInstance(DateFormat.SHORT)
+            else -> SimpleDateFormat(format, Locale.getDefault())
+        }
 
     fun downloadsDirectory() = flowPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
 
@@ -240,12 +246,18 @@ class PreferencesHelper(val context: Context) {
     fun enableDoh() = prefs.getBoolean(Keys.enableDoh, false)
 
     fun hideLastUsedSource() = flowPrefs.getBoolean(Keys.hideLastUsedSource, false)
-    fun extensionInstaller() = flowPrefs.getEnum(
-        Keys.extensionInstaller,
-        if (MiuiUtil.isMiui()) Values.ExtensionInstaller.LEGACY else Values.ExtensionInstaller.PACKAGEINSTALLER
-    )
 
-    fun defaultUserAgent() = flowPrefs.getString(Keys.defaultUserAgent, "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.124 Safari/537.36 Edg/102.0.1245.44")
+    fun extensionInstaller() =
+        flowPrefs.getEnum(
+            Keys.extensionInstaller,
+            if (MiuiUtil.isMiui()) Values.ExtensionInstaller.LEGACY else Values.ExtensionInstaller.PACKAGEINSTALLER
+        )
+
+    fun defaultUserAgent() =
+        flowPrefs.getString(
+            Keys.defaultUserAgent,
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.124 Safari/537.36 Edg/102.0.1245.44"
+        )
 
     // --> AZ J2K CHERRYPICKING
 
@@ -299,11 +311,17 @@ class PreferencesHelper(val context: Context) {
     fun memberIdVal() = flowPrefs.getString("eh_ipb_member_id", "")
 
     fun passHashVal() = flowPrefs.getString("eh_ipb_pass_hash", "")
+
     fun igneousVal() = flowPrefs.getString("eh_igneous", "")
+
     fun eh_ehSettingsProfile() = flowPrefs.getInt(Keys.eh_ehSettingsProfile, -1)
+
     fun eh_exhSettingsProfile() = flowPrefs.getInt(Keys.eh_exhSettingsProfile, -1)
+
     fun eh_settingsKey() = flowPrefs.getString(Keys.eh_settingsKey, "")
+
     fun eh_sessionCookie() = flowPrefs.getString(Keys.eh_sessionCookie, "")
+
     fun eh_hathPerksCookies() = flowPrefs.getString(Keys.eh_hathPerksCookie, "")
 
     // Lock
@@ -371,9 +389,17 @@ class PreferencesHelper(val context: Context) {
 
     fun eh_watchedListDefaultState() = flowPrefs.getBoolean(Keys.eh_watched_list_default_state, false)
 
-    fun eh_settingsLanguages() = flowPrefs.getString(Keys.eh_settings_languages, "false*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false")
+    fun eh_settingsLanguages() =
+        flowPrefs.getString(
+            Keys.eh_settings_languages,
+            "false*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false\nfalse*false*false"
+        )
 
-    fun eh_EnabledCategories() = flowPrefs.getString(Keys.eh_enabled_categories, "false,false,false,false,false,false,false,false,false,false")
+    fun eh_EnabledCategories() =
+        flowPrefs.getString(
+            Keys.eh_enabled_categories,
+            "false,false,false,false,false,false,false,false,false,false"
+        )
 
     fun startReadingButton() = flowPrefs.getBoolean(Keys.startReadingButton, true)
 

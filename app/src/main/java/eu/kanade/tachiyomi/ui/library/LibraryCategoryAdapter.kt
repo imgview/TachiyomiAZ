@@ -59,7 +59,10 @@ class LibraryCategoryAdapter(view: LibraryCategoryView, val controller: LibraryC
      *
      * @param list the list to set.
      */
-    suspend fun setItems(scope: CoroutineScope, list: List<LibraryItem>) {
+    suspend fun setItems(
+        scope: CoroutineScope,
+        list: List<LibraryItem>
+    ) {
         // A copy of manga always unfiltered.
         mangas = list.toList()
 
@@ -84,76 +87,83 @@ class LibraryCategoryAdapter(view: LibraryCategoryView, val controller: LibraryC
         if (mangas.isNotEmpty() && searchText.isNotBlank()) {
             val savedSearchText = searchText
 
-            val job = scope.launch(Dispatchers.IO) {
-                val newManga = try {
-                    // Prepare filter object
-                    val parsedQuery = searchEngine.parseQuery(savedSearchText)
-                    val sqlQuery = searchEngine.queryToSql(parsedQuery)
-                    val queryResult = db.lowLevel().rawQuery(
-                        RawQuery.builder()
-                            .query(sqlQuery.first)
-                            .args(*sqlQuery.second.toTypedArray())
-                            .build()
-                    )
+            val job =
+                scope.launch(Dispatchers.IO) {
+                    val newManga =
+                        try {
+                            // Prepare filter object
+                            val parsedQuery = searchEngine.parseQuery(savedSearchText)
+                            val sqlQuery = searchEngine.queryToSql(parsedQuery)
+                            val queryResult =
+                                db.lowLevel().rawQuery(
+                                    RawQuery.builder()
+                                        .query(sqlQuery.first)
+                                        .args(*sqlQuery.second.toTypedArray())
+                                        .build()
+                                )
 
-                    ensureActive() // Fail early when cancelled
-
-                    val mangaWithMetaIdsQuery = db.getIdsOfFavoriteMangaWithMetadata().await()
-                    val mangaWithMetaIds = LongArray(mangaWithMetaIdsQuery.count)
-                    if (mangaWithMetaIds.isNotEmpty()) {
-                        val mangaIdCol = mangaWithMetaIdsQuery.getColumnIndex(MangaTable.COL_ID)
-                        mangaWithMetaIdsQuery.moveToFirst()
-                        while (!mangaWithMetaIdsQuery.isAfterLast) {
                             ensureActive() // Fail early when cancelled
 
-                            mangaWithMetaIds[mangaWithMetaIdsQuery.position] = mangaWithMetaIdsQuery.getLong(mangaIdCol)
-                            mangaWithMetaIdsQuery.moveToNext()
-                        }
-                    }
+                            val mangaWithMetaIdsQuery = db.getIdsOfFavoriteMangaWithMetadata().await()
+                            val mangaWithMetaIds = LongArray(mangaWithMetaIdsQuery.count)
+                            if (mangaWithMetaIds.isNotEmpty()) {
+                                val mangaIdCol = mangaWithMetaIdsQuery.getColumnIndex(MangaTable.COL_ID)
+                                mangaWithMetaIdsQuery.moveToFirst()
+                                while (!mangaWithMetaIdsQuery.isAfterLast) {
+                                    ensureActive() // Fail early when cancelled
 
-                    ensureActive() // Fail early when cancelled
+                                    mangaWithMetaIds[mangaWithMetaIdsQuery.position] = mangaWithMetaIdsQuery.getLong(mangaIdCol)
+                                    mangaWithMetaIdsQuery.moveToNext()
+                                }
+                            }
 
-                    val convertedResult = LongArray(queryResult.count)
-                    if (convertedResult.isNotEmpty()) {
-                        val mangaIdCol = queryResult.getColumnIndex(SearchMetadataTable.COL_MANGA_ID)
-                        queryResult.moveToFirst()
-                        while (!queryResult.isAfterLast) {
                             ensureActive() // Fail early when cancelled
 
-                            convertedResult[queryResult.position] = queryResult.getLong(mangaIdCol)
-                            queryResult.moveToNext()
-                        }
-                    }
+                            val convertedResult = LongArray(queryResult.count)
+                            if (convertedResult.isNotEmpty()) {
+                                val mangaIdCol = queryResult.getColumnIndex(SearchMetadataTable.COL_MANGA_ID)
+                                queryResult.moveToFirst()
+                                while (!queryResult.isAfterLast) {
+                                    ensureActive() // Fail early when cancelled
 
-                    ensureActive() // Fail early when cancelled
+                                    convertedResult[queryResult.position] = queryResult.getLong(mangaIdCol)
+                                    queryResult.moveToNext()
+                                }
+                            }
 
-                    // Flow the mangas to allow cancellation of this filter operation
-                    mangas.asFlow().cancellable().filter { item ->
-                        if (isLewdSource(item.manga.source)) {
-                            val mangaId = item.manga.id ?: -1
-                            if (convertedResult.binarySearch(mangaId) < 0) {
-                                // Check if this manga even has metadata
-                                if (mangaWithMetaIds.binarySearch(mangaId) < 0) {
-                                    // No meta? Filter using title
+                            ensureActive() // Fail early when cancelled
+
+                            // Flow the mangas to allow cancellation of this filter operation
+                            mangas.asFlow().cancellable().filter { item ->
+                                if (isLewdSource(item.manga.source)) {
+                                    val mangaId = item.manga.id ?: -1
+                                    if (convertedResult.binarySearch(mangaId) < 0) {
+                                        // Check if this manga even has metadata
+                                        if (mangaWithMetaIds.binarySearch(mangaId) < 0) {
+                                            // No meta? Filter using title
+                                            item.filter(savedSearchText to true)
+                                        } else {
+                                            item.filter(savedSearchText to false)
+                                        }
+                                    } else {
+                                        true
+                                    }
+                                } else {
                                     item.filter(savedSearchText to true)
-                                } else item.filter(savedSearchText to false)
-                            } else true
-                        } else {
-                            item.filter(savedSearchText to true)
+                                }
+                            }.toList()
+                        } catch (e: Exception) {
+                            // Do not catch cancellations
+                            if (e is CancellationException) throw e
+
+                            Timber.w(e, "Could not filter mangas!")
+                            mangas
                         }
-                    }.toList()
-                } catch (e: Exception) {
-                    // Do not catch cancellations
-                    if (e is CancellationException) throw e
 
-                    Timber.w(e, "Could not filter mangas!")
-                    mangas
+                    withContext(Dispatchers.Main) {
+                        updateDataSet(newManga)
+                    }
                 }
-
-                withContext(Dispatchers.Main) {
-                    updateDataSet(newManga)
-                }
-            }
             lastFilterJob = job
             job.join()
         } else {
@@ -162,7 +172,10 @@ class LibraryCategoryAdapter(view: LibraryCategoryView, val controller: LibraryC
     }
 
     interface LibraryListener {
-        fun startReading(manga: Manga, adapter: LibraryCategoryAdapter)
+        fun startReading(
+            manga: Manga,
+            adapter: LibraryCategoryAdapter
+        )
     }
     // EXH <--
 }

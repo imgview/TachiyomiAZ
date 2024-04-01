@@ -17,12 +17,13 @@ import kotlin.math.abs
 /**
  * Implementation of a [RecyclerView] used by the webtoon reader.
  */
-open class WebtoonRecyclerView @JvmOverloads constructor(
+open class WebtoonRecyclerView
+@JvmOverloads
+constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyle: Int = 0
 ) : RecyclerView(context, attrs, defStyle) {
-
     private var isZooming = false
     private var atLastPosition = false
     private var atFirstPosition = false
@@ -40,7 +41,10 @@ open class WebtoonRecyclerView @JvmOverloads constructor(
     var tapListener: ((MotionEvent) -> Unit)? = null
     var longTapListener: ((MotionEvent) -> Boolean)? = null
 
-    override fun onMeasure(widthSpec: Int, heightSpec: Int) {
+    override fun onMeasure(
+        widthSpec: Int,
+        heightSpec: Int
+    ) {
         halfWidth = MeasureSpec.getSize(widthSpec) / 2
         halfHeight = MeasureSpec.getSize(heightSpec) / 2
         if (!heightSet) {
@@ -55,7 +59,10 @@ open class WebtoonRecyclerView @JvmOverloads constructor(
         return super.onTouchEvent(e)
     }
 
-    override fun onScrolled(dx: Int, dy: Int) {
+    override fun onScrolled(
+        dx: Int,
+        dy: Int
+    ) {
         super.onScrolled(dx, dy)
         val layoutManager = layoutManager
         lastVisibleItemPosition =
@@ -112,24 +119,29 @@ open class WebtoonRecyclerView @JvmOverloads constructor(
         animatorSet.duration = ANIMATOR_DURATION_TIME.toLong()
         animatorSet.interpolator = DecelerateInterpolator()
         animatorSet.start()
-        animatorSet.addListener(object : Animator.AnimatorListener {
-            override fun onAnimationStart(animation: Animator) {
-            }
+        animatorSet.addListener(
+            object : Animator.AnimatorListener {
+                override fun onAnimationStart(animation: Animator) {
+                }
 
-            override fun onAnimationEnd(animation: Animator) {
-                isZooming = false
-                currentScale = toRate
-            }
+                override fun onAnimationEnd(animation: Animator) {
+                    isZooming = false
+                    currentScale = toRate
+                }
 
-            override fun onAnimationCancel(animation: Animator) {
-            }
+                override fun onAnimationCancel(animation: Animator) {
+                }
 
-            override fun onAnimationRepeat(animation: Animator) {
+                override fun onAnimationRepeat(animation: Animator) {
+                }
             }
-        })
+        )
     }
 
-    fun zoomFling(velocityX: Int, velocityY: Int): Boolean {
+    fun zoomFling(
+        velocityX: Int,
+        velocityY: Int
+    ): Boolean {
         if (currentScale <= 1f) return false
 
         val distanceTimeFactor = 0.4f
@@ -157,7 +169,10 @@ open class WebtoonRecyclerView @JvmOverloads constructor(
         return true
     }
 
-    private fun zoomScrollBy(dx: Int, dy: Int) {
+    private fun zoomScrollBy(
+        dx: Int,
+        dy: Int
+    ) {
         if (dx != 0) {
             x = getPositionX(x + dx)
         }
@@ -173,14 +188,20 @@ open class WebtoonRecyclerView @JvmOverloads constructor(
 
     fun onScale(scaleFactor: Float) {
         currentScale *= scaleFactor
-        currentScale = currentScale.coerceIn(
-            MIN_RATE,
-            MAX_SCALE_RATE
-        )
+        currentScale =
+            currentScale.coerceIn(
+                MIN_RATE,
+                MAX_SCALE_RATE
+            )
 
         setScaleRate(currentScale)
 
-        layoutParams.height = if (currentScale < 1) { (originalHeight / currentScale).toInt() } else { originalHeight }
+        layoutParams.height =
+            if (currentScale < 1) {
+                (originalHeight / currentScale).toInt()
+            } else {
+                originalHeight
+            }
         halfHeight = layoutParams.height / 2
 
         if (currentScale != DEFAULT_RATE) {
@@ -207,7 +228,6 @@ open class WebtoonRecyclerView @JvmOverloads constructor(
     }
 
     inner class GestureListener : GestureDetectorWithLongTap.Listener() {
-
         override fun onSingleTapConfirmed(ev: MotionEvent): Boolean {
             tapListener?.invoke(ev)
             return false
@@ -240,7 +260,6 @@ open class WebtoonRecyclerView @JvmOverloads constructor(
     }
 
     inner class Detector : GestureDetectorWithLongTap(context, listener) {
-
         private var scrollPointerId = 0
         private var downX = 0
         private var downY = 0

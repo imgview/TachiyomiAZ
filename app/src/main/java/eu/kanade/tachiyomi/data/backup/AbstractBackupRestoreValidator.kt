@@ -10,7 +10,10 @@ abstract class AbstractBackupRestoreValidator {
     protected val sourceManager: SourceManager by injectLazy()
     protected val trackManager: TrackManager by injectLazy()
 
-    abstract fun validate(context: Context, uri: Uri): Results
+    abstract fun validate(
+        context: Context,
+        uri: Uri
+    ): Results
 
     data class Results(val missingSources: List<String>, val missingTrackers: List<String>)
 }

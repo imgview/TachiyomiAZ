@@ -26,7 +26,6 @@ class PagerTransitionHolder(
     val viewer: PagerViewer,
     val transition: ChapterTransition
 ) : LinearLayout(viewer.activity), ViewPagerAdapter.PositionableView {
-
     /**
      * Item that identifies this view. Needed by the adapter to not recreate views.
      */
@@ -42,11 +41,12 @@ class PagerTransitionHolder(
      * View container of the current status of the transition page. Child views will be added
      * dynamically.
      */
-    private var pagesContainer = LinearLayout(context).apply {
-        layoutParams = LayoutParams(MATCH_PARENT, WRAP_CONTENT)
-        orientation = VERTICAL
-        gravity = Gravity.CENTER
-    }
+    private var pagesContainer =
+        LinearLayout(context).apply {
+            layoutParams = LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+            orientation = VERTICAL
+            gravity = Gravity.CENTER
+        }
 
     init {
         orientation = VERTICAL
@@ -78,18 +78,19 @@ class PagerTransitionHolder(
      */
     private fun observeStatus(chapter: ReaderChapter) {
         statusSubscription?.unsubscribe()
-        statusSubscription = chapter.stateObserver
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { state ->
-                pagesContainer.removeAllViews()
-                when (state) {
-                    is ReaderChapter.State.Wait -> {
+        statusSubscription =
+            chapter.stateObserver
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { state ->
+                    pagesContainer.removeAllViews()
+                    when (state) {
+                        is ReaderChapter.State.Wait -> {
+                        }
+                        is ReaderChapter.State.Loading -> setLoading()
+                        is ReaderChapter.State.Error -> setError(state.error)
+                        is ReaderChapter.State.Loaded -> setLoaded()
                     }
-                    is ReaderChapter.State.Loading -> setLoading()
-                    is ReaderChapter.State.Error -> setError(state.error)
-                    is ReaderChapter.State.Loaded -> setLoaded()
                 }
-            }
     }
 
     /**
@@ -98,10 +99,11 @@ class PagerTransitionHolder(
     private fun setLoading() {
         val progress = ProgressBar(context, null, android.R.attr.progressBarStyle)
 
-        val textView = AppCompatTextView(context).apply {
-            wrapContent()
-            setText(R.string.transition_pages_loading)
-        }
+        val textView =
+            AppCompatTextView(context).apply {
+                wrapContent()
+                setText(R.string.transition_pages_loading)
+            }
 
         pagesContainer.addView(progress)
         pagesContainer.addView(textView)
@@ -118,21 +120,23 @@ class PagerTransitionHolder(
      * Sets the error state on the pages container.
      */
     private fun setError(error: Throwable) {
-        val textView = AppCompatTextView(context).apply {
-            wrapContent()
-            text = context.getString(R.string.transition_pages_error, error.message)
-        }
+        val textView =
+            AppCompatTextView(context).apply {
+                wrapContent()
+                text = context.getString(R.string.transition_pages_error, error.message)
+            }
 
-        val retryBtn = PagerButton(context, viewer).apply {
-            wrapContent()
-            setText(R.string.action_retry)
-            setOnClickListener {
-                val toChapter = transition.to
-                if (toChapter != null) {
-                    viewer.activity.requestPreloadChapter(toChapter)
+        val retryBtn =
+            PagerButton(context, viewer).apply {
+                wrapContent()
+                setText(R.string.action_retry)
+                setOnClickListener {
+                    val toChapter = transition.to
+                    if (toChapter != null) {
+                        viewer.activity.requestPreloadChapter(toChapter)
+                    }
                 }
             }
-        }
 
         pagesContainer.addView(textView)
         pagesContainer.addView(retryBtn)

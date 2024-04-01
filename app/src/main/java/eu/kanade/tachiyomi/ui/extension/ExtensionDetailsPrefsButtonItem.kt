@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.R
  * Repo item for a recycler view.
  */
 class ExtensionDetailsPrefsButtonItem(val sourceName: String) : AbstractFlexibleItem<ExtensionDetailsPrefsButtonHolder>() {
-
     /**
      * Returns the layout resource for this item.
      */
@@ -25,7 +24,10 @@ class ExtensionDetailsPrefsButtonItem(val sourceName: String) : AbstractFlexible
      * @param view The view of this item.
      * @param adapter The adapter of this item.
      */
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): ExtensionDetailsPrefsButtonHolder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): ExtensionDetailsPrefsButtonHolder {
         return ExtensionDetailsPrefsButtonHolder(view, adapter as ExtensionDetailsPrefsButtonAdapter)
     }
 

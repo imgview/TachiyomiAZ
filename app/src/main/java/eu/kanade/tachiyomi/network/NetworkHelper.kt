@@ -7,9 +7,6 @@ import eu.kanade.tachiyomi.network.interceptor.CloudflareInterceptor
 import eu.kanade.tachiyomi.network.interceptor.IgnoreGzipInterceptor
 import eu.kanade.tachiyomi.network.interceptor.UserAgentInterceptor
 import exh.log.maybeInjectEHLogger
-import java.io.File
-import java.net.InetAddress
-import java.util.concurrent.TimeUnit
 import okhttp3.Cache
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
@@ -17,9 +14,11 @@ import okhttp3.brotli.BrotliInterceptor
 import okhttp3.dnsoverhttps.DnsOverHttps
 import okhttp3.logging.HttpLoggingInterceptor
 import uy.kohesive.injekt.injectLazy
+import java.io.File
+import java.net.InetAddress
+import java.util.concurrent.TimeUnit
 
 open class NetworkHelper(context: Context) {
-
     private val preferences: PreferencesHelper by injectLazy()
 
     private val cacheDir = File(context.cacheDir, "network_cache")
@@ -28,20 +27,23 @@ open class NetworkHelper(context: Context) {
 
     open val cookieManager = AndroidCookieJar()
 
-    /* SY --> */ open /* SY <-- */ val client by lazy {
-        val builder = OkHttpClient.Builder()
-            .cookieJar(cookieManager)
-            .cache(Cache(cacheDir, cacheSize))
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .addNetworkInterceptor(IgnoreGzipInterceptor())
-            .addNetworkInterceptor(BrotliInterceptor)
-            .maybeInjectEHLogger()
+    // SY -->
+    open /* SY <-- */ val client by lazy {
+        val builder =
+            OkHttpClient.Builder()
+                .cookieJar(cookieManager)
+                .cache(Cache(cacheDir, cacheSize))
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .addNetworkInterceptor(IgnoreGzipInterceptor())
+                .addNetworkInterceptor(BrotliInterceptor)
+                .maybeInjectEHLogger()
 
         if (BuildConfig.DEBUG) {
-            val httpLoggingInterceptor = HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.HEADERS
-            }
+            val httpLoggingInterceptor =
+                HttpLoggingInterceptor().apply {
+                    level = HttpLoggingInterceptor.Level.HEADERS
+                }
             builder.addInterceptor(httpLoggingInterceptor)
         }
 
@@ -69,11 +71,12 @@ open class NetworkHelper(context: Context) {
         builder.build()
     }
 
-    open val cloudflareClient = client.newBuilder()
-        .addInterceptor(UserAgentInterceptor())
-        .addInterceptor(CloudflareInterceptor(context))
-        .maybeInjectEHLogger()
-        .build()
+    open val cloudflareClient =
+        client.newBuilder()
+            .addInterceptor(UserAgentInterceptor())
+            .addInterceptor(CloudflareInterceptor(context))
+            .maybeInjectEHLogger()
+            .build()
 
     val defaultUserAgent by lazy {
         preferences.defaultUserAgent().get()

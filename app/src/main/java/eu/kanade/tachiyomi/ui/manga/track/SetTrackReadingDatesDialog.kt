@@ -9,13 +9,12 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import java.util.Calendar
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Calendar
 
 class SetTrackReadingDatesDialog<T> : DialogController
-        where T : Controller, T : SetTrackReadingDatesDialog.Listener {
-
+    where T : Controller, T : SetTrackReadingDatesDialog.Listener {
     private val item: TrackItem
 
     private val dateToUpdate: ReadingDate
@@ -60,10 +59,11 @@ class SetTrackReadingDatesDialog<T> : DialogController
         // Today if no date is set, otherwise the already set date
         return Calendar.getInstance().apply {
             item.track?.let {
-                val date = when (dateToUpdate) {
-                    ReadingDate.Start -> it.started_reading_date
-                    ReadingDate.Finish -> it.finished_reading_date
-                }
+                val date =
+                    when (dateToUpdate) {
+                        ReadingDate.Start -> it.started_reading_date
+                        ReadingDate.Finish -> it.finished_reading_date
+                    }
                 if (date != 0L) {
                     timeInMillis = date
                 }
@@ -72,7 +72,11 @@ class SetTrackReadingDatesDialog<T> : DialogController
     }
 
     interface Listener {
-        fun setReadingDate(item: TrackItem, type: ReadingDate, date: Long)
+        fun setReadingDate(
+            item: TrackItem,
+            type: ReadingDate,
+            date: Long
+        )
     }
 
     enum class ReadingDate {

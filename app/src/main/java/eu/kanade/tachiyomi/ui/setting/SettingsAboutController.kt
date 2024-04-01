@@ -20,15 +20,14 @@ import eu.kanade.tachiyomi.util.preference.onClick
 import eu.kanade.tachiyomi.util.preference.preference
 import eu.kanade.tachiyomi.util.preference.titleRes
 import eu.kanade.tachiyomi.util.system.toast
+import timber.log.Timber
 import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
-import timber.log.Timber
 
 class SettingsAboutController : SettingsController() {
-
     /**
      * Checks for new releases
      */
@@ -38,73 +37,75 @@ class SettingsAboutController : SettingsController() {
 
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
 
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        titleRes = R.string.pref_category_about
+    override fun setupPreferenceScreen(screen: PreferenceScreen) =
+        with(screen) {
+            titleRes = R.string.pref_category_about
 
-        preference {
-            title = "GitHub"
-            val url = "https://github.com/az4521/TachiyomiAZ"
-            summary = url
-            onClick {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                startActivity(intent)
+            preference {
+                title = "GitHub"
+                val url = "https://github.com/az4521/TachiyomiAZ"
+                summary = url
+                onClick {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                    startActivity(intent)
+                }
             }
-        }
-        preference {
-            title = "Dev Build"
-            val url = "https://crafty.moe/tachiyomiAZ.apk"
-            summary = url
-            onClick {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                startActivity(intent)
+            preference {
+                title = "Dev Build"
+                val url = "https://crafty.moe/tachiyomiAZ.apk"
+                summary = url
+                onClick {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                    startActivity(intent)
+                }
             }
-        }
-        preference {
-            titleRes = R.string.version
-            summary = if (BuildConfig.DEBUG) {
-                "r" + BuildConfig.COMMIT_COUNT
-            } else {
-                BuildConfig.VERSION_NAME
-            }
+            preference {
+                titleRes = R.string.version
+                summary =
+                    if (BuildConfig.DEBUG) {
+                        "r" + BuildConfig.COMMIT_COUNT
+                    } else {
+                        BuildConfig.VERSION_NAME
+                    }
 
-            if (isUpdaterEnabled) {
-                onClick { checkVersion() }
+                if (isUpdaterEnabled) {
+                    onClick { checkVersion() }
+                }
             }
-        }
-        preference {
-            titleRes = R.string.build_time
-            summary = getFormattedBuildTime()
+            preference {
+                titleRes = R.string.build_time
+                summary = getFormattedBuildTime()
 
-            onClick {
-                ChangelogDialogController().showDialog(router)
+                onClick {
+                    ChangelogDialogController().showDialog(router)
+                }
             }
-        }
-        preference {
-            titleRes = R.string.website
-            val url = "https://crafty.moe/tachiAZ.htm"
-            summary = url
-            onClick {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                startActivity(intent)
+            preference {
+                titleRes = R.string.website
+                val url = "https://crafty.moe/tachiAZ.htm"
+                summary = url
+                onClick {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                    startActivity(intent)
+                }
             }
-        }
-        preference {
-            title = "Discord"
-            val url = "https://discord.gg/mihon"
-            summary = url
-            onClick {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                startActivity(intent)
+            preference {
+                title = "Discord"
+                val url = "https://discord.gg/mihon"
+                summary = url
+                onClick {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                    startActivity(intent)
+                }
             }
-        }
-        preference {
-            titleRes = R.string.licenses
+            preference {
+                titleRes = R.string.licenses
 
-            onClick {
-                startActivity(Intent(activity, OssLicensesMenuActivity::class.java))
+                onClick {
+                    startActivity(Intent(activity, OssLicensesMenuActivity::class.java))
+                }
             }
         }
-    }
 
     /**
      * Checks version and shows a user prompt if an update is available.
@@ -136,7 +137,6 @@ class SettingsAboutController : SettingsController() {
     }
 
     class NewUpdateDialogController(bundle: Bundle? = null) : DialogController(bundle) {
-
         constructor(body: String, url: String) : this(
             Bundle().apply {
                 putString(BODY_KEY, body)
@@ -171,9 +171,12 @@ class SettingsAboutController : SettingsController() {
             inputDf.timeZone = TimeZone.getTimeZone("UTC")
             val buildTime = inputDf.parse(BuildConfig.BUILD_TIME)
 
-            val outputDf = DateFormat.getDateTimeInstance(
-                DateFormat.MEDIUM, DateFormat.SHORT, Locale.getDefault()
-            )
+            val outputDf =
+                DateFormat.getDateTimeInstance(
+                    DateFormat.MEDIUM,
+                    DateFormat.SHORT,
+                    Locale.getDefault()
+                )
             outputDf.timeZone = TimeZone.getDefault()
 
             buildTime!!.toDateTimestampString(dateFormat)

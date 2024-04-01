@@ -22,17 +22,14 @@ import timber.log.Timber
  * Restores backup.
  */
 class BackupRestoreService : Service() {
-
     companion object {
-
         /**
          * Returns the status of the service.
          *
          * @param context the application context.
          * @return true if the service is running, false otherwise.
          */
-        fun isRunning(context: Context): Boolean =
-            context.isServiceRunning(BackupRestoreService::class.java)
+        fun isRunning(context: Context): Boolean = context.isServiceRunning(BackupRestoreService::class.java)
 
         /**
          * Starts a service to restore a backup from Json
@@ -40,13 +37,19 @@ class BackupRestoreService : Service() {
          * @param context context of application
          * @param uri path of Uri
          */
-        fun start(context: Context, uri: Uri, mode: Int, online: Boolean?) {
+        fun start(
+            context: Context,
+            uri: Uri,
+            mode: Int,
+            online: Boolean?
+        ) {
             if (!isRunning(context)) {
-                val intent = Intent(context, BackupRestoreService::class.java).apply {
-                    putExtra(BackupConst.EXTRA_URI, uri)
-                    putExtra(BackupConst.EXTRA_MODE, mode)
-                    online?.let { putExtra(BackupConst.EXTRA_TYPE, it) }
-                }
+                val intent =
+                    Intent(context, BackupRestoreService::class.java).apply {
+                        putExtra(BackupConst.EXTRA_URI, uri)
+                        putExtra(BackupConst.EXTRA_MODE, mode)
+                        online?.let { putExtra(BackupConst.EXTRA_TYPE, it) }
+                    }
                 ContextCompat.startForegroundService(context, intent)
             }
         }
@@ -110,7 +113,11 @@ class BackupRestoreService : Service() {
      * @param startId the start id of this command.
      * @return the start value of the command.
      */
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int
+    ): Int {
         val uri = intent?.getParcelableExtra<Uri>(BackupConst.EXTRA_URI) ?: return START_NOT_STICKY
         val mode = intent.getIntExtra(BackupConst.EXTRA_MODE, BackupConst.BACKUP_TYPE_FULL)
         val online = intent.getBooleanExtra(BackupConst.EXTRA_TYPE, true)
@@ -118,22 +125,25 @@ class BackupRestoreService : Service() {
         // Cancel any previous job if needed.
         backupRestore?.job?.cancel()
 
-        backupRestore = when (mode) {
-            BackupConst.BACKUP_TYPE_FULL -> FullBackupRestore(this, notifier, online)
-            else -> LegacyBackupRestore(this, notifier)
-        }
-        val handler = CoroutineExceptionHandler { _, exception ->
-            Timber.e(exception)
-            backupRestore?.writeErrorLog()
-
-            notifier.showRestoreError(exception.message)
-            stopSelf(startId)
-        }
-        backupRestore?.job = GlobalScope.launch(handler) {
-            if (backupRestore?.restoreBackup(uri) == false) {
-                notifier.showRestoreError(getString(R.string.restoring_backup_canceled))
+        backupRestore =
+            when (mode) {
+                BackupConst.BACKUP_TYPE_FULL -> FullBackupRestore(this, notifier, online)
+                else -> LegacyBackupRestore(this, notifier)
             }
-        }
+        val handler =
+            CoroutineExceptionHandler { _, exception ->
+                Timber.e(exception)
+                backupRestore?.writeErrorLog()
+
+                notifier.showRestoreError(exception.message)
+                stopSelf(startId)
+            }
+        backupRestore?.job =
+            GlobalScope.launch(handler) {
+                if (backupRestore?.restoreBackup(uri) == false) {
+                    notifier.showRestoreError(getString(R.string.restoring_backup_canceled))
+                }
+            }
         backupRestore?.job?.invokeOnCompletion {
             stopSelf(startId)
         }

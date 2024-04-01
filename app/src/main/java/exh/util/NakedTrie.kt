@@ -11,7 +11,11 @@ class NakedTrieNode<T>(val key: Int, var parent: NakedTrieNode<T>?) {
 
     // Walks in ascending order
     // Consumer should return true to continue walking, false to stop walking
-    inline fun walk(prefix: String, consumer: (String, T) -> Boolean, leavesOnly: Boolean) {
+    inline fun walk(
+        prefix: String,
+        consumer: (String, T) -> Boolean,
+        leavesOnly: Boolean
+    ) {
         // Special case root
         if (hasData && (!leavesOnly || children.size() <= 0)) {
             if (!consumer(prefix, data!! as T)) return
@@ -70,7 +74,10 @@ class NakedTrie<T> : MutableMap<String, T> {
     val root = NakedTrieNode<T>(-1, null)
     private var version: Long = 0
 
-    override fun put(key: String, value: T): T? {
+    override fun put(
+        key: String,
+        value: T
+    ): T? {
         // Traverse to node location in tree, making parent nodes if required
         var current = root
         for (c in key) {
@@ -84,13 +91,14 @@ class NakedTrie<T> : MutableMap<String, T> {
         }
 
         // Add data to node or replace existing data
-        val previous = if (current.hasData) {
-            current.data
-        } else {
-            current.hasData = true
-            size++
-            null
-        }
+        val previous =
+            if (current.hasData) {
+                current.data
+            } else {
+                current.hasData = true
+                size++
+                null
+            }
         current.data = value
 
         version++
@@ -143,7 +151,9 @@ class NakedTrie<T> : MutableMap<String, T> {
             if (!curBottom.hasData && curBottom.children.size() <= 0) {
                 // No data or child nodes, this node is useless, discard
                 parent.children.remove(curBottom.key)
-            } else break
+            } else {
+                break
+            }
         }
 
         version++
@@ -170,11 +180,17 @@ class NakedTrie<T> : MutableMap<String, T> {
 
     // Walks in ascending order
     // Consumer should return true to continue walking, false to stop walking
-    inline fun walk(consumer: (String, T) -> Boolean, leavesOnly: Boolean) {
+    inline fun walk(
+        consumer: (String, T) -> Boolean,
+        leavesOnly: Boolean
+    ) {
         root.walk("", consumer, leavesOnly)
     }
 
-    fun getOrPut(key: String, producer: () -> T): T {
+    fun getOrPut(
+        key: String,
+        producer: () -> T
+    ): T {
         // Traverse to node location in tree, making parent nodes if required
         var current = root
         for (c in key) {
@@ -199,7 +215,10 @@ class NakedTrie<T> : MutableMap<String, T> {
     }
 
     // Includes root
-    fun subMap(prefix: String, leavesOnly: Boolean = false): Map<String, T> {
+    fun subMap(
+        prefix: String,
+        leavesOnly: Boolean = false
+    ): Map<String, T> {
         val node = getAsNode(prefix) ?: return emptyMap()
 
         return object : Map<String, T> {
@@ -219,6 +238,7 @@ class NakedTrie<T> : MutableMap<String, T> {
                     )
                     return out
                 }
+
             /**
              * Returns a read-only [Set] of all keys in this map.
              */
@@ -241,7 +261,10 @@ class NakedTrie<T> : MutableMap<String, T> {
              */
             override val size: Int get() {
                 var s = 0
-                node.walk("", { _, _ -> s++; true }, leavesOnly)
+                node.walk("", { _, _ ->
+                    s++
+                    true
+                }, leavesOnly)
                 return s
             }
 
@@ -331,38 +354,41 @@ class NakedTrie<T> : MutableMap<String, T> {
      * Returns a [MutableSet] of all key/value pairs in this map.
      */
     override val entries: MutableSet<MutableMap.MutableEntry<String, T>>
-        get() = FakeMutableSet.fromSet(
-            mutableSetOf<MutableMap.MutableEntry<String, T>>().apply {
-                walk { k, v ->
-                    this += FakeMutableEntry.fromPair(k, v)
-                    true
+        get() =
+            FakeMutableSet.fromSet(
+                mutableSetOf<MutableMap.MutableEntry<String, T>>().apply {
+                    walk { k, v ->
+                        this += FakeMutableEntry.fromPair(k, v)
+                        true
+                    }
                 }
-            }
-        )
+            )
 
     /**
      * Returns a [MutableSet] of all keys in this map.
      */
     override val keys: MutableSet<String>
-        get() = FakeMutableSet.fromSet(
-            mutableSetOf<String>().apply {
-                walk { k, _ ->
-                    this += k
-                    true
+        get() =
+            FakeMutableSet.fromSet(
+                mutableSetOf<String>().apply {
+                    walk { k, _ ->
+                        this += k
+                        true
+                    }
                 }
-            }
-        )
+            )
 
     /**
      * Returns a [MutableCollection] of all values in this map. Note that this collection may contain duplicate values.
      */
     override val values: MutableCollection<T>
-        get() = FakeMutableCollection.fromCollection(
-            mutableListOf<T>().apply {
-                walk { _, v ->
-                    this += v
-                    true
+        get() =
+            FakeMutableCollection.fromCollection(
+                mutableListOf<T>().apply {
+                    walk { _, v ->
+                        this += v
+                        true
+                    }
                 }
-            }
-        )
+            )
 }

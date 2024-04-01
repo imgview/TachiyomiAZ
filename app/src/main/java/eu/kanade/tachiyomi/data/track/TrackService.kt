@@ -12,7 +12,6 @@ import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
 abstract class TrackService(val id: Int) {
-
     val preferences: PreferencesHelper by injectLazy()
     val networkService: NetworkHelper by injectLazy()
 
@@ -54,7 +53,10 @@ abstract class TrackService(val id: Int) {
 
     abstract fun refresh(track: Track): Observable<Track>
 
-    abstract fun login(username: String, password: String): Completable
+    abstract fun login(
+        username: String,
+        password: String
+    ): Completable
 
     @CallSuper
     open fun logout() {
@@ -62,14 +64,18 @@ abstract class TrackService(val id: Int) {
     }
 
     open val isLogged: Boolean
-        get() = getUsername().isNotEmpty() &&
-            getPassword().isNotEmpty()
+        get() =
+            getUsername().isNotEmpty() &&
+                getPassword().isNotEmpty()
 
     fun getUsername() = preferences.trackUsername(this)!!
 
     fun getPassword() = preferences.trackPassword(this)!!
 
-    fun saveCredentials(username: String, password: String) {
+    fun saveCredentials(
+        username: String,
+        password: String
+    ) {
         preferences.setTrackCredentials(this, username, password)
     }
 }

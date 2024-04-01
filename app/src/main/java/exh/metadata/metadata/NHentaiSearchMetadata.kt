@@ -6,10 +6,10 @@ import exh.metadata.EX_DATE_FORMAT
 import exh.metadata.ONGOING_SUFFIX
 import exh.metadata.nullIfBlank
 import exh.plusAssign
-import java.util.Date
 import kotlinx.serialization.Serializable
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Date
 
 @Serializable
 class NHentaiSearchMetadata : RaisedSearchMetadata() {
@@ -92,9 +92,10 @@ class NHentaiSearchMetadata : RaisedSearchMetadata() {
 
         val tagsDesc = tagsToDescription()
 
-        manga.description = listOf(titleDesc.toString(), detailsDesc.toString(), tagsDesc.toString())
-            .filter(String::isNotBlank)
-            .joinToString(separator = "\n")
+        manga.description =
+            listOf(titleDesc.toString(), detailsDesc.toString(), tagsDesc.toString())
+                .filter(String::isNotBlank)
+                .joinToString(separator = "\n")
     }
 
     companion object {
@@ -117,8 +118,7 @@ class NHentaiSearchMetadata : RaisedSearchMetadata() {
                 else -> null
             }
 
-        fun nhUrlToId(url: String) =
-            url.split("/").last { it.isNotBlank() }.toLong()
+        fun nhUrlToId(url: String) = url.split("/").last { it.isNotBlank() }.toLong()
 
         fun nhIdToPath(id: Long) = "/g/$id/"
     }

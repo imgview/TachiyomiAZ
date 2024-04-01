@@ -27,7 +27,6 @@ class StateImageViewTarget(
     private val errorDrawableRes: Int = R.drawable.ic_broken_image_grey_24dp,
     private val errorScaleType: ScaleType = ScaleType.CENTER
 ) : ImageViewTarget<Drawable>(view) {
-
     private var resource: Drawable? = null
 
     private val imageScaleType = view.scaleType
@@ -55,7 +54,10 @@ class StateImageViewTarget(
         super.onLoadCleared(placeholder)
     }
 
-    override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
+    override fun onResourceReady(
+        resource: Drawable,
+        transition: Transition<in Drawable>?
+    ) {
         progress?.gone()
         view.scaleType = imageScaleType
         super.onResourceReady(resource, transition)

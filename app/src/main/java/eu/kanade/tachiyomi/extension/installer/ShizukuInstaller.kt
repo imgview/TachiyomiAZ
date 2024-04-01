@@ -8,8 +8,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.util.system.getUriSize
 import eu.kanade.tachiyomi.util.system.toast
-import java.io.BufferedReader
-import java.io.InputStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -17,29 +15,35 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import rikka.shizuku.Shizuku
 import timber.log.Timber
+import java.io.BufferedReader
+import java.io.InputStream
 
 class ShizukuInstaller(private val service: Service) : Installer(service) {
-
     private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    private val shizukuDeadListener = Shizuku.OnBinderDeadListener {
-        Timber.e("Shizuku was killed prematurely")
-        service.stopSelf()
-    }
+    private val shizukuDeadListener =
+        Shizuku.OnBinderDeadListener {
+            Timber.e("Shizuku was killed prematurely")
+            service.stopSelf()
+        }
 
-    private val shizukuPermissionListener = object : Shizuku.OnRequestPermissionResultListener {
-        override fun onRequestPermissionResult(requestCode: Int, grantResult: Int) {
-            if (requestCode == SHIZUKU_PERMISSION_REQUEST_CODE) {
-                if (grantResult == PackageManager.PERMISSION_GRANTED) {
-                    ready = true
-                    checkQueue()
-                } else {
-                    service.stopSelf()
+    private val shizukuPermissionListener =
+        object : Shizuku.OnRequestPermissionResultListener {
+            override fun onRequestPermissionResult(
+                requestCode: Int,
+                grantResult: Int
+            ) {
+                if (requestCode == SHIZUKU_PERMISSION_REQUEST_CODE) {
+                    if (grantResult == PackageManager.PERMISSION_GRANTED) {
+                        ready = true
+                        checkQueue()
+                    } else {
+                        service.stopSelf()
+                    }
+                    Shizuku.removeRequestPermissionResultListener(this)
                 }
-                Shizuku.removeRequestPermissionResultListener(this)
             }
         }
-    }
 
     override var ready = false
 
@@ -51,12 +55,13 @@ class ShizukuInstaller(private val service: Service) : Installer(service) {
             try {
                 val size = service.getUriSize(entry.uri) ?: throw IllegalStateException()
                 service.contentResolver.openInputStream(entry.uri)!!.use {
-                    val createCommand = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        val userId = Process.myUserHandle().hashCode()
-                        "pm install-create --user $userId -r -i ${service.packageName} -S $size"
-                    } else {
-                        "pm install-create -r -i ${service.packageName} -S $size"
-                    }
+                    val createCommand =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            val userId = Process.myUserHandle().hashCode()
+                            "pm install-create --user $userId -r -i ${service.packageName} -S $size"
+                        } else {
+                            "pm install-create -r -i ${service.packageName} -S $size"
+                        }
 
                     val createResult = exec(createCommand)
                     sessionId = SESSION_ID_REGEX.find(createResult.out)?.value
@@ -94,7 +99,10 @@ class ShizukuInstaller(private val service: Service) : Installer(service) {
         super.onDestroy()
     }
 
-    private fun exec(command: String, stdin: InputStream? = null): ShellResult {
+    private fun exec(
+        command: String,
+        stdin: InputStream? = null
+    ): ShellResult {
         @Suppress("DEPRECATION")
         val process = Shizuku.newProcess(arrayOf("sh", "-c", command), null, null)
         if (stdin != null) {
@@ -109,20 +117,21 @@ class ShizukuInstaller(private val service: Service) : Installer(service) {
 
     init {
         Shizuku.addBinderDeadListener(shizukuDeadListener)
-        ready = if (Shizuku.pingBinder()) {
-            if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-                true
+        ready =
+            if (Shizuku.pingBinder()) {
+                if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+                    true
+                } else {
+                    Shizuku.addRequestPermissionResultListener(shizukuPermissionListener)
+                    Shizuku.requestPermission(SHIZUKU_PERMISSION_REQUEST_CODE)
+                    false
+                }
             } else {
-                Shizuku.addRequestPermissionResultListener(shizukuPermissionListener)
-                Shizuku.requestPermission(SHIZUKU_PERMISSION_REQUEST_CODE)
+                Timber.e("Shizuku is not ready to use.")
+                service.toast(R.string.ext_installer_shizuku_stopped)
+                service.stopSelf()
                 false
             }
-        } else {
-            Timber.e("Shizuku is not ready to use.")
-            service.toast(R.string.ext_installer_shizuku_stopped)
-            service.stopSelf()
-            false
-        }
     }
 }
 

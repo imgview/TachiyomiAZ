@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.R
  * @param code The lang code.
  */
 data class LangItem(val code: String) : AbstractHeaderItem<LangHolder>() {
-
     /**
      * Returns the layout resource of this item.
      */
@@ -23,7 +22,10 @@ data class LangItem(val code: String) : AbstractHeaderItem<LangHolder>() {
     /**
      * Creates a new view holder for this item.
      */
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<androidx.recyclerview.widget.RecyclerView.ViewHolder>>): LangHolder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<androidx.recyclerview.widget.RecyclerView.ViewHolder>>
+    ): LangHolder {
         return LangHolder(view, adapter)
     }
 

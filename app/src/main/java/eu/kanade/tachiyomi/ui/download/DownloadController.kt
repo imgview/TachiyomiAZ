@@ -13,11 +13,11 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.DownloadControllerBinding
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
-import java.util.HashMap
-import java.util.concurrent.TimeUnit
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
+import java.util.HashMap
+import java.util.concurrent.TimeUnit
 
 /**
  * Controller that shows the currently active downloads.
@@ -26,7 +26,6 @@ import rx.android.schedulers.AndroidSchedulers
 class DownloadController :
     NucleusController<DownloadControllerBinding, DownloadPresenter>(),
     DownloadAdapter.DownloadItemListener {
-
     /**
      * Adapter containing the active downloads.
      */
@@ -46,7 +45,10 @@ class DownloadController :
         setHasOptionsMenu(true)
     }
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = DownloadControllerBinding.inflate(inflater)
         return binding.root
     }
@@ -97,7 +99,10 @@ class DownloadController :
         super.onDestroyView(view)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
         inflater.inflate(R.menu.download_queue, menu)
     }
 
@@ -122,8 +127,9 @@ class DownloadController :
             }
             R.id.newest, R.id.oldest -> {
                 val adapter = adapter ?: return false
-                val items = adapter.currentItems.sortedBy { it.download.chapter.date_upload }
-                    .toMutableList()
+                val items =
+                    adapter.currentItems.sortedBy { it.download.chapter.date_upload }
+                        .toMutableList()
                 if (item.itemId == R.id.newest) {
                     items.reverse()
                 }
@@ -162,23 +168,24 @@ class DownloadController :
      * @param download the download to observe its progress.
      */
     private fun observeProgress(download: Download) {
-        val subscription = Observable.interval(50, TimeUnit.MILLISECONDS)
-            // Get the sum of percentages for all the pages.
-            .flatMap {
-                Observable.from(download.pages)
-                    .map(Page::progress)
-                    .reduce { x, y -> x + y }
-            }
-            // Keep only the latest emission to avoid backpressure.
-            .onBackpressureLatest()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { progress ->
-                // Update the view only if the progress has changed.
-                if (download.totalProgress != progress) {
-                    download.totalProgress = progress
-                    onUpdateProgress(download)
+        val subscription =
+            Observable.interval(50, TimeUnit.MILLISECONDS)
+                // Get the sum of percentages for all the pages.
+                .flatMap {
+                    Observable.from(download.pages)
+                        .map(Page::progress)
+                        .reduce { x, y -> x + y }
                 }
-            }
+                // Keep only the latest emission to avoid backpressure.
+                .onBackpressureLatest()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { progress ->
+                    // Update the view only if the progress has changed.
+                    if (download.totalProgress != progress) {
+                        download.totalProgress = progress
+                        onUpdateProgress(download)
+                    }
+                }
 
         // Avoid leaking subscriptions
         progressSubscriptions.remove(download)?.unsubscribe()
@@ -275,7 +282,10 @@ class DownloadController :
      * @param position The position of the item
      * @param menuItem The menu Item pressed
      */
-    override fun onMenuItemClick(position: Int, menuItem: MenuItem) {
+    override fun onMenuItemClick(
+        position: Int,
+        menuItem: MenuItem
+    ) {
         when (menuItem.itemId) {
             R.id.move_to_top, R.id.move_to_bottom -> {
                 val download = adapter?.getItem(position) ?: return

@@ -6,16 +6,15 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import uy.kohesive.injekt.injectLazy
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
-import uy.kohesive.injekt.injectLazy
 
 class ChaptersAdapter(
     controller: ChaptersController,
     context: Context
 ) : FlexibleAdapter<ChapterItem>(null, controller, true) {
-
     val preferences: PreferencesHelper by injectLazy()
 
     var items: List<ChapterItem> = emptyList()
@@ -26,11 +25,12 @@ class ChaptersAdapter(
 
     val bookmarkedColor = context.getResourceColor(R.attr.colorAccent)
 
-    val decimalFormat = DecimalFormat(
-        "#.###",
-        DecimalFormatSymbols()
-            .apply { decimalSeparator = '.' }
-    )
+    val decimalFormat =
+        DecimalFormat(
+            "#.###",
+            DecimalFormatSymbols()
+                .apply { decimalSeparator = '.' }
+        )
 
     val dateFormat: DateFormat = preferences.dateFormat()
 
@@ -44,6 +44,9 @@ class ChaptersAdapter(
     }
 
     interface OnMenuItemClickListener {
-        fun onMenuItemClick(position: Int, item: MenuItem)
+        fun onMenuItemClick(
+            position: Int,
+            item: MenuItem
+        )
     }
 }

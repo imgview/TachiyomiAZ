@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.onEach
  * Common configuration for all viewers.
  */
 abstract class ViewerConfig(preferences: PreferencesHelper) {
-
     private val scope = CoroutineScope(Job() + Dispatchers.Main)
 
     var imagePropertyChangedListener: (() -> Unit)? = null

@@ -18,7 +18,6 @@ class DownloadStore(
     context: Context,
     private val sourceManager: SourceManager
 ) {
-
     /**
      * Preference file where active downloads are stored.
      */
@@ -76,18 +75,20 @@ class DownloadStore(
      * Returns the list of downloads to restore. It should be called in a background thread.
      */
     fun restore(): List<Download> {
-        val objs = preferences.all
-            .mapNotNull { it.value as? String }
-            .mapNotNull { deserialize(it) }
-            .sortedBy { it.order }
+        val objs =
+            preferences.all
+                .mapNotNull { it.value as? String }
+                .mapNotNull { deserialize(it) }
+                .sortedBy { it.order }
 
         val downloads = mutableListOf<Download>()
         if (objs.isNotEmpty()) {
             val cachedManga = mutableMapOf<Long, Manga?>()
             for ((mangaId, chapterId) in objs) {
-                val manga = cachedManga.getOrPut(mangaId) {
-                    db.getManga(mangaId).executeAsBlocking()
-                } ?: continue
+                val manga =
+                    cachedManga.getOrPut(mangaId) {
+                        db.getManga(mangaId).executeAsBlocking()
+                    } ?: continue
                 val source = sourceManager.get(manga.source) as? HttpSource ?: continue
                 val chapter = db.getChapter(chapterId).executeAsBlocking() ?: continue
                 downloads.add(Download(source, manga, chapter))

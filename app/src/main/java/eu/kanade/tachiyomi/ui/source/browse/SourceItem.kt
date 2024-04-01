@@ -19,7 +19,6 @@ import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 
 class SourceItem(val manga: Manga, private val catalogueDisplayMode: Preference<DisplayMode>) :
     AbstractFlexibleItem<SourceHolder<*>>() {
-
     override fun getLayoutRes(): Int {
         return when (catalogueDisplayMode.get()) {
             DisplayMode.COMPACT_GRID -> R.layout.source_compact_grid_item
@@ -38,12 +37,17 @@ class SourceItem(val manga: Manga, private val catalogueDisplayMode: Preference<
                 val parent = adapter.recyclerView as AutofitRecyclerView
                 val coverHeight = parent.itemWidth / 3 * 4
                 view.apply {
-                    binding.card.layoutParams = FrameLayout.LayoutParams(
-                        MATCH_PARENT, coverHeight
-                    )
-                    binding.gradient.layoutParams = FrameLayout.LayoutParams(
-                        MATCH_PARENT, coverHeight / 2, Gravity.BOTTOM
-                    )
+                    binding.card.layoutParams =
+                        FrameLayout.LayoutParams(
+                            MATCH_PARENT,
+                            coverHeight
+                        )
+                    binding.gradient.layoutParams =
+                        FrameLayout.LayoutParams(
+                            MATCH_PARENT,
+                            coverHeight / 2,
+                            Gravity.BOTTOM
+                        )
                 }
                 SourceGridHolder(view, adapter)
             }
@@ -52,9 +56,11 @@ class SourceItem(val manga: Manga, private val catalogueDisplayMode: Preference<
                 val parent = adapter.recyclerView as AutofitRecyclerView
                 val coverHeight = parent.itemWidth / 3 * 4
                 view.apply {
-                    binding.card.layoutParams = ConstraintLayout.LayoutParams(
-                        MATCH_PARENT, coverHeight
-                    )
+                    binding.card.layoutParams =
+                        ConstraintLayout.LayoutParams(
+                            MATCH_PARENT,
+                            coverHeight
+                        )
                 }
                 SourceComfortableGridHolder(view, adapter)
             }

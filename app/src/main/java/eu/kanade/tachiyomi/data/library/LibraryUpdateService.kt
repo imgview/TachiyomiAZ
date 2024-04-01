@@ -33,15 +33,15 @@ import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.acquireWakeLock
 import eu.kanade.tachiyomi.util.system.isServiceRunning
 import exh.LIBRARY_UPDATE_EXCLUDED_SOURCES
-import java.io.File
-import java.util.ArrayList
-import java.util.concurrent.atomic.AtomicInteger
 import rx.Observable
 import rx.Subscription
 import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.File
+import java.util.ArrayList
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * This class will take care of updating the chapters of the manga from the library. It can be
@@ -59,7 +59,6 @@ class LibraryUpdateService(
     val trackManager: TrackManager = Injekt.get(),
     val coverCache: CoverCache = Injekt.get()
 ) : Service() {
-
     /**
      * Wake lock that will be held until the service is destroyed.
      */
@@ -83,7 +82,6 @@ class LibraryUpdateService(
     }
 
     companion object {
-
         /**
          * Key for category to update.
          */
@@ -113,12 +111,17 @@ class LibraryUpdateService(
          * @param target defines what should be updated.
          * @return true if service newly started, false otherwise
          */
-        fun start(context: Context, category: Category? = null, target: Target = Target.CHAPTERS): Boolean {
+        fun start(
+            context: Context,
+            category: Category? = null,
+            target: Target = Target.CHAPTERS
+        ): Boolean {
             if (!isRunning(context)) {
-                val intent = Intent(context, LibraryUpdateService::class.java).apply {
-                    putExtra(KEY_TARGET, target)
-                    category?.let { putExtra(KEY_CATEGORY, it.id) }
-                }
+                val intent =
+                    Intent(context, LibraryUpdateService::class.java).apply {
+                        putExtra(KEY_TARGET, target)
+                        category?.let { putExtra(KEY_CATEGORY, it.id) }
+                    }
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                     context.startService(intent)
                 } else {
@@ -181,41 +184,48 @@ class LibraryUpdateService(
      * @param startId the start id of this command.
      * @return the start value of the command.
      */
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int
+    ): Int {
         if (intent == null) return START_NOT_STICKY
-        val target = intent.getSerializableExtra(KEY_TARGET) as? Target
-            ?: return START_NOT_STICKY
+        val target =
+            intent.getSerializableExtra(KEY_TARGET) as? Target
+                ?: return START_NOT_STICKY
 
         // Unsubscribe from any previous subscription if needed.
         subscription?.unsubscribe()
 
         // Update favorite manga. Destroy service when completed or in case of an error.
-        subscription = Observable
-            .defer {
-                val selectedScheme = preferences.libraryUpdatePrioritization().get()
-                val mangaList = getMangaToUpdate(intent, target)
-                    .sortedWith(rankingScheme[selectedScheme])
+        subscription =
+            Observable
+                .defer {
+                    val selectedScheme = preferences.libraryUpdatePrioritization().get()
+                    val mangaList =
+                        getMangaToUpdate(intent, target)
+                            .sortedWith(rankingScheme[selectedScheme])
 
-                // Update either chapter list or manga details.
-                when (target) {
-                    Target.CHAPTERS -> updateChapterList(mangaList)
-                    Target.COVERS -> updateCovers(mangaList)
-                    Target.TRACKING -> updateTrackings(mangaList)
-                    Target.DETAILS -> updateMangaMetadata(mangaList)
+                    // Update either chapter list or manga details.
+                    when (target) {
+                        Target.CHAPTERS -> updateChapterList(mangaList)
+                        Target.COVERS -> updateCovers(mangaList)
+                        Target.TRACKING -> updateTrackings(mangaList)
+                        Target.DETAILS -> updateMangaMetadata(mangaList)
+                    }
                 }
-            }
-            .subscribeOn(Schedulers.io())
-            .subscribe(
-                {
-                },
-                {
-                    Timber.e(it)
-                    stopSelf(startId)
-                },
-                {
-                    stopSelf(startId)
-                }
-            )
+                .subscribeOn(Schedulers.io())
+                .subscribe(
+                    {
+                    },
+                    {
+                        Timber.e(it)
+                        stopSelf(startId)
+                    },
+                    {
+                        stopSelf(startId)
+                    }
+                )
 
         return START_REDELIVER_INTENT
     }
@@ -227,21 +237,25 @@ class LibraryUpdateService(
      * @param target the target to update.
      * @return a list of manga to update
      */
-    fun getMangaToUpdate(intent: Intent, target: Target): List<LibraryManga> {
+    fun getMangaToUpdate(
+        intent: Intent,
+        target: Target
+    ): List<LibraryManga> {
         val categoryId = intent.getIntExtra(KEY_CATEGORY, -1)
 
-        var listToUpdate = if (categoryId != -1) {
-            db.getLibraryMangas().executeAsBlocking().filter { it.category == categoryId }
-        } else {
-            val categoriesToUpdate = preferences.libraryUpdateCategories().get().map(String::toInt)
-            if (categoriesToUpdate.isNotEmpty()) {
-                db.getLibraryMangas().executeAsBlocking()
-                    .filter { it.category in categoriesToUpdate }
-                    .distinctBy { it.id }
+        var listToUpdate =
+            if (categoryId != -1) {
+                db.getLibraryMangas().executeAsBlocking().filter { it.category == categoryId }
             } else {
-                db.getLibraryMangas().executeAsBlocking().distinctBy { it.id }
+                val categoriesToUpdate = preferences.libraryUpdateCategories().get().map(String::toInt)
+                if (categoriesToUpdate.isNotEmpty()) {
+                    db.getLibraryMangas().executeAsBlocking()
+                        .filter { it.category in categoriesToUpdate }
+                        .distinctBy { it.id }
+                } else {
+                    db.getLibraryMangas().executeAsBlocking().distinctBy { it.id }
+                }
             }
-        }
         if (target == Target.CHAPTERS && preferences.updateOnlyNonCompleted()) {
             listToUpdate = listToUpdate.filter { it.status != SManga.COMPLETED }
         }
@@ -333,7 +347,10 @@ class LibraryUpdateService(
             .map { manga -> manga.first }
     }
 
-    private fun downloadChapters(manga: Manga, chapters: List<Chapter>) {
+    private fun downloadChapters(
+        manga: Manga,
+        chapters: List<Chapter>
+    ) {
         // We don't want to start downloading while the library is updating, because websites
         // may don't like it and they could ban the user.
         downloadManager.downloadChapters(manga, chapters, false)
@@ -420,8 +437,9 @@ class LibraryUpdateService(
                 notifier.showProgressNotification(it, count++, mangaToUpdate.size)
             }
             .flatMap { manga ->
-                val source = sourceManager.get(manga.source)
-                    ?: return@flatMap Observable.empty<LibraryManga>()
+                val source =
+                    sourceManager.get(manga.source)
+                        ?: return@flatMap Observable.empty<LibraryManga>()
 
                 runAsObservable({
                     val networkManga = source.getMangaDetails(manga.toMangaInfo())

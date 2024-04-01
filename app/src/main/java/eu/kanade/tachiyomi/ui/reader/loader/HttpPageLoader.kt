@@ -13,9 +13,6 @@ import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import exh.EH_SOURCE_ID
 import exh.EXH_SOURCE_ID
-import java.util.concurrent.PriorityBlockingQueue
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.min
 import rx.Completable
 import rx.Observable
 import rx.schedulers.Schedulers
@@ -26,6 +23,9 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.util.concurrent.PriorityBlockingQueue
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.min
 
 /**
  * Loader used to load chapters from an online source.
@@ -55,24 +55,25 @@ class HttpPageLoader(
         // EXH -->
         repeat(prefs.eh_readerThreads().get()) {
             // EXH <--
-            subscriptions += Observable.defer { Observable.just(queue.take().page) }
-                .filter { it.status == Page.QUEUE }
-                .concatMap {
-                    source.fetchImageFromCacheThenNet(it).doOnNext {
-                        XLog.d("Downloaded page: ${it.number}!")
-                    }
-                }
-                .repeat()
-                .subscribeOn(Schedulers.io())
-                .subscribe(
-                    {
-                    },
-                    { error ->
-                        if (error !is InterruptedException) {
-                            Timber.e(error)
+            subscriptions +=
+                Observable.defer { Observable.just(queue.take().page) }
+                    .filter { it.status == Page.QUEUE }
+                    .concatMap {
+                        source.fetchImageFromCacheThenNet(it).doOnNext {
+                            XLog.d("Downloaded page: ${it.number}!")
                         }
                     }
-                )
+                    .repeat()
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(
+                        {
+                        },
+                        { error ->
+                            if (error !is InterruptedException) {
+                                Timber.e(error)
+                            }
+                        }
+                    )
             // EXH -->
         }
         // EXH <--
@@ -110,15 +111,18 @@ class HttpPageLoader(
             .getPageListFromCache(chapter.chapter)
             .onErrorResumeNext { source.fetchPageList(chapter.chapter) }
             .map { pages ->
-                val rp = pages.mapIndexed { index, page ->
-                    // Don't trust sources and use our own indexing
-                    ReaderPage(index, page.url, page.imageUrl)
-                }
+                val rp =
+                    pages.mapIndexed { index, page ->
+                        // Don't trust sources and use our own indexing
+                        ReaderPage(index, page.url, page.imageUrl)
+                    }
                 if (prefs.eh_aggressivePageLoading().get()) {
                     rp.mapNotNull {
                         if (it.status == Page.QUEUE) {
                             PriorityPage(it, 0)
-                        } else null
+                        } else {
+                            null
+                        }
                     }.forEach { queue.offer(it) }
                 }
                 rp
@@ -169,7 +173,10 @@ class HttpPageLoader(
      * Preloads the given [amount] of pages after the [currentPage] with a lower priority.
      * @return a list of [PriorityPage] that were added to the [queue]
      */
-    private fun preloadNextPages(currentPage: ReaderPage, amount: Int): List<PriorityPage> {
+    private fun preloadNextPages(
+        currentPage: ReaderPage,
+        amount: Int
+    ): List<PriorityPage> {
         val pageIndex = currentPage.index
         val pages = currentPage.chapter.pages ?: return emptyList()
         if (pageIndex == pages.lastIndex) return emptyList()
@@ -179,7 +186,9 @@ class HttpPageLoader(
             .mapNotNull {
                 if (it.status == Page.QUEUE) {
                     PriorityPage(it, 0).apply { queue.offer(this) }
-                } else null
+                } else {
+                    null
+                }
             }
     }
 
@@ -197,9 +206,9 @@ class HttpPageLoader(
         }
 
         if (prefs.eh_readerInstantRetry().get()) // EXH <--
-        {
-            boostPage(page)
-        } else {
+            {
+                boostPage(page)
+            } else {
             // EXH <--
             queue.offer(PriorityPage(page, 2))
         }
@@ -212,7 +221,6 @@ class HttpPageLoader(
         val page: ReaderPage,
         val priority: Int
     ) : Comparable<PriorityPage> {
-
         companion object {
             private val idGenerator = AtomicInteger()
         }
@@ -285,9 +293,12 @@ class HttpPageLoader(
                 if (readerTheme >= 3) {
                     val stream = chapterCache.getImageFile(imageUrl).inputStream()
                     val image = BitmapFactory.decodeStream(stream)
-                    page.bg = ImageUtil.autoSetBackground(
-                        image, readerTheme == 2, prefs.context
-                    )
+                    page.bg =
+                        ImageUtil.autoSetBackground(
+                            image,
+                            readerTheme == 2,
+                            prefs.context
+                        )
                     page.bgType = PagerPageHolder.getBGType(readerTheme, prefs.context)
                     stream.close()
                 }
@@ -329,18 +340,19 @@ class HttpPageLoader(
     // EXH -->
     fun boostPage(page: ReaderPage) {
         if (page.status == Page.QUEUE) {
-            subscriptions += Observable.just(page)
-                .concatMap { source.fetchImageFromCacheThenNet(it) }
-                .subscribeOn(Schedulers.io())
-                .subscribe(
-                    {
-                    },
-                    { error ->
-                        if (error !is InterruptedException) {
-                            Timber.e(error)
+            subscriptions +=
+                Observable.just(page)
+                    .concatMap { source.fetchImageFromCacheThenNet(it) }
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(
+                        {
+                        },
+                        { error ->
+                            if (error !is InterruptedException) {
+                                Timber.e(error)
+                            }
                         }
-                    }
-                )
+                    )
         }
     }
     // EXH <--

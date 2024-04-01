@@ -21,12 +21,12 @@ import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.util.system.jobScheduler
 import exh.source.BlacklistedSources
-import java.io.File
-import java.net.URI
-import java.net.URISyntaxException
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.io.File
+import java.net.URI
+import java.net.URISyntaxException
 
 object EXHMigrations {
     private val db: DatabaseHelper by injectLazy()
@@ -61,16 +61,17 @@ object EXHMigrations {
                         )
 
                         // Migrate nhentai URLs
-                        val nhentaiManga = db.db.get()
-                            .listOfObjects(Manga::class.java)
-                            .withQuery(
-                                Query.builder()
-                                    .table(MangaTable.TABLE)
-                                    .where("${MangaTable.COL_SOURCE} = $NHENTAI_SOURCE_ID")
-                                    .build()
-                            )
-                            .prepare()
-                            .executeAsBlocking()
+                        val nhentaiManga =
+                            db.db.get()
+                                .listOfObjects(Manga::class.java)
+                                .withQuery(
+                                    Query.builder()
+                                        .table(MangaTable.TABLE)
+                                        .where("${MangaTable.COL_SOURCE} = $NHENTAI_SOURCE_ID")
+                                        .build()
+                                )
+                                .prepare()
+                                .executeAsBlocking()
 
                         nhentaiManga.forEach {
                             it.url = getUrlWithoutDomain(it.url)
@@ -130,16 +131,17 @@ object EXHMigrations {
                 if (oldVersion < 8409) {
                     db.inTransaction {
                         // Migrate tsumino URLs
-                        val tsuminoManga = db.db.get()
-                            .listOfObjects(Manga::class.java)
-                            .withQuery(
-                                Query.builder()
-                                    .table(MangaTable.TABLE)
-                                    .where("${MangaTable.COL_SOURCE} = $TSUMINO_SOURCE_ID")
-                                    .build()
-                            )
-                            .prepare()
-                            .executeAsBlocking()
+                        val tsuminoManga =
+                            db.db.get()
+                                .listOfObjects(Manga::class.java)
+                                .withQuery(
+                                    Query.builder()
+                                        .table(MangaTable.TABLE)
+                                        .where("${MangaTable.COL_SOURCE} = $TSUMINO_SOURCE_ID")
+                                        .build()
+                                )
+                                .prepare()
+                                .executeAsBlocking()
                         tsuminoManga.forEach {
                             it.url = "/entry/" + it.url.split("/").last()
                         }
@@ -257,7 +259,10 @@ object EXHMigrations {
         return manga
     }
 
-    private fun backupDatabase(context: Context, oldMigrationVersion: Int) {
+    private fun backupDatabase(
+        context: Context,
+        oldMigrationVersion: Int
+    ) {
         val backupLocation = File(File(context.filesDir, "exh_db_bck"), "$oldMigrationVersion.bck.db")
         if (backupLocation.exists()) return // Do not backup same version twice
 

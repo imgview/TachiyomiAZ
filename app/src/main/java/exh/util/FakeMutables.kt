@@ -136,6 +136,7 @@ private value class EntryShim<K, V>(private val entry: Map.Entry<K, V>) : FakeMu
      */
     override val key: K
         get() = entry.key
+
     /**
      * Returns the value of this key/value pair.
      */
@@ -149,6 +150,7 @@ private value class PairShim<K, V>(private val pair: Pair<K, V>) : FakeMutableEn
      * Returns the key of this key/value pair.
      */
     override val key: K get() = pair.first
+
     /**
      * Returns the value of this key/value pair.
      */
@@ -165,11 +167,15 @@ interface FakeMutableEntry<K, V> : MutableMap.MutableEntry<K, V> {
 
         fun <K, V> fromPair(pair: Pair<K, V>): FakeMutableEntry<K, V> = PairShim(pair)
 
-        fun <K, V> fromPair(key: K, value: V) = object : FakeMutableEntry<K, V> {
+        fun <K, V> fromPair(
+            key: K,
+            value: V
+        ) = object : FakeMutableEntry<K, V> {
             /**
              * Returns the key of this key/value pair.
              */
             override val key: K = key
+
             /**
              * Returns the value of this key/value pair.
              */

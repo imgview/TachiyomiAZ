@@ -20,7 +20,6 @@ import reactivecircus.flowbinding.appcompat.navigationClicks
 import reactivecircus.flowbinding.swiperefreshlayout.refreshes
 
 open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
-
     internal var bundle: Bundle? = null
 
     internal var isRefreshing: Boolean = false
@@ -65,16 +64,20 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
                 WebView.setWebContentsDebuggingEnabled(true)
             }
 
-            binding.webview.webChromeClient = object : WebChromeClient() {
-                override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                    binding.progressBar.isVisible = true
-                    binding.progressBar.progress = newProgress
-                    if (newProgress == 100) {
-                        binding.progressBar.isInvisible = true
+            binding.webview.webChromeClient =
+                object : WebChromeClient() {
+                    override fun onProgressChanged(
+                        view: WebView?,
+                        newProgress: Int
+                    ) {
+                        binding.progressBar.isVisible = true
+                        binding.progressBar.progress = newProgress
+                        if (newProgress == 100) {
+                            binding.progressBar.isInvisible = true
+                        }
+                        super.onProgressChanged(view, newProgress)
                     }
-                    super.onProgressChanged(view, newProgress)
                 }
-            }
         } else {
             binding.webview.restoreState(bundle ?: return)
         }
@@ -86,8 +89,11 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
     }
 
     override fun onBackPressed() {
-        if (binding.webview.canGoBack()) binding.webview.goBack()
-        else super.onBackPressed()
+        if (binding.webview.canGoBack()) {
+            binding.webview.goBack()
+        } else {
+            super.onBackPressed()
+        }
     }
 
     fun refreshPage() {

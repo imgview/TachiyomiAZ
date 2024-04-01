@@ -21,7 +21,6 @@ data class ExtensionItem(
     val installStep: InstallStep = InstallStep.Idle
 ) :
     AbstractSectionableItem<ExtensionHolder, ExtensionGroupItem>(header) {
-
     /**
      * Returns the layout resource of this item.
      */
@@ -32,7 +31,10 @@ data class ExtensionItem(
     /**
      * Creates a new view holder for this item.
      */
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<androidx.recyclerview.widget.RecyclerView.ViewHolder>>): ExtensionHolder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<androidx.recyclerview.widget.RecyclerView.ViewHolder>>
+    ): ExtensionHolder {
         return ExtensionHolder(view, adapter as ExtensionAdapter)
     }
 

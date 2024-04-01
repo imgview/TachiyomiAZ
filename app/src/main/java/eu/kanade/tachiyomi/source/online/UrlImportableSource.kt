@@ -4,6 +4,7 @@ import android.net.Uri
 import eu.kanade.tachiyomi.source.Source
 import java.net.URI
 import java.net.URISyntaxException
+
 interface UrlImportableSource : Source {
     val matchingHosts: List<String>
 

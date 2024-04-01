@@ -11,14 +11,14 @@ import uy.kohesive.injekt.api.get
  * Used to connect with the GitHub API.
  */
 interface GithubService {
-
     companion object {
         fun create(): GithubService {
-            val restAdapter = Retrofit.Builder()
-                .baseUrl("https://api.github.com")
-                .addConverterFactory(GsonConverterFactory.create())
-                .client(Injekt.get<NetworkHelper>().client)
-                .build()
+            val restAdapter =
+                Retrofit.Builder()
+                    .baseUrl("https://api.github.com")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .client(Injekt.get<NetworkHelper>().client)
+                    .build()
 
             return restAdapter.create(GithubService::class.java)
         }

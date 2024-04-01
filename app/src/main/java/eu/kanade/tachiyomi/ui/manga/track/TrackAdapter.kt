@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.view.inflate
 
 class TrackAdapter(controller: TrackController) : androidx.recyclerview.widget.RecyclerView.Adapter<TrackHolder>() {
-
     var items = emptyList<TrackItem>()
         set(value) {
             if (field !== value) {
@@ -24,23 +23,36 @@ class TrackAdapter(controller: TrackController) : androidx.recyclerview.widget.R
         return items.size
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): TrackHolder {
         val view = parent.inflate(R.layout.track_item)
         return TrackHolder(view, this)
     }
 
-    override fun onBindViewHolder(holder: TrackHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: TrackHolder,
+        position: Int
+    ) {
         holder.bind(items[position])
     }
 
     interface OnClickListener {
         fun onLogoClick(position: Int)
+
         fun onSetClick(position: Int)
+
         fun onTitleLongClick(position: Int)
+
         fun onStatusClick(position: Int)
+
         fun onChaptersClick(position: Int)
+
         fun onScoreClick(position: Int)
+
         fun onStartDateClick(position: Int)
+
         fun onFinishDateClick(position: Int)
     }
 }

@@ -49,10 +49,6 @@ import exh.EH_SOURCE_ID
 import exh.EXH_SOURCE_ID
 import exh.MERGED_SOURCE_ID
 import exh.util.setChipsExtended
-import java.text.DateFormat
-import java.text.DecimalFormat
-import java.util.Date
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -68,6 +64,10 @@ import reactivecircus.flowbinding.swiperefreshlayout.refreshes
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.text.DateFormat
+import java.text.DecimalFormat
+import java.util.Date
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Fragment that shows manga information.
@@ -78,7 +78,6 @@ class MangaInfoController(private val fromSource: Boolean = false) :
     NucleusController<MangaInfoControllerBinding, MangaInfoPresenter>(),
     ChangeMangaCategoriesDialog.Listener,
     CoroutineScope {
-
     private val preferences: PreferencesHelper by injectLazy()
 
     private val dateFormat: DateFormat by lazy {
@@ -105,12 +104,19 @@ class MangaInfoController(private val fromSource: Boolean = false) :
     override fun createPresenter(): MangaInfoPresenter {
         val ctrl = parentController as MangaController
         return MangaInfoPresenter(
-            ctrl.manga!!, ctrl.source!!, ctrl.smartSearchConfig,
-            ctrl.chapterCountRelay, ctrl.lastUpdateRelay, ctrl.mangaFavoriteRelay
+            ctrl.manga!!,
+            ctrl.source!!,
+            ctrl.smartSearchConfig,
+            ctrl.chapterCountRelay,
+            ctrl.lastUpdateRelay,
+            ctrl.mangaFavoriteRelay
         )
     }
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = MangaInfoControllerBinding.inflate(inflater)
         return binding.root
     }
@@ -199,7 +205,9 @@ class MangaInfoController(private val fromSource: Boolean = false) :
                 .launchIn(scope)
         }
         smartSearchConfig?.let { smartSearchConfig ->
-            if (smartSearchConfig.origMangaId != null) { binding.mergeBtn.visible() }
+            if (smartSearchConfig.origMangaId != null) {
+                binding.mergeBtn.visible()
+            }
             binding.mergeBtn.clicks()
                 .onEach {
                     // Init presenter here to avoid threading issues
@@ -207,9 +215,10 @@ class MangaInfoController(private val fromSource: Boolean = false) :
 
                     launch {
                         try {
-                            val mergedManga = withContext(Dispatchers.IO + NonCancellable) {
-                                presenter.smartSearchMerge(presenter.manga, smartSearchConfig.origMangaId!!)
-                            }
+                            val mergedManga =
+                                withContext(Dispatchers.IO + NonCancellable) {
+                                    presenter.smartSearchMerge(presenter.manga, smartSearchConfig.origMangaId!!)
+                                }
 
                             parentController?.router?.pushController(
                                 MangaController(
@@ -220,8 +229,9 @@ class MangaInfoController(private val fromSource: Boolean = false) :
                             )
                             applicationContext?.toast("Manga merged!")
                         } catch (e: Exception) {
-                            if (e is CancellationException) throw e
-                            else {
+                            if (e is CancellationException) {
+                                throw e
+                            } else {
                                 applicationContext?.toast("Failed to merge manga: ${e.message}")
                             }
                         }
@@ -232,7 +242,10 @@ class MangaInfoController(private val fromSource: Boolean = false) :
         // EXH <--
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
         inflater.inflate(R.menu.manga_info, menu)
 
         if (presenter.source !is HttpSource) {
@@ -293,7 +306,10 @@ class MangaInfoController(private val fromSource: Boolean = false) :
      * @param manga manga object containing information about manga.
      * @param source the source of the manga.
      */
-    fun onNextManga(manga: Manga, source: Source) {
+    fun onNextManga(
+        manga: Manga,
+        source: Source
+    ) {
         if (manga.initialized) {
             // Update view.
             setMangaInfo(manga, source)
@@ -311,40 +327,47 @@ class MangaInfoController(private val fromSource: Boolean = false) :
      * @param manga manga object containing information about manga.
      * @param source the source of the manga.
      */
-    private fun setMangaInfo(manga: Manga, source: Source?) {
+    private fun setMangaInfo(
+        manga: Manga,
+        source: Source?
+    ) {
         val view = view ?: return
 
         // TODO Duplicated in MigrationProcedureAdapter
 
         // update full title TextView.
-        binding.mangaFullTitle.text = if (manga.title.isBlank()) {
-            view.context.getString(R.string.unknown)
-        } else {
-            manga.title
-        }
+        binding.mangaFullTitle.text =
+            if (manga.title.isBlank()) {
+                view.context.getString(R.string.unknown)
+            } else {
+                manga.title
+            }
 
         // Update artist TextView.
-        binding.mangaArtist.text = if (manga.artist.isNullOrBlank()) {
-            view.context.getString(R.string.unknown)
-        } else {
-            manga.artist
-        }
+        binding.mangaArtist.text =
+            if (manga.artist.isNullOrBlank()) {
+                view.context.getString(R.string.unknown)
+            } else {
+                manga.artist
+            }
 
         // Update author TextView.
-        binding.mangaAuthor.text = if (manga.author.isNullOrBlank()) {
-            view.context.getString(R.string.unknown)
-        } else {
-            manga.author
-        }
+        binding.mangaAuthor.text =
+            if (manga.author.isNullOrBlank()) {
+                view.context.getString(R.string.unknown)
+            } else {
+                manga.author
+            }
 
         // If manga source is known update source TextView.
         if (source == null) {
             binding.mangaSource.text = view.context.getString(R.string.unknown)
             // EXH -->
         } else if (source.id == MERGED_SOURCE_ID) {
-            binding.mangaSource.text = MergedSource.MangaConfig.readFromUrl(gson, manga.url).children.map {
-                sourceManager.getOrStub(it.source).toString()
-            }.distinct().joinToString()
+            binding.mangaSource.text =
+                MergedSource.MangaConfig.readFromUrl(gson, manga.url).children.map {
+                    sourceManager.getOrStub(it.source).toString()
+                }.distinct().joinToString()
             // EXH <--
         } else {
             val mangaSource = source.toString()
@@ -370,11 +393,12 @@ class MangaInfoController(private val fromSource: Boolean = false) :
             binding.mangaGenresTags.setChipsExtended(manga.getGenres(), this::performSearch, this::performGlobalSearch, manga.source)
         }
 
-        binding.mangaSummary.text = if (manga.description.isNullOrBlank()) {
-            view.context.getString(R.string.unknown)
-        } else {
-            manga.description
-        }
+        binding.mangaSummary.text =
+            if (manga.description.isNullOrBlank()) {
+                view.context.getString(R.string.unknown)
+            } else {
+                manga.description
+            }
 
         // Update status TextView.
         binding.mangaStatus.setText(
@@ -392,11 +416,12 @@ class MangaInfoController(private val fromSource: Boolean = false) :
         // Set the favorite drawable to the correct one.
         setFavoriteDrawable(manga.favorite)
 
-        binding.mangaCoverCard.radius = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            preferences.eh_library_corner_radius().get().toFloat(),
-            view.context.resources.displayMetrics
-        )
+        binding.mangaCoverCard.radius =
+            TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                preferences.eh_library_corner_radius().get().toFloat(),
+                view.context.resources.displayMetrics
+            )
 
         // Set cover if it wasn't already.
         val mangaThumbnail = manga.toMangaThumbnail()
@@ -456,11 +481,12 @@ class MangaInfoController(private val fromSource: Boolean = false) :
     private fun openInWebView() {
         val source = presenter.source as? HttpSource ?: return
 
-        val url = try {
-            source.getMangaUrl(presenter.manga)
-        } catch (e: Exception) {
-            return
-        }
+        val url =
+            try {
+                source.getMangaUrl(presenter.manga)
+            } catch (e: Exception) {
+                return
+            }
 
         val activity = activity ?: return
         val intent = WebViewActivity.newIntent(activity, url, source.id, presenter.manga.title)
@@ -476,10 +502,11 @@ class MangaInfoController(private val fromSource: Boolean = false) :
         val source = presenter.source as? HttpSource ?: return
         try {
             val url = source.getMangaUrl(presenter.manga)
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, url)
-            }
+            val intent =
+                Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, url)
+                }
             startActivity(Intent.createChooser(intent, context.getString(R.string.action_share)))
         } catch (e: Exception) {
             context.toast(e.message)
@@ -575,9 +602,10 @@ class MangaInfoController(private val fromSource: Boolean = false) :
                 // Choose a category
                 else -> {
                     val ids = presenter.getMangaCategoryIds(manga)
-                    val preselected = ids.mapNotNull { id ->
-                        categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
-                    }.toTypedArray()
+                    val preselected =
+                        ids.mapNotNull { id ->
+                            categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
+                        }.toTypedArray()
 
                     ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected)
                         .showDialog(router)
@@ -593,9 +621,10 @@ class MangaInfoController(private val fromSource: Boolean = false) :
             val categories = presenter.getCategories()
 
             val ids = presenter.getMangaCategoryIds(manga)
-            val preselected = ids.mapNotNull { id ->
-                categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
-            }.toTypedArray()
+            val preselected =
+                ids.mapNotNull { id ->
+                    categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
+                }.toTypedArray()
 
             ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected)
                 .showDialog(router)
@@ -604,7 +633,10 @@ class MangaInfoController(private val fromSource: Boolean = false) :
         }
     }
 
-    override fun updateCategoriesForMangas(mangas: List<Manga>, categories: List<Category>) {
+    override fun updateCategoriesForMangas(
+        mangas: List<Manga>,
+        categories: List<Category>
+    ) {
         val manga = mangas.firstOrNull() ?: return
 
         if (!manga.favorite) {
@@ -621,7 +653,10 @@ class MangaInfoController(private val fromSource: Boolean = false) :
      * @param label Label to show to the user describing the content
      * @param content the actual text to copy to the board
      */
-    private fun copyToClipboard(label: String, content: String) {
+    private fun copyToClipboard(
+        label: String,
+        content: String
+    ) {
         if (content.isBlank()) return
 
         val activity = activity ?: return
@@ -664,7 +699,8 @@ class MangaInfoController(private val fromSource: Boolean = false) :
                 previousController.search(query)
             }
             is UpdatesController,
-            is HistoryController -> {
+            is HistoryController
+            -> {
                 // Manually navigate to LibraryController
                 router.handleBack()
                 (router.activity as MainActivity).setSelectedDrawerItem(R.id.nav_drawer_library)
@@ -679,7 +715,10 @@ class MangaInfoController(private val fromSource: Boolean = false) :
     }
 
     // --> EH
-    private fun wrapTag(namespace: String, tag: String) = if (tag.contains(' ')) {
+    private fun wrapTag(
+        namespace: String,
+        tag: String
+    ) = if (tag.contains(' ')) {
         "$namespace:\"$tag$\""
     } else {
         "$namespace:$tag$"

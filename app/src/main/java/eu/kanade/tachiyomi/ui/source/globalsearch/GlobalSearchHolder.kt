@@ -16,8 +16,8 @@ import eu.kanade.tachiyomi.util.view.visible
  */
 class GlobalSearchHolder(view: View, val adapter: GlobalSearchAdapter) :
     BaseFlexibleViewHolder(view, adapter) {
-
     private val binding = GlobalSearchControllerCardBinding.bind(view)
+
     /**
      * Adapter containing manga from search results.
      */

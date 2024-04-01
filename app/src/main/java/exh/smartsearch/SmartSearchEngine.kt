@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.SManga
 import exh.util.await
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -15,6 +14,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.injectLazy
+import kotlin.coroutines.CoroutineContext
 
 class SmartSearchEngine(
     parentContext: CoroutineContext,
@@ -26,53 +26,68 @@ class SmartSearchEngine(
 
     private val normalizedLevenshtein = NormalizedLevenshtein()
 
-    suspend fun smartSearch(source: CatalogueSource, title: String): SManga? {
+    suspend fun smartSearch(
+        source: CatalogueSource,
+        title: String
+    ): SManga? {
         val cleanedTitle = cleanSmartSearchTitle(title)
 
         val queries = getSmartSearchQueries(cleanedTitle)
 
-        val eligibleManga = supervisorScope {
-            queries.map { query ->
-                async(Dispatchers.Default) {
-                    val builtQuery = if (extraSearchParams != null) {
-                        "$query ${extraSearchParams.trim()}"
-                    } else query
+        val eligibleManga =
+            supervisorScope {
+                queries.map { query ->
+                    async(Dispatchers.Default) {
+                        val builtQuery =
+                            if (extraSearchParams != null) {
+                                "$query ${extraSearchParams.trim()}"
+                            } else {
+                                query
+                            }
 
-                    val searchResults = source.fetchSearchManga(1, builtQuery, FilterList())
-                        .toSingle().await(Schedulers.io())
+                        val searchResults =
+                            source.fetchSearchManga(1, builtQuery, FilterList())
+                                .toSingle().await(Schedulers.io())
 
-                    searchResults.mangas.map {
-                        val cleanedMangaTitle = cleanSmartSearchTitle(it.title)
-                        val normalizedDistance = normalizedLevenshtein.similarity(cleanedTitle, cleanedMangaTitle)
-                        SearchEntry(it, normalizedDistance)
-                    }.filter { (_, normalizedDistance) ->
-                        normalizedDistance >= MIN_SMART_ELIGIBLE_THRESHOLD
+                        searchResults.mangas.map {
+                            val cleanedMangaTitle = cleanSmartSearchTitle(it.title)
+                            val normalizedDistance = normalizedLevenshtein.similarity(cleanedTitle, cleanedMangaTitle)
+                            SearchEntry(it, normalizedDistance)
+                        }.filter { (_, normalizedDistance) ->
+                            normalizedDistance >= MIN_SMART_ELIGIBLE_THRESHOLD
+                        }
                     }
-                }
-            }.flatMap { it.await() }
-        }
+                }.flatMap { it.await() }
+            }
 
         return eligibleManga.maxByOrNull { it.dist }?.manga
     }
 
-    suspend fun normalSearch(source: CatalogueSource, title: String): SManga? {
-        val eligibleManga = supervisorScope {
-            val searchQuery = if (extraSearchParams != null) {
-                "$title ${extraSearchParams.trim()}"
-            } else title
-            val searchResults = source.fetchSearchManga(1, searchQuery, FilterList()).toSingle().await(Schedulers.io())
+    suspend fun normalSearch(
+        source: CatalogueSource,
+        title: String
+    ): SManga? {
+        val eligibleManga =
+            supervisorScope {
+                val searchQuery =
+                    if (extraSearchParams != null) {
+                        "$title ${extraSearchParams.trim()}"
+                    } else {
+                        title
+                    }
+                val searchResults = source.fetchSearchManga(1, searchQuery, FilterList()).toSingle().await(Schedulers.io())
 
-            if (searchResults.mangas.size == 1) {
-                return@supervisorScope listOf(SearchEntry(searchResults.mangas.first(), 0.0))
-            }
+                if (searchResults.mangas.size == 1) {
+                    return@supervisorScope listOf(SearchEntry(searchResults.mangas.first(), 0.0))
+                }
 
-            searchResults.mangas.map {
-                val normalizedDistance = normalizedLevenshtein.similarity(title, it.title)
-                SearchEntry(it, normalizedDistance)
-            }.filter { (_, normalizedDistance) ->
-                normalizedDistance >= MIN_NORMAL_ELIGIBLE_THRESHOLD
+                searchResults.mangas.map {
+                    val normalizedDistance = normalizedLevenshtein.similarity(title, it.title)
+                    SearchEntry(it, normalizedDistance)
+                }.filter { (_, normalizedDistance) ->
+                    normalizedDistance >= MIN_NORMAL_ELIGIBLE_THRESHOLD
+                }
             }
-        }
 
         return eligibleManga.maxByOrNull { it.dist }?.manga
     }
@@ -91,13 +106,14 @@ class SmartSearchEngine(
         // Search first two words
         // Search first word
 
-        val searchQueries = listOf(
-            listOf(cleanedTitle),
-            splitSortedByLargest.take(2),
-            splitSortedByLargest.take(1),
-            splitCleanedTitle.take(2),
-            splitCleanedTitle.take(1)
-        )
+        val searchQueries =
+            listOf(
+                listOf(cleanedTitle),
+                splitSortedByLargest.take(2),
+                splitSortedByLargest.take(1),
+                splitCleanedTitle.take(2),
+                splitCleanedTitle.take(1)
+            )
 
         return searchQueries.map {
             it.joinToString(" ").trim()
@@ -122,19 +138,25 @@ class SmartSearchEngine(
         return cleanedTitle
     }
 
-    private fun removeTextInBrackets(text: String, readForward: Boolean): String {
-        val bracketPairs = listOf(
-            '(' to ')',
-            '[' to ']',
-            '<' to '>',
-            '{' to '}'
-        )
-        var openingBracketPairs = bracketPairs.mapIndexed { index, (opening, _) ->
-            opening to index
-        }.toMap()
-        var closingBracketPairs = bracketPairs.mapIndexed { index, (_, closing) ->
-            closing to index
-        }.toMap()
+    private fun removeTextInBrackets(
+        text: String,
+        readForward: Boolean
+    ): String {
+        val bracketPairs =
+            listOf(
+                '(' to ')',
+                '[' to ']',
+                '<' to '>',
+                '{' to '}'
+            )
+        var openingBracketPairs =
+            bracketPairs.mapIndexed { index, (opening, _) ->
+                opening to index
+            }.toMap()
+        var closingBracketPairs =
+            bracketPairs.mapIndexed { index, (_, closing) ->
+                closing to index
+            }.toMap()
 
         // Reverse pairs if reading backwards
         if (!readForward) {
@@ -174,7 +196,10 @@ class SmartSearchEngine(
      * @param sManga the manga from the source.
      * @return a manga from the database.
      */
-    suspend fun networkToLocalManga(sManga: SManga, sourceId: Long): Manga {
+    suspend fun networkToLocalManga(
+        sManga: SManga,
+        sourceId: Long
+    ): Manga {
         var localManga = db.getManga(sManga.url, sourceId).executeAsBlocking()
         if (localManga == null) {
             val newManga = Manga.create(sManga.url, sManga.title, sourceId)

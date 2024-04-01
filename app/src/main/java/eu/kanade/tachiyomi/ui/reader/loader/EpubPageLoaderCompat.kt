@@ -3,14 +3,13 @@ package eu.kanade.tachiyomi.ui.reader.loader
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.util.storage.EpubFileCompat
-import java.io.File
 import rx.Observable
+import java.io.File
 
 /**
  * Loader used to load a chapter from a .epub file.
  */
 class EpubPageLoaderCompat(private val epub: EpubFileCompat) : PageLoader() {
-
     constructor(file: File) : this(EpubFileCompat(file))
 
     /**

@@ -23,7 +23,6 @@ class WebtoonTransitionHolder(
     val layout: LinearLayout,
     viewer: WebtoonViewer
 ) : WebtoonBaseHolder(layout, viewer) {
-
     /**
      * Subscription for status changes of the transition page.
      */
@@ -35,10 +34,11 @@ class WebtoonTransitionHolder(
      * View container of the current status of the transition page. Child views will be added
      * dynamically.
      */
-    private var pagesContainer = LinearLayout(context).apply {
-        orientation = LinearLayout.VERTICAL
-        gravity = Gravity.CENTER
-    }
+    private var pagesContainer =
+        LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+        }
 
     init {
         layout.layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
@@ -50,9 +50,10 @@ class WebtoonTransitionHolder(
         layout.setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical)
 
         val childMargins = 16.dpToPx
-        val childParams = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply {
-            setMargins(0, childMargins, 0, childMargins)
-        }
+        val childParams =
+            LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply {
+                setMargins(0, childMargins, 0, childMargins)
+            }
 
         layout.addView(transitionView)
         layout.addView(pagesContainer, childParams)
@@ -78,22 +79,26 @@ class WebtoonTransitionHolder(
      * Observes the status of the page list of the next/previous chapter. Whenever there's a new
      * state, the pages container is cleaned up before setting the new state.
      */
-    private fun observeStatus(chapter: ReaderChapter, transition: ChapterTransition) {
+    private fun observeStatus(
+        chapter: ReaderChapter,
+        transition: ChapterTransition
+    ) {
         unsubscribeStatus()
 
-        statusSubscription = chapter.stateObserver
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { state ->
-                pagesContainer.removeAllViews()
-                when (state) {
-                    is ReaderChapter.State.Wait -> {
+        statusSubscription =
+            chapter.stateObserver
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { state ->
+                    pagesContainer.removeAllViews()
+                    when (state) {
+                        is ReaderChapter.State.Wait -> {
+                        }
+                        is ReaderChapter.State.Loading -> setLoading()
+                        is ReaderChapter.State.Error -> setError(state.error, transition)
+                        is ReaderChapter.State.Loaded -> setLoaded()
                     }
-                    is ReaderChapter.State.Loading -> setLoading()
-                    is ReaderChapter.State.Error -> setError(state.error, transition)
-                    is ReaderChapter.State.Loaded -> setLoaded()
+                    pagesContainer.visibleIf { pagesContainer.childCount > 0 }
                 }
-                pagesContainer.visibleIf { pagesContainer.childCount > 0 }
-            }
 
         addSubscription(statusSubscription)
     }
@@ -112,10 +117,11 @@ class WebtoonTransitionHolder(
     private fun setLoading() {
         val progress = ProgressBar(context, null, android.R.attr.progressBarStyle)
 
-        val textView = AppCompatTextView(context).apply {
-            wrapContent()
-            setText(R.string.transition_pages_loading)
-        }
+        val textView =
+            AppCompatTextView(context).apply {
+                wrapContent()
+                setText(R.string.transition_pages_loading)
+            }
 
         pagesContainer.addView(progress)
         pagesContainer.addView(textView)
@@ -131,22 +137,27 @@ class WebtoonTransitionHolder(
     /**
      * Sets the error state on the pages container.
      */
-    private fun setError(error: Throwable, transition: ChapterTransition) {
-        val textView = AppCompatTextView(context).apply {
-            wrapContent()
-            text = context.getString(R.string.transition_pages_error, error.message)
-        }
+    private fun setError(
+        error: Throwable,
+        transition: ChapterTransition
+    ) {
+        val textView =
+            AppCompatTextView(context).apply {
+                wrapContent()
+                text = context.getString(R.string.transition_pages_error, error.message)
+            }
 
-        val retryBtn = AppCompatButton(context).apply {
-            wrapContent()
-            setText(R.string.action_retry)
-            setOnClickListener {
-                val toChapter = transition.to
-                if (toChapter != null) {
-                    viewer.activity.requestPreloadChapter(toChapter)
+        val retryBtn =
+            AppCompatButton(context).apply {
+                wrapContent()
+                setText(R.string.action_retry)
+                setOnClickListener {
+                    val toChapter = transition.to
+                    if (toChapter != null) {
+                        viewer.activity.requestPreloadChapter(toChapter)
+                    }
                 }
             }
-        }
 
         pagesContainer.addView(textView)
         pagesContainer.addView(retryBtn)

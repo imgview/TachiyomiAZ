@@ -20,9 +20,10 @@ import uy.kohesive.injekt.injectLazy
 /**
  * The navigation view shown in a drawer with the different options to show the library.
  */
-class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+class LibraryNavigationView
+@JvmOverloads
+constructor(context: Context, attrs: AttributeSet? = null) :
     ExtendedNavigationView(context, attrs) {
-
     /**
      * Preferences helper.
      */
@@ -61,7 +62,6 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
      * Adapter of the recycler view.
      */
     inner class Adapter(items: List<Item>) : ExtendedNavigationView.Adapter(items) {
-
         override fun onItemClicked(item: Item) {
             if (item is GroupedItem) {
                 item.group.onItemClicked(item)
@@ -74,7 +74,6 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
      * Filters group (unread, downloaded, ...).
      */
     inner class FilterGroup : Group {
-
         private val downloaded = Item.TriStateGroup(R.string.action_filter_downloaded, this)
 
         private val unread = Item.TriStateGroup(R.string.action_filter_unread, this)
@@ -115,11 +114,12 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
 
         override fun onItemClicked(item: Item) { // j2k changes
             item as Item.TriStateGroup
-            val newState = when (item.state) {
-                STATE_IGNORE -> STATE_INCLUDE
-                STATE_INCLUDE -> STATE_EXCLUDE
-                else -> STATE_IGNORE
-            }
+            val newState =
+                when (item.state) {
+                    STATE_IGNORE -> STATE_INCLUDE
+                    STATE_INCLUDE -> STATE_EXCLUDE
+                    else -> STATE_IGNORE
+                }
             item.state = newState
             when (item) {
                 downloaded -> preferences.filterDownloaded().set(item.state)
@@ -138,7 +138,6 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
      * Sorting group (alphabetically, by last read, ...) and ascending or descending.
      */
     inner class SortGroup : Group {
-
         private val alphabetically = Item.MultiSort(R.string.action_sort_alpha, this)
 
         private val total = Item.MultiSort(R.string.action_sort_total, this)
@@ -165,11 +164,12 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
 
         override fun initModels() {
             val sorting = preferences.librarySortingMode().get()
-            val order = if (preferences.librarySortingAscending().get()) {
-                SORT_ASC
-            } else {
-                SORT_DESC
-            }
+            val order =
+                if (preferences.librarySortingAscending().get()) {
+                    SORT_ASC
+                } else {
+                    SORT_DESC
+                }
 
             alphabetically.state = if (sorting == LibrarySort.ALPHA) order else SORT_NONE
             lastRead.state = if (sorting == LibrarySort.LAST_READ) order else SORT_NONE
@@ -190,12 +190,13 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
             if (item == dragAndDrop) {
                 item.state = SORT_ASC
             } else {
-                item.state = when (prevState) {
-                    SORT_NONE -> SORT_ASC
-                    SORT_ASC -> SORT_DESC
-                    SORT_DESC -> SORT_ASC
-                    else -> throw Exception("Unknown state")
-                }
+                item.state =
+                    when (prevState) {
+                        SORT_NONE -> SORT_ASC
+                        SORT_ASC -> SORT_DESC
+                        SORT_DESC -> SORT_ASC
+                        else -> throw Exception("Unknown state")
+                    }
             }
 
             preferences.librarySortingMode().set(
@@ -224,6 +225,7 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
         override val header = null
         override val footer = null
         override val items = listOf(downloadBadge, unreadBadge)
+
         override fun initModels() {
             downloadBadge.checked = preferences.downloadBadge().get()
             unreadBadge.checked = preferences.unreadBadge().get()
@@ -269,7 +271,6 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
      * Display group, to show the library as a list or a grid.
      */
     inner class DisplayGroup : Group {
-
         private val compactGrid = Item.Radio(R.string.action_display_grid, this)
 
         private val comfortableGrid = Item.Radio(R.string.action_display_comfortable_grid, this)

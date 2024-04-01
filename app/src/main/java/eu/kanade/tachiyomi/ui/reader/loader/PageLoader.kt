@@ -9,7 +9,6 @@ import rx.Observable
  * method [recycle] is called.
  */
 abstract class PageLoader {
-
     /**
      * Whether this loader has been already recycled.
      */

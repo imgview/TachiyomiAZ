@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
-import java.util.TreeMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -19,6 +18,7 @@ import rx.Observable
 import rx.Subscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.TreeMap
 
 /**
  * Presenter of [SourceController]
@@ -32,7 +32,6 @@ class SourcePresenter(
     private val preferences: PreferencesHelper = Injekt.get(),
     private val controllerMode: SourceController.Mode
 ) : BasePresenter<SourceController>() {
-
     private val scope = CoroutineScope(Job() + Dispatchers.Main)
 
     var sources = getEnabledSources()
@@ -59,32 +58,35 @@ class SourcePresenter(
         val pinnedSources = mutableListOf<SourceItem>()
         val pinnedCatalogues = preferences.pinnedCatalogues().get()
 
-        val map = TreeMap<String, MutableList<CatalogueSource>> { d1, d2 ->
-            // Catalogues without a lang defined will be placed at the end
-            when {
-                d1 == "" && d2 != "" -> 1
-                d2 == "" && d1 != "" -> -1
-                else -> d1.compareTo(d2)
-            }
-        }
-        val byLang = sources.groupByTo(map, { it.lang })
-        var sourceItems = byLang.flatMap {
-            val langItem = LangItem(it.key)
-            it.value.map { source ->
-                if (source.id.toString() in pinnedCatalogues) {
-                    pinnedSources.add(SourceItem(source, LangItem(PINNED_KEY), controllerMode == SourceController.Mode.CATALOGUE))
+        val map =
+            TreeMap<String, MutableList<CatalogueSource>> { d1, d2 ->
+                // Catalogues without a lang defined will be placed at the end
+                when {
+                    d1 == "" && d2 != "" -> 1
+                    d2 == "" && d1 != "" -> -1
+                    else -> d1.compareTo(d2)
                 }
-
-                SourceItem(source, langItem, controllerMode == SourceController.Mode.CATALOGUE)
             }
-        }
+        val byLang = sources.groupByTo(map, { it.lang })
+        var sourceItems =
+            byLang.flatMap {
+                val langItem = LangItem(it.key)
+                it.value.map { source ->
+                    if (source.id.toString() in pinnedCatalogues) {
+                        pinnedSources.add(SourceItem(source, LangItem(PINNED_KEY), controllerMode == SourceController.Mode.CATALOGUE))
+                    }
+
+                    SourceItem(source, langItem, controllerMode == SourceController.Mode.CATALOGUE)
+                }
+            }
 
         if (pinnedSources.isNotEmpty()) {
             sourceItems = pinnedSources + sourceItems
         }
 
-        sourceSubscription = Observable.just(sourceItems)
-            .subscribeLatestCache(SourceController::setSources)
+        sourceSubscription =
+            Observable.just(sourceItems)
+                .subscribeLatestCache(SourceController::setSources)
     }
 
     private fun loadLastUsedSource() {
@@ -103,7 +105,10 @@ class SourcePresenter(
         if (preferences.hideLastUsedSource().get()) {
             view().subscribe { view -> view?.setLastUsedSource(null) }
         } else {
-            val source = (sourceManager.get(sourceId) as? CatalogueSource)?.let { SourceItem(it, showButtons = controllerMode == SourceController.Mode.CATALOGUE) }
+            val source =
+                (sourceManager.get(sourceId) as? CatalogueSource)?.let {
+                    SourceItem(it, showButtons = controllerMode == SourceController.Mode.CATALOGUE)
+                }
             source?.let {
                 view().subscribe { view -> view?.setLastUsedSource(it) }
             }

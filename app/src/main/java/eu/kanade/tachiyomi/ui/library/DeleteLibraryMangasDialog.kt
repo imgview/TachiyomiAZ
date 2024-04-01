@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.widget.DialogCheckboxView
 
 class DeleteLibraryMangasDialog<T>(bundle: Bundle? = null) :
     DialogController(bundle) where T : Controller, T : DeleteLibraryMangasDialog.Listener {
-
     private var mangas = emptyList<Manga>()
 
     constructor(target: T, mangas: List<Manga>) : this() {
@@ -21,10 +20,11 @@ class DeleteLibraryMangasDialog<T>(bundle: Bundle? = null) :
     }
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-        val view = DialogCheckboxView(activity!!).apply {
-            setDescription(R.string.confirm_delete_manga)
-            setOptionDescription(R.string.also_delete_chapters)
-        }
+        val view =
+            DialogCheckboxView(activity!!).apply {
+                setDescription(R.string.confirm_delete_manga)
+                setOptionDescription(R.string.also_delete_chapters)
+            }
 
         return MaterialDialog(activity!!)
             .title(R.string.action_remove)
@@ -40,6 +40,9 @@ class DeleteLibraryMangasDialog<T>(bundle: Bundle? = null) :
     }
 
     interface Listener {
-        fun deleteMangasFromLibrary(mangas: List<Manga>, deleteChapters: Boolean)
+        fun deleteMangasFromLibrary(
+            mangas: List<Manga>,
+            deleteChapters: Boolean
+        )
     }
 }

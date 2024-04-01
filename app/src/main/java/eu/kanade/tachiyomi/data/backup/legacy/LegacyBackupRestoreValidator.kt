@@ -16,7 +16,10 @@ class LegacyBackupRestoreValidator : AbstractBackupRestoreValidator() {
      * @throws Exception if version or manga cannot be found.
      * @return List of missing sources or missing trackers.
      */
-    override fun validate(context: Context, uri: Uri): Results {
+    override fun validate(
+        context: Context,
+        uri: Uri
+    ): Results {
         val reader = JsonReader(context.contentResolver.openInputStream(uri)!!.bufferedReader())
         val json = JsonParser.parseReader(reader).asJsonObject
 
@@ -32,21 +35,24 @@ class LegacyBackupRestoreValidator : AbstractBackupRestoreValidator() {
         }
 
         val sources = getSourceMapping(json)
-        val missingSources = sources
-            .filter { sourceManager.get(it.key) == null }
-            .values
-            .sorted()
+        val missingSources =
+            sources
+                .filter { sourceManager.get(it.key) == null }
+                .values
+                .sorted()
 
-        val trackers = mangas
-            .filter { it.asJsonObject.has("track") }
-            .flatMap { it.asJsonObject["track"].asJsonArray }
-            .map { it.asJsonObject["s"].asInt }
-            .distinct()
-        val missingTrackers = trackers
-            .mapNotNull { trackManager.getService(it) }
-            .filter { !it.isLogged }
-            .map { it.name }
-            .sorted()
+        val trackers =
+            mangas
+                .filter { it.asJsonObject.has("track") }
+                .flatMap { it.asJsonObject["track"].asJsonArray }
+                .map { it.asJsonObject["s"].asInt }
+                .distinct()
+        val missingTrackers =
+            trackers
+                .mapNotNull { trackManager.getService(it) }
+                .filter { !it.isLogged }
+                .map { it.name }
+                .sorted()
 
         return Results(missingSources, missingTrackers)
     }

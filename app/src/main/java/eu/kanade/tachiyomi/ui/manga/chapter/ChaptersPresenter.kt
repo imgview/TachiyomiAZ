@@ -24,7 +24,6 @@ import exh.EH_SOURCE_ID
 import exh.EXH_SOURCE_ID
 import exh.debug.DebugToggles
 import exh.eh.EHentaiUpdateHelper
-import java.util.Date
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -33,6 +32,7 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.util.Date
 
 /**
  * Presenter of [ChaptersController].
@@ -47,7 +47,6 @@ class ChaptersPresenter(
     private val db: DatabaseHelper = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get()
 ) : BasePresenter<ChaptersController>() {
-
     /**
      * List of chapters of the manga. It's always unfiltered and unsorted.
      */
@@ -58,7 +57,7 @@ class ChaptersPresenter(
      * Subject of list of chapters to allow updating the view without going to DB.
      */
     val chaptersRelay: PublishRelay<List<ChapterItem>>
-    by lazy { PublishRelay.create<List<ChapterItem>>() }
+        by lazy { PublishRelay.create<List<ChapterItem>>() }
 
     /**
      * Whether the chapter list has been requested to the source.
@@ -154,13 +153,14 @@ class ChaptersPresenter(
 
     private fun observeDownloads() {
         observeDownloadsSubscription?.let { remove(it) }
-        observeDownloadsSubscription = downloadManager.queue.getStatusObservable()
-            .observeOn(AndroidSchedulers.mainThread())
-            .filter { download -> download.manga.id == manga.id }
-            .doOnNext { onDownloadStatusChange(it) }
-            .subscribeLatestCache(ChaptersController::onChapterStatusChange) { _, error ->
-                Timber.e(error)
-            }
+        observeDownloadsSubscription =
+            downloadManager.queue.getStatusObservable()
+                .observeOn(AndroidSchedulers.mainThread())
+                .filter { download -> download.manga.id == manga.id }
+                .doOnNext { onDownloadStatusChange(it) }
+                .subscribeLatestCache(ChaptersController::onChapterStatusChange) { _, error ->
+                    Timber.e(error)
+                }
     }
 
     /**
@@ -200,26 +200,27 @@ class ChaptersPresenter(
         hasRequested = true
 
         if (!fetchChaptersSubscription.isNullOrUnsubscribed()) return
-        fetchChaptersSubscription = Observable.defer {
-            runAsObservable({
-                source.getChapterList(manga.toMangaInfo())
-                    .map { it.toSChapter() }
-            })
-        }
-            .subscribeOn(Schedulers.io())
-            .map { syncChaptersWithSource(db, it, manga, source) }
-            .doOnNext {
-                if (manualFetch) {
-                    downloadNewChapters(it.first)
-                }
+        fetchChaptersSubscription =
+            Observable.defer {
+                runAsObservable({
+                    source.getChapterList(manga.toMangaInfo())
+                        .map { it.toSChapter() }
+                })
             }
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeFirst(
-                { view, _ ->
-                    view.onFetchChaptersDone()
-                },
-                ChaptersController::onFetchChaptersError
-            )
+                .subscribeOn(Schedulers.io())
+                .map { syncChaptersWithSource(db, it, manga, source) }
+                .doOnNext {
+                    if (manualFetch) {
+                        downloadNewChapters(it.first)
+                    }
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeFirst(
+                    { view, _ ->
+                        view.onFetchChaptersDone()
+                    },
+                    ChaptersController::onFetchChaptersError
+                )
     }
 
     /**
@@ -247,21 +248,25 @@ class ChaptersPresenter(
         if (onlyBookmarked()) {
             observable = observable.filter { it.bookmark }
         }
-        val sortFunction: (Chapter, Chapter) -> Int = when (manga.sorting) {
-            Manga.SORTING_SOURCE -> when (sortDescending()) {
-                true -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
-                false -> { c1, c2 -> c2.source_order.compareTo(c1.source_order) }
+        val sortFunction: (Chapter, Chapter) -> Int =
+            when (manga.sorting) {
+                Manga.SORTING_SOURCE ->
+                    when (sortDescending()) {
+                        true -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
+                        false -> { c1, c2 -> c2.source_order.compareTo(c1.source_order) }
+                    }
+                Manga.SORTING_NUMBER ->
+                    when (sortDescending()) {
+                        true -> { c1, c2 -> c2.chapter_number.compareTo(c1.chapter_number) }
+                        false -> { c1, c2 -> c1.chapter_number.compareTo(c2.chapter_number) }
+                    }
+                Manga.SORTING_UPLOAD_DATE ->
+                    when (sortDescending()) {
+                        true -> { c1, c2 -> c2.date_upload.compareTo(c1.date_upload) }
+                        false -> { c1, c2 -> c1.date_upload.compareTo(c2.date_upload) }
+                    }
+                else -> throw NotImplementedError("Unimplemented sorting method")
             }
-            Manga.SORTING_NUMBER -> when (sortDescending()) {
-                true -> { c1, c2 -> c2.chapter_number.compareTo(c1.chapter_number) }
-                false -> { c1, c2 -> c1.chapter_number.compareTo(c2.chapter_number) }
-            }
-            Manga.SORTING_UPLOAD_DATE -> when (sortDescending()) {
-                true -> { c1, c2 -> c2.date_upload.compareTo(c1.date_upload) }
-                false -> { c1, c2 -> c1.date_upload.compareTo(c2.date_upload) }
-            }
-            else -> throw NotImplementedError("Unimplemented sorting method")
-        }
         return observable.toSortedList(sortFunction)
     }
 
@@ -297,17 +302,22 @@ class ChaptersPresenter(
      * @param selectedChapters the list of selected chapters.
      * @param read whether to mark chapters as read or unread.
      */
-    fun markChaptersRead(selectedChapters: List<ChapterItem>, read: Boolean) {
-        val chapters = selectedChapters.map { chapter ->
-            chapter.read = read
-            if (!read /* --> EH */ && !preferences
-                .eh_preserveReadingPosition()
-                .getOrDefault() /* <-- EH */
-            ) {
-                chapter.last_page_read = 0
+    fun markChaptersRead(
+        selectedChapters: List<ChapterItem>,
+        read: Boolean
+    ) {
+        val chapters =
+            selectedChapters.map { chapter ->
+                chapter.read = read
+                if (!read /* --> EH */ &&
+                    !preferences
+                        .eh_preserveReadingPosition()
+                        .getOrDefault() // <-- EH
+                ) {
+                    chapter.last_page_read = 0
+                }
+                chapter
             }
-            chapter
-        }
 
         launchIO {
             db.updateChaptersProgress(chapters).executeAsBlocking()
@@ -330,7 +340,10 @@ class ChaptersPresenter(
      * Bookmarks the given list of chapters.
      * @param selectedChapters the list of chapters to bookmark.
      */
-    fun bookmarkChapters(selectedChapters: List<ChapterItem>, bookmarked: Boolean) {
+    fun bookmarkChapters(
+        selectedChapters: List<ChapterItem>,
+        bookmarked: Boolean
+    ) {
         Observable.from(selectedChapters)
             .doOnNext { chapter ->
                 chapter.bookmark = bookmarked

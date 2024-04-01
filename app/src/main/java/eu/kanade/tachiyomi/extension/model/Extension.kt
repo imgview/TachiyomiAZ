@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.extension.model
 import eu.kanade.tachiyomi.source.Source
 
 sealed class Extension {
-
     abstract val name: String
     abstract val pkgName: String
     abstract val versionName: String

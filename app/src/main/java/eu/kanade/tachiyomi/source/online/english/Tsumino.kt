@@ -14,10 +14,10 @@ import exh.metadata.metadata.TsuminoSearchMetadata.Companion.TAG_TYPE_DEFAULT
 import exh.metadata.metadata.base.RaisedTag
 import exh.source.DelegatedHttpSource
 import exh.util.urlImportFetchSearchManga
-import java.text.SimpleDateFormat
-import java.util.Locale
 import org.jsoup.nodes.Document
 import rx.Observable
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class Tsumino(delegate: HttpSource) :
     DelegatedHttpSource(delegate),
@@ -27,10 +27,13 @@ class Tsumino(delegate: HttpSource) :
     override val lang = "en"
 
     // Support direct URL importing
-    override fun fetchSearchManga(page: Int, query: String, filters: FilterList) =
-        urlImportFetchSearchManga(query) {
-            super.fetchSearchManga(page, query, filters)
-        }
+    override fun fetchSearchManga(
+        page: Int,
+        query: String,
+        filters: FilterList
+    ) = urlImportFetchSearchManga(query) {
+        super.fetchSearchManga(page, query, filters)
+    }
 
     override fun mapUrlToMangaUrl(uri: Uri): String? {
         val lcFirstPathSegment = uri.pathSegments.firstOrNull()?.lowercase() ?: return null
@@ -48,7 +51,10 @@ class Tsumino(delegate: HttpSource) :
             }
     }
 
-    override fun parseIntoMetadata(metadata: TsuminoSearchMetadata, input: Document) {
+    override fun parseIntoMetadata(
+        metadata: TsuminoSearchMetadata,
+        input: Document
+    ) {
         with(metadata) {
             tmId = TsuminoSearchMetadata.tmIdFromUrl(input.location())!!.toInt()
             tags.clear()
@@ -118,10 +124,11 @@ class Tsumino(delegate: HttpSource) :
         }
     }
 
-    override val matchingHosts = listOf(
-        "www.tsumino.com",
-        "tsumino.com"
-    )
+    override val matchingHosts =
+        listOf(
+            "www.tsumino.com",
+            "tsumino.com"
+        )
 
     companion object {
         val TM_DATE_FORMAT = SimpleDateFormat("yyyy MMM dd", Locale.US)

@@ -13,7 +13,11 @@ fun Manga.isLocal() = source == LocalSource.ID
 /**
  * Call before updating [Manga.thumbnail_url] to ensure old cover can be cleared from cache
  */
-fun Manga.prepUpdateCover(coverCache: CoverCache, remoteManga: SManga, refreshSameUrl: Boolean) {
+fun Manga.prepUpdateCover(
+    coverCache: CoverCache,
+    remoteManga: SManga,
+    refreshSameUrl: Boolean
+) {
     // Never refresh covers if the new url is null, as the current url has possibly become invalid
     val newUrl = remoteManga.thumbnail_url ?: return
 
@@ -52,7 +56,10 @@ fun Manga.updateCoverLastModified(db: DatabaseHelper) {
     db.updateMangaCoverLastModified(this).executeAsBlocking()
 }
 
-fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper): Boolean {
+fun Manga.shouldDownloadNewChapters(
+    db: DatabaseHelper,
+    prefs: PreferencesHelper
+): Boolean {
     if (!favorite) return false
 
     // Boolean to determine if user wants to automatically download new chapters.

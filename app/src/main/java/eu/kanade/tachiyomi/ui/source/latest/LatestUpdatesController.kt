@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.ui.source.browse.BrowseSourcePresenter
  * Controller that shows the latest manga from the catalogue. Inherit [BrowseSourceController].
  */
 class LatestUpdatesController(bundle: Bundle) : BrowseSourceController(bundle) {
-
     constructor(source: CatalogueSource) : this(
         Bundle().apply {
             putLong(SOURCE_ID_KEY, source.id)

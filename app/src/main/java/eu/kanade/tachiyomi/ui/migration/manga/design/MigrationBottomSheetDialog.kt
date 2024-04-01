@@ -23,8 +23,7 @@ import uy.kohesive.injekt.injectLazy
 class MigrationBottomSheetDialog(
     activity: Activity,
     theme: Int,
-    private val listener:
-        StartMigrationListener
+    private val listener: StartMigrationListener
 ) :
     BottomSheetDialog(
         activity,
@@ -36,6 +35,7 @@ class MigrationBottomSheetDialog(
     private val preferences by injectLazy<PreferencesHelper>()
 
     private val binding = MigrationBottomSheetBinding.inflate(activity.layoutInflater)
+
     init {
         // Use activity theme for this layout
         // val scroll = NestedScrollView(context)
@@ -61,7 +61,9 @@ class MigrationBottomSheetDialog(
             listener.startMigration(
                 if (binding.useSmartSearch.isChecked && binding.extraSearchParamText.text.isNotBlank()) {
                     binding.extraSearchParamText.text.toString()
-                } else null
+                } else {
+                    null
+                }
             )
             dismiss()
         }

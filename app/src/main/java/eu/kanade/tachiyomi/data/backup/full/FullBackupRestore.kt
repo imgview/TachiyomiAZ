@@ -16,16 +16,19 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.source.Source
 import exh.EXHMigrations
-import java.util.Date
 import kotlinx.serialization.ExperimentalSerializationApi
 import okio.buffer
 import okio.gzip
 import okio.source
 import rx.Observable
+import java.util.Date
 
 @OptIn(ExperimentalSerializationApi::class)
-class FullBackupRestore(context: Context, notifier: BackupNotifier, private val online: Boolean) : AbstractBackupRestore<FullBackupManager>(context, notifier) {
-
+class FullBackupRestore(
+    context: Context,
+    notifier: BackupNotifier,
+    private val online: Boolean
+) : AbstractBackupRestore<FullBackupManager>(context, notifier) {
     override fun performRestore(uri: Uri): Boolean {
         // SY -->
         throttleManager.resetThrottle()
@@ -81,7 +84,11 @@ class FullBackupRestore(context: Context, notifier: BackupNotifier, private val 
     }
     // SY <--
 
-    private fun restoreManga(backupManga: BackupManga, backupCategories: List<BackupCategory>, online: Boolean) {
+    private fun restoreManga(
+        backupManga: BackupManga,
+        backupCategories: List<BackupCategory>,
+        online: Boolean
+    ) {
         var manga = backupManga.getMangaImpl()
         val chapters = backupManga.getChaptersImpl()
         val categories = backupManga.categories
@@ -221,7 +228,14 @@ class FullBackupRestore(context: Context, notifier: BackupNotifier, private val 
             .subscribe()
     }
 
-    private fun restoreExtraForManga(manga: Manga, categories: List<Int>, history: List<BackupHistory>, tracks: List<Track>, backupCategories: List<BackupCategory>, flatMetadata: BackupFlatMetadata?) {
+    private fun restoreExtraForManga(
+        manga: Manga,
+        categories: List<Int>,
+        history: List<BackupHistory>,
+        tracks: List<Track>,
+        backupCategories: List<BackupCategory>,
+        flatMetadata: BackupFlatMetadata?
+    ) {
         // Restore categories
         backupManager.restoreCategoriesForManga(manga, categories, backupCategories)
 

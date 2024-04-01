@@ -25,9 +25,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import exh.source.DelegatedHttpSource
 import exh.util.melt
-import java.io.Serializable
-import java.net.URL
-import java.util.UUID
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -38,6 +35,9 @@ import rx.Single
 import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import java.io.Serializable
+import java.net.URL
+import java.util.UUID
 
 class BrowserActionActivity : AppCompatActivity() {
     private val sourceManager: SourceManager by injectLazy()
@@ -53,6 +53,7 @@ class BrowserActionActivity : AppCompatActivity() {
     lateinit var credentialsObservable: Observable<String>
 
     private lateinit var binding: EhActivityCaptchaBinding
+
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,20 +64,24 @@ class BrowserActionActivity : AppCompatActivity() {
 
         val sourceId = intent.getLongExtra(SOURCE_ID_EXTRA, -1)
         val originalSource = if (sourceId != -1L) sourceManager.get(sourceId) else null
-        val source = if (originalSource != null) {
-            originalSource as? ActionCompletionVerifier
-                ?: run {
-                    (originalSource as? HttpSource)?.let {
-                        NoopActionCompletionVerifier(it)
+        val source =
+            if (originalSource != null) {
+                originalSource as? ActionCompletionVerifier
+                    ?: run {
+                        (originalSource as? HttpSource)?.let {
+                            NoopActionCompletionVerifier(it)
+                        }
                     }
-                }
-        } else null
+            } else {
+                null
+            }
 
-        val headers = (
-            (source as? HttpSource)?.headers?.toMultimap()?.mapValues {
-                it.value.joinToString(",")
-            } ?: emptyMap()
-            ) + (intent.getSerializableExtra(HEADERS_EXTRA) as? HashMap<String, String> ?: emptyMap())
+        val headers =
+            (
+                (source as? HttpSource)?.headers?.toMultimap()?.mapValues {
+                    it.value.joinToString(",")
+                } ?: emptyMap()
+                ) + (intent.getSerializableExtra(HEADERS_EXTRA) as? HashMap<String, String> ?: emptyMap())
 
         val cookies: HashMap<String, String>? =
             intent.getSerializableExtra(COOKIES_EXTRA) as? HashMap<String, String>
@@ -85,9 +90,12 @@ class BrowserActionActivity : AppCompatActivity() {
         val actionName = intent.getStringExtra(ACTION_NAME_EXTRA)
 
         @Suppress("NOT_NULL_ASSERTION_ON_CALLABLE_REFERENCE")
-        val verifyComplete = if (source != null) {
-            source::verifyComplete!!
-        } else intent.getSerializableExtra(VERIFY_LAMBDA_EXTRA) as? (String) -> Boolean
+        val verifyComplete =
+            if (source != null) {
+                source::verifyComplete!!
+            } else {
+                intent.getSerializableExtra(VERIFY_LAMBDA_EXTRA) as? (String) -> Boolean
+            }
 
         if (verifyComplete == null || url == null) {
             finish()
@@ -96,9 +104,12 @@ class BrowserActionActivity : AppCompatActivity() {
 
         val actionStr = actionName ?: "Solve captcha"
 
-        binding.toolbar.title = if (source != null) {
-            "${source.name}: $actionStr"
-        } else actionStr
+        binding.toolbar.title =
+            if (source != null) {
+                "${source.name}: $actionStr"
+            } else {
+                actionStr
+            }
 
         val parsedUrl = URL(url)
 
@@ -117,53 +128,61 @@ class BrowserActionActivity : AppCompatActivity() {
 
         var loadedInners = 0
 
-        binding.webview.webChromeClient = object : WebChromeClient() {
-            override fun onJsAlert(view: WebView?, url: String?, message: String, result: JsResult): Boolean {
-                if (message.startsWith("exh-")) {
-                    loadedInners++
-                    // Wait for both inner scripts to be loaded
-                    if (loadedInners >= 2) {
-                        // Attempt to autosolve captcha
-                        if (preferencesHelper.eh_autoSolveCaptchas().get()) {
-                            binding.webview.post {
-                                // 10 seconds to auto-solve captcha
-                                strictValidationStartTime = System.currentTimeMillis() + 1000 * 10
-                                beginSolveLoop()
-                                beginValidateCaptchaLoop()
-                                binding.webview.evaluateJavascript(SOLVE_UI_SCRIPT_HIDE) {
-                                    binding.webview.evaluateJavascript(SOLVE_UI_SCRIPT_SHOW, null)
+        binding.webview.webChromeClient =
+            object : WebChromeClient() {
+                override fun onJsAlert(
+                    view: WebView?,
+                    url: String?,
+                    message: String,
+                    result: JsResult
+                ): Boolean {
+                    if (message.startsWith("exh-")) {
+                        loadedInners++
+                        // Wait for both inner scripts to be loaded
+                        if (loadedInners >= 2) {
+                            // Attempt to autosolve captcha
+                            if (preferencesHelper.eh_autoSolveCaptchas().get()) {
+                                binding.webview.post {
+                                    // 10 seconds to auto-solve captcha
+                                    strictValidationStartTime = System.currentTimeMillis() + 1000 * 10
+                                    beginSolveLoop()
+                                    beginValidateCaptchaLoop()
+                                    binding.webview.evaluateJavascript(SOLVE_UI_SCRIPT_HIDE) {
+                                        binding.webview.evaluateJavascript(SOLVE_UI_SCRIPT_SHOW, null)
+                                    }
                                 }
                             }
                         }
+                        result.confirm()
+                        return true
                     }
-                    result.confirm()
-                    return true
+                    return false
                 }
-                return false
             }
-        }
 
-        binding.webview.webViewClient = if (actionName == null && preferencesHelper.eh_autoSolveCaptchas().get()) {
-            // Fetch auto-solve credentials early for speed
-            credentialsObservable = httpClient.newCall(
-                Request.Builder()
-                    // Rob demo credentials
-                    .url("https://speech-to-text-demo.ng.bluemix.net/api/v1/credentials")
-                    .build()
-            )
-                .asObservableSuccess()
-                .subscribeOn(Schedulers.io())
-                .map {
-                    val json = JsonParser.parseString(it.body.string())
-                    it.close()
-                    json["token"].string
-                }.melt()
+        binding.webview.webViewClient =
+            if (actionName == null && preferencesHelper.eh_autoSolveCaptchas().get()) {
+                // Fetch auto-solve credentials early for speed
+                credentialsObservable =
+                    httpClient.newCall(
+                        Request.Builder()
+                            // Rob demo credentials
+                            .url("https://speech-to-text-demo.ng.bluemix.net/api/v1/credentials")
+                            .build()
+                    )
+                        .asObservableSuccess()
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            val json = JsonParser.parseString(it.body.string())
+                            it.close()
+                            json["token"].string
+                        }.melt()
 
-            binding.webview.addJavascriptInterface(this@BrowserActionActivity, "exh")
-            AutoSolvingWebViewClient(this, verifyComplete, script, headers)
-        } else {
-            HeadersInjectingWebViewClient(this, verifyComplete, script, headers)
-        }
+                binding.webview.addJavascriptInterface(this@BrowserActionActivity, "exh")
+                AutoSolvingWebViewClient(this, verifyComplete, script, headers)
+            } else {
+                HeadersInjectingWebViewClient(this, verifyComplete, script, headers)
+            }
 
         binding.webview.loadUrl(url, headers)
 
@@ -194,7 +213,11 @@ class BrowserActionActivity : AppCompatActivity() {
     }
 
     @JavascriptInterface
-    fun callback(result: String?, loopId: String, stage: Int) {
+    fun callback(
+        result: String?,
+        loopId: String,
+        stage: Int
+    ) {
         if (loopId != currentLoopId) return
 
         when (stage) {
@@ -412,7 +435,10 @@ class BrowserActionActivity : AppCompatActivity() {
         )
     }
 
-    fun typeResult(loopId: String, result: String) {
+    fun typeResult(
+        loopId: String,
+        result: String
+    ) {
         binding.webview.evaluateJavascript(
             """
             (function() {
@@ -450,7 +476,10 @@ class BrowserActionActivity : AppCompatActivity() {
     }
 
     @JavascriptInterface
-    fun validateCaptchaCallback(result: Boolean, loopId: String) {
+    fun validateCaptchaCallback(
+        result: Boolean,
+        loopId: String
+    ) {
         if (loopId != validateCurrentLoopId) return
 
         if (result) {
@@ -517,22 +546,27 @@ class BrowserActionActivity : AppCompatActivity() {
         runValidateCaptcha(loopId)
     }
 
-    private fun simulateClick(x: Float, y: Float) {
+    private fun simulateClick(
+        x: Float,
+        y: Float
+    ) {
         val downTime = SystemClock.uptimeMillis()
         val eventTime = SystemClock.uptimeMillis()
         val properties = arrayOfNulls<MotionEvent.PointerProperties>(1)
-        val pp1 = MotionEvent.PointerProperties().apply {
-            id = 0
-            toolType = MotionEvent.TOOL_TYPE_FINGER
-        }
+        val pp1 =
+            MotionEvent.PointerProperties().apply {
+                id = 0
+                toolType = MotionEvent.TOOL_TYPE_FINGER
+            }
         properties[0] = pp1
         val pointerCoords = arrayOfNulls<MotionEvent.PointerCoords>(1)
-        val pc1 = MotionEvent.PointerCoords().apply {
-            this.x = x
-            this.y = y
-            pressure = 1f
-            size = 1f
-        }
+        val pc1 =
+            MotionEvent.PointerCoords().apply {
+                this.x = x
+                this.y = y
+                pressure = 1f
+                size = 1f
+            }
         pointerCoords[0] = pc1
         var motionEvent = MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_DOWN, 1, properties, pointerCoords, 0, 0, 1f, 1f, 0, 0, 0, 0)
         dispatchTouchEvent(motionEvent)
@@ -674,13 +708,14 @@ class BrowserActionActivity : AppCompatActivity() {
             url: String,
             autoSolveSubmitBtnSelector: String? = null
         ) {
-            val intent = baseIntent(context).apply {
-                putExtra(SOURCE_ID_EXTRA, source.id)
-                putExtra(COOKIES_EXTRA, HashMap(cookies))
-                putExtra(SCRIPT_EXTRA, script)
-                putExtra(URL_EXTRA, url)
-                putExtra(ASBTN_EXTRA, autoSolveSubmitBtnSelector)
-            }
+            val intent =
+                baseIntent(context).apply {
+                    putExtra(SOURCE_ID_EXTRA, source.id)
+                    putExtra(COOKIES_EXTRA, HashMap(cookies))
+                    putExtra(SCRIPT_EXTRA, script)
+                    putExtra(URL_EXTRA, url)
+                    putExtra(ASBTN_EXTRA, autoSolveSubmitBtnSelector)
+                }
 
             context.startActivity(intent)
         }
@@ -690,10 +725,11 @@ class BrowserActionActivity : AppCompatActivity() {
             source: HttpSource,
             url: String
         ) {
-            val intent = baseIntent(context).apply {
-                putExtra(SOURCE_ID_EXTRA, source.id)
-                putExtra(URL_EXTRA, url)
-            }
+            val intent =
+                baseIntent(context).apply {
+                    putExtra(SOURCE_ID_EXTRA, source.id)
+                    putExtra(URL_EXTRA, url)
+                }
 
             context.startActivity(intent)
         }
@@ -703,10 +739,11 @@ class BrowserActionActivity : AppCompatActivity() {
             sourceId: Long,
             url: String
         ) {
-            val intent = baseIntent(context).apply {
-                putExtra(SOURCE_ID_EXTRA, sourceId)
-                putExtra(URL_EXTRA, url)
-            }
+            val intent =
+                baseIntent(context).apply {
+                    putExtra(SOURCE_ID_EXTRA, sourceId)
+                    putExtra(URL_EXTRA, url)
+                }
 
             context.startActivity(intent)
         }
@@ -718,12 +755,13 @@ class BrowserActionActivity : AppCompatActivity() {
             url: String,
             actionName: String
         ) {
-            val intent = baseIntent(context).apply {
-                putExtra(SOURCE_ID_EXTRA, completionVerifier.id)
-                putExtra(SCRIPT_EXTRA, script)
-                putExtra(URL_EXTRA, url)
-                putExtra(ACTION_NAME_EXTRA, actionName)
-            }
+            val intent =
+                baseIntent(context).apply {
+                    putExtra(SOURCE_ID_EXTRA, completionVerifier.id)
+                    putExtra(SCRIPT_EXTRA, script)
+                    putExtra(URL_EXTRA, url)
+                    putExtra(ACTION_NAME_EXTRA, actionName)
+                }
 
             context.startActivity(intent)
         }
@@ -736,13 +774,14 @@ class BrowserActionActivity : AppCompatActivity() {
             actionName: String,
             headers: Map<String, String>? = emptyMap()
         ) {
-            val intent = baseIntent(context).apply {
-                putExtra(HEADERS_EXTRA, HashMap(headers!!))
-                putExtra(VERIFY_LAMBDA_EXTRA, completionVerifier as Serializable)
-                putExtra(SCRIPT_EXTRA, script)
-                putExtra(URL_EXTRA, url)
-                putExtra(ACTION_NAME_EXTRA, actionName)
-            }
+            val intent =
+                baseIntent(context).apply {
+                    putExtra(HEADERS_EXTRA, HashMap(headers!!))
+                    putExtra(VERIFY_LAMBDA_EXTRA, completionVerifier as Serializable)
+                    putExtra(SCRIPT_EXTRA, script)
+                    putExtra(URL_EXTRA, url)
+                    putExtra(ACTION_NAME_EXTRA, actionName)
+                }
 
             context.startActivity(intent)
         }

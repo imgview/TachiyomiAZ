@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.databinding.ExtensionDetailItemBinding
  * @param adapter The adapter containing this holder.
  */
 class ExtensionDetailsPrefsButtonHolder(view: View, val adapter: ExtensionDetailsPrefsButtonAdapter) : FlexibleViewHolder(view, adapter) {
-
     private val binding = ExtensionDetailItemBinding.bind(view)
 
     /**

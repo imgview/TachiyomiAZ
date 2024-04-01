@@ -12,8 +12,10 @@ open class LibraryMangaCustomCoverFetcher(
     private val manga: Manga,
     private val coverCache: CoverCache
 ) : FileFetcher() {
-
-    override fun loadData(priority: Priority, callback: DataFetcher.DataCallback<in InputStream>) {
+    override fun loadData(
+        priority: Priority,
+        callback: DataFetcher.DataCallback<in InputStream>
+    ) {
         getCustomCoverFile()?.let {
             loadFromFile(it, callback)
         } ?: callback.onLoadFailed(Exception("Custom cover file not found"))

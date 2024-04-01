@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.source.CatalogueSource
  */
 data class SourceItem(val source: CatalogueSource, val header: LangItem? = null, val showButtons: Boolean) :
     AbstractSectionableItem<SourceHolder, LangItem>(header) {
-
     /**
      * Returns the layout resource of this item.
      */
@@ -27,7 +26,10 @@ data class SourceItem(val source: CatalogueSource, val header: LangItem? = null,
     /**
      * Creates a new view holder for this item.
      */
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): SourceHolder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): SourceHolder {
         return SourceHolder(view, adapter as SourceAdapter, showButtons)
     }
 

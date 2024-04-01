@@ -26,7 +26,6 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import uy.kohesive.injekt.injectLazy
 
 class WebViewActivity : BaseWebViewActivity() {
-
     private val sourceManager by injectLazy<SourceManager>()
     private val network: NetworkHelper by injectLazy()
 
@@ -52,47 +51,62 @@ class WebViewActivity : BaseWebViewActivity() {
                 WebView.setWebContentsDebuggingEnabled(true)
             }
 
-            binding.webview.webChromeClient = object : WebChromeClient() {
-                override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                    binding.progressBar.isVisible = true
-                    binding.progressBar.progress = newProgress
-                    if (newProgress == 100) {
-                        binding.progressBar.isInvisible = true
-                    }
-                    super.onProgressChanged(view, newProgress)
-                }
-            }
-
-            binding.webview.webViewClient = object : WebViewClientCompat() {
-                override fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
-                    if (url.startsWith("blob:http")) {
-                        return false
-                    }
-
-                    view.loadUrl(url, headers)
-                    return true
-                }
-
-                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                    super.onPageStarted(view, url, favicon)
-                    invalidateOptionsMenu()
-                }
-
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    super.onPageFinished(view, url)
-                    invalidateOptionsMenu()
-                    title = view?.title
-                    supportActionBar?.subtitle = url
-                    binding.swipeRefresh.isEnabled = true
-                    binding.swipeRefresh.isRefreshing = false
-
-                    // Reset to top when page refreshes
-                    if (isRefreshing) {
-                        view?.scrollTo(0, 0)
-                        isRefreshing = false
+            binding.webview.webChromeClient =
+                object : WebChromeClient() {
+                    override fun onProgressChanged(
+                        view: WebView?,
+                        newProgress: Int
+                    ) {
+                        binding.progressBar.isVisible = true
+                        binding.progressBar.progress = newProgress
+                        if (newProgress == 100) {
+                            binding.progressBar.isInvisible = true
+                        }
+                        super.onProgressChanged(view, newProgress)
                     }
                 }
-            }
+
+            binding.webview.webViewClient =
+                object : WebViewClientCompat() {
+                    override fun shouldOverrideUrlCompat(
+                        view: WebView,
+                        url: String
+                    ): Boolean {
+                        if (url.startsWith("blob:http")) {
+                            return false
+                        }
+
+                        view.loadUrl(url, headers)
+                        return true
+                    }
+
+                    override fun onPageStarted(
+                        view: WebView?,
+                        url: String?,
+                        favicon: Bitmap?
+                    ) {
+                        super.onPageStarted(view, url, favicon)
+                        invalidateOptionsMenu()
+                    }
+
+                    override fun onPageFinished(
+                        view: WebView?,
+                        url: String?
+                    ) {
+                        super.onPageFinished(view, url)
+                        invalidateOptionsMenu()
+                        title = view?.title
+                        supportActionBar?.subtitle = url
+                        binding.swipeRefresh.isEnabled = true
+                        binding.swipeRefresh.isRefreshing = false
+
+                        // Reset to top when page refreshes
+                        if (isRefreshing) {
+                            view?.scrollTo(0, 0)
+                            isRefreshing = false
+                        }
+                    }
+                }
 
             binding.webview.loadUrl(url, headers)
         }
@@ -138,10 +152,11 @@ class WebViewActivity : BaseWebViewActivity() {
 
     private fun shareWebpage() {
         try {
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, binding.webview.url)
-            }
+            val intent =
+                Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, binding.webview.url)
+                }
             startActivity(Intent.createChooser(intent, getString(R.string.action_share)))
         } catch (e: Exception) {
             toast(e.message)
@@ -162,7 +177,12 @@ class WebViewActivity : BaseWebViewActivity() {
         private const val SOURCE_KEY = "source_key"
         private const val TITLE_KEY = "title_key"
 
-        fun newIntent(context: Context, url: String, sourceId: Long? = null, title: String? = null): Intent {
+        fun newIntent(
+            context: Context,
+            url: String,
+            sourceId: Long? = null,
+            title: String? = null
+        ): Intent {
             return Intent(context, WebViewActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 putExtra(URL_KEY, url)

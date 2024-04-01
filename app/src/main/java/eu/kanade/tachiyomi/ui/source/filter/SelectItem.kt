@@ -13,29 +13,39 @@ import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
 
 open class SelectItem(val filter: Filter.Select<*>) : AbstractFlexibleItem<SelectItem.Holder>() {
-
     override fun getLayoutRes(): Int {
         return R.layout.navigation_view_spinner
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<androidx.recyclerview.widget.RecyclerView.ViewHolder>>): Holder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<androidx.recyclerview.widget.RecyclerView.ViewHolder>>
+    ): Holder {
         return Holder(view, adapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<androidx.recyclerview.widget.RecyclerView.ViewHolder>>, holder: Holder, position: Int, payloads: List<Any?>?) {
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<androidx.recyclerview.widget.RecyclerView.ViewHolder>>,
+        holder: Holder,
+        position: Int,
+        payloads: List<Any?>?
+    ) {
         holder.text.text = filter.name + ": "
 
         val spinner = holder.spinner
         spinner.prompt = filter.name
-        spinner.adapter = ArrayAdapter<Any>(
-            holder.itemView.context,
-            android.R.layout.simple_spinner_item, filter.values
-        ).apply {
-            setDropDownViewResource(R.layout.common_spinner_item)
-        }
-        spinner.onItemSelectedListener = IgnoreFirstSpinnerListener { pos ->
-            filter.state = pos
-        }
+        spinner.adapter =
+            ArrayAdapter<Any>(
+                holder.itemView.context,
+                android.R.layout.simple_spinner_item,
+                filter.values
+            ).apply {
+                setDropDownViewResource(R.layout.common_spinner_item)
+            }
+        spinner.onItemSelectedListener =
+            IgnoreFirstSpinnerListener { pos ->
+                filter.state = pos
+            }
         spinner.setSelection(filter.state)
     }
 
@@ -50,7 +60,6 @@ open class SelectItem(val filter: Filter.Select<*>) : AbstractFlexibleItem<Selec
     }
 
     class Holder(view: View, adapter: FlexibleAdapter<*>) : FlexibleViewHolder(view, adapter) {
-
         val text: TextView = itemView.findViewById(R.id.nav_view_item_text)
         val spinner: Spinner = itemView.findViewById(R.id.nav_view_item)
     }

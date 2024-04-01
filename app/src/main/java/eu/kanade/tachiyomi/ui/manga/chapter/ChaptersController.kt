@@ -54,7 +54,6 @@ class ChaptersController :
     ChaptersAdapter.OnMenuItemClickListener,
     DownloadCustomChaptersDialog.Listener,
     DeleteChaptersDialog.Listener {
-
     private val sourceManager: SourceManager by injectLazy()
 
     /**
@@ -82,12 +81,18 @@ class ChaptersController :
     override fun createPresenter(): ChaptersPresenter {
         val ctrl = parentController as MangaController
         return ChaptersPresenter(
-            ctrl.manga!!, ctrl.source!!,
-            ctrl.chapterCountRelay, ctrl.lastUpdateRelay, ctrl.mangaFavoriteRelay
+            ctrl.manga!!,
+            ctrl.source!!,
+            ctrl.chapterCountRelay,
+            ctrl.lastUpdateRelay,
+            ctrl.mangaFavoriteRelay
         )
     }
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = ChaptersControllerBinding.inflate(inflater)
         return binding.root
     }
@@ -116,11 +121,12 @@ class ChaptersController :
                 val item = presenter.getNextUnreadChapter()
                 if (item != null) {
                     // Create animation listener
-                    val revealAnimationListener: Animator.AnimatorListener = object : AnimatorListenerAdapter() {
-                        override fun onAnimationStart(animation: Animator) {
-                            openChapter(item.chapter, true)
+                    val revealAnimationListener: Animator.AnimatorListener =
+                        object : AnimatorListenerAdapter() {
+                            override fun onAnimationStart(animation: Animator) {
+                                openChapter(item.chapter, true)
+                            }
                         }
-                    }
 
                     // Get coordinates and start animation
                     val coordinates = binding.fab.getCoordinates()
@@ -136,7 +142,12 @@ class ChaptersController :
         presenter.redirectUserRelay
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeUntilDestroy { redirect ->
-                XLog.d("Redirecting to updated manga (manga.id: %s, manga.title: %s, update: %s)!", redirect.manga.id, redirect.manga.title, redirect.update)
+                XLog.d(
+                    "Redirecting to updated manga (manga.id: %s, manga.title: %s, update: %s)!",
+                    redirect.manga.id,
+                    redirect.manga.title,
+                    redirect.update
+                )
                 // Replace self
                 parentController?.router?.replaceTopController(RouterTransaction.with(MangaController(redirect)))
             }
@@ -160,7 +171,10 @@ class ChaptersController :
         super.onActivityResumed(activity)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
         inflater.inflate(R.menu.chapters, menu)
     }
 
@@ -206,12 +220,13 @@ class ChaptersController :
         }
 
         // Sorting mode submenu
-        val sortingItem = when (presenter.manga.sorting) {
-            Manga.SORTING_SOURCE -> R.id.sort_by_source
-            Manga.SORTING_NUMBER -> R.id.sort_by_number
-            Manga.SORTING_UPLOAD_DATE -> R.id.sort_by_upload_date
-            else -> throw NotImplementedError("Unimplemented sorting method")
-        }
+        val sortingItem =
+            when (presenter.manga.sorting) {
+                Manga.SORTING_SOURCE -> R.id.sort_by_source
+                Manga.SORTING_NUMBER -> R.id.sort_by_number
+                Manga.SORTING_UPLOAD_DATE -> R.id.sort_by_upload_date
+                else -> throw NotImplementedError("Unimplemented sorting method")
+            }
         menu.findItem(sortingItem).isChecked = true
     }
 
@@ -338,21 +353,28 @@ class ChaptersController :
         return binding.recycler.findViewHolderForItemId(chapter.id!!) as? ChapterHolder
     }
 
-    fun openChapter(chapter: Chapter, hasAnimation: Boolean = false) {
+    fun openChapter(
+        chapter: Chapter,
+        hasAnimation: Boolean = false
+    ) {
         val activity = activity ?: return
 
-        val intent = if (sourceManager.getOrStub(presenter.manga.source) is AnimeSource) {
-            VideoActivity.newIntent(activity, presenter.manga, chapter)
-        } else {
-            ReaderActivity.newIntent(activity, presenter.manga, chapter)
-        }
+        val intent =
+            if (sourceManager.getOrStub(presenter.manga.source) is AnimeSource) {
+                VideoActivity.newIntent(activity, presenter.manga, chapter)
+            } else {
+                ReaderActivity.newIntent(activity, presenter.manga, chapter)
+            }
         if (hasAnimation) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
         }
         startActivity(intent)
     }
 
-    override fun onItemClick(view: View, position: Int): Boolean {
+    override fun onItemClick(
+        view: View,
+        position: Int
+    ): Boolean {
         val adapter = adapter ?: return false
         val item = adapter.getItem(position) ?: return false
         return if (actionMode != null && adapter.mode == SelectableAdapter.Mode.MULTI) {
@@ -422,14 +444,20 @@ class ChaptersController :
         actionMode?.finish()
     }
 
-    override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+    override fun onCreateActionMode(
+        mode: ActionMode,
+        menu: Menu
+    ): Boolean {
         mode.menuInflater.inflate(R.menu.chapter_selection, menu)
         adapter?.mode = SelectableAdapter.Mode.MULTI
         return true
     }
 
     @SuppressLint("StringFormatInvalid")
-    override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+    override fun onPrepareActionMode(
+        mode: ActionMode,
+        menu: Menu
+    ): Boolean {
         val count = adapter?.selectedItemCount ?: 0
         if (count == 0) {
             // Destroy action mode if there are no items selected.
@@ -451,7 +479,10 @@ class ChaptersController :
         return false
     }
 
-    override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+    override fun onActionItemClicked(
+        mode: ActionMode,
+        item: MenuItem
+    ): Boolean {
         return onActionItemClicked(item)
     }
 
@@ -479,7 +510,10 @@ class ChaptersController :
         actionMode = null
     }
 
-    override fun onMenuItemClick(position: Int, item: MenuItem) {
+    override fun onMenuItemClick(
+        position: Int,
+        item: MenuItem
+    ) {
         val chapter = adapter?.getItem(position) ?: return
         val chapters = listOf(chapter)
 
@@ -554,7 +588,10 @@ class ChaptersController :
         destroyActionModeIfNeeded()
     }
 
-    private fun bookmarkChapters(chapters: List<ChapterItem>, bookmarked: Boolean) {
+    private fun bookmarkChapters(
+        chapters: List<ChapterItem>,
+        bookmarked: Boolean
+    ) {
         destroyActionModeIfNeeded()
         presenter.bookmarkChapters(chapters, bookmarked)
         destroyActionModeIfNeeded()
@@ -587,24 +624,26 @@ class ChaptersController :
         adapter?.notifyDataSetChanged()
     }
 
-    private fun getUnreadChaptersSorted() = presenter.chapters
-        .filter { !it.read && it.status == Download.NOT_DOWNLOADED }
-        .distinctBy { it.name }
-        .sortedByDescending { it.source_order }
+    private fun getUnreadChaptersSorted() =
+        presenter.chapters
+            .filter { !it.read && it.status == Download.NOT_DOWNLOADED }
+            .distinctBy { it.name }
+            .sortedByDescending { it.source_order }
 
     private fun downloadChapters(choice: Int) {
-        val chaptersToDownload = when (choice) {
-            R.id.download_next -> getUnreadChaptersSorted().take(1)
-            R.id.download_next_5 -> getUnreadChaptersSorted().take(5)
-            R.id.download_next_10 -> getUnreadChaptersSorted().take(10)
-            R.id.download_custom -> {
-                showCustomDownloadDialog()
-                return
+        val chaptersToDownload =
+            when (choice) {
+                R.id.download_next -> getUnreadChaptersSorted().take(1)
+                R.id.download_next_5 -> getUnreadChaptersSorted().take(5)
+                R.id.download_next_10 -> getUnreadChaptersSorted().take(10)
+                R.id.download_custom -> {
+                    showCustomDownloadDialog()
+                    return
+                }
+                R.id.download_unread -> presenter.chapters.filter { !it.read }
+                R.id.download_all -> presenter.chapters
+                else -> emptyList()
             }
-            R.id.download_unread -> presenter.chapters.filter { !it.read }
-            R.id.download_all -> presenter.chapters
-            else -> emptyList()
-        }
         if (chaptersToDownload.isNotEmpty()) {
             downloadChapters(chaptersToDownload)
         }

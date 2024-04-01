@@ -17,8 +17,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Matchers.anyLong
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 import org.robolectric.Robolectric
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
@@ -31,7 +31,6 @@ import uy.kohesive.injekt.api.addSingleton
 @Config(constants = BuildConfig::class, sdk = [Build.VERSION_CODES.LOLLIPOP])
 @RunWith(CustomRobolectricGradleTestRunner::class)
 class LibraryUpdateServiceTest {
-
     lateinit var app: Application
     lateinit var context: Context
     lateinit var service: LibraryUpdateService
@@ -43,11 +42,12 @@ class LibraryUpdateServiceTest {
         context = app.applicationContext
 
         // Mock the source manager
-        val module = object : InjektModule {
-            override fun InjektRegistrar.registerInjectables() {
-                addSingleton(mock(SourceManager::class.java, RETURNS_DEEP_STUBS))
+        val module =
+            object : InjektModule {
+                override fun InjektRegistrar.registerInjectables() {
+                    addSingleton(mock(SourceManager::class.java, RETURNS_DEEP_STUBS))
+                }
             }
-        }
         Injekt.importModule(module)
 
         service = Robolectric.setupService(LibraryUpdateService::class.java)

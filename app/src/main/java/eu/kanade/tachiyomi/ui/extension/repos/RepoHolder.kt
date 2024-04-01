@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.databinding.CategoriesItemBinding
  * @param adapter The adapter containing this holder.
  */
 class RepoHolder(view: View, val adapter: RepoAdapter) : FlexibleViewHolder(view, adapter) {
-
     private val binding = CategoriesItemBinding.bind(view)
 
     /**

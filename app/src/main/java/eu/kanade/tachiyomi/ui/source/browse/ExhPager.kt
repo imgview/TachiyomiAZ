@@ -7,15 +7,15 @@ import eu.kanade.tachiyomi.util.lang.awaitSingle
 import exh.EH_SOURCE_ID
 
 open class ExhPager(val source: CatalogueSource, val query: String, val filters: FilterList) : Pager() {
-
     override suspend fun requestNextPage() {
         val page = currentPage
 
-        val observable = if (query.isBlank() && filters.isEmpty()) {
-            source.fetchPopularManga(page)
-        } else {
-            source.fetchSearchManga(page, query, filters)
-        }
+        val observable =
+            if (query.isBlank() && filters.isEmpty()) {
+                source.fetchPopularManga(page)
+            } else {
+                source.fetchSearchManga(page, query, filters)
+            }
 
         val mangasPage = observable.awaitSingle()
 

@@ -8,12 +8,11 @@ import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import exh.GalleryAddEvent
 import exh.GalleryAdder
 import exh.metadata.nullIfBlank
-import kotlin.concurrent.thread
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import kotlin.concurrent.thread
 
 class BatchAddPresenter : BasePresenter<BatchAddController>() {
-
     private val galleryAdder by lazy { GalleryAdder() }
 
     val progressTotalRelay = BehaviorRelay.create(0)!!
@@ -27,23 +26,25 @@ class BatchAddPresenter : BasePresenter<BatchAddController>() {
             """[0-9]*?\.[a-z0-9]*?:""".toRegex()
         val testedGalleries: String
 
-        testedGalleries = if (regex.containsMatchIn(galleries)) {
-            regex.findAll(galleries).map { galleryKeys ->
-                val LinkParts = galleryKeys.value.split(".")
-                val Link = "${if (Injekt.get<PreferencesHelper>().enableExhentai().get()) {
-                    "https://exhentai.org/g/"
-                } else {
-                    "https://e-hentai.org/g/"
-                }}${LinkParts[0]}/${LinkParts[1].replace(":", "")}"
-                Log.d("Batch Add", Link)
-                Link
-            }.joinToString(separator = "\n")
-        } else {
-            galleries
-        }
-        val splitGalleries = testedGalleries.split("\n").mapNotNull {
-            it.trim().nullIfBlank()
-        }
+        testedGalleries =
+            if (regex.containsMatchIn(galleries)) {
+                regex.findAll(galleries).map { galleryKeys ->
+                    val LinkParts = galleryKeys.value.split(".")
+                    val Link = "${if (Injekt.get<PreferencesHelper>().enableExhentai().get()) {
+                        "https://exhentai.org/g/"
+                    } else {
+                        "https://e-hentai.org/g/"
+                    }}${LinkParts[0]}/${LinkParts[1].replace(":", "")}"
+                    Log.d("Batch Add", Link)
+                    Link
+                }.joinToString(separator = "\n")
+            } else {
+                galleries
+            }
+        val splitGalleries =
+            testedGalleries.split("\n").mapNotNull {
+                it.trim().nullIfBlank()
+            }
 
         progressRelay.call(0)
         progressTotalRelay.call(splitGalleries.size)

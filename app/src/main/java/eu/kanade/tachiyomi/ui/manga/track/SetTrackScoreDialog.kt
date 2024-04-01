@@ -15,8 +15,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class SetTrackScoreDialog<T> : DialogController
-        where T : Controller, T : SetTrackScoreDialog.Listener {
-
+    where T : Controller, T : SetTrackScoreDialog.Listener {
     private val item: TrackItem
 
     constructor(target: T, item: TrackItem) : super(
@@ -38,18 +37,19 @@ class SetTrackScoreDialog<T> : DialogController
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val item = item
 
-        val dialog = MaterialDialog(activity!!)
-            .title(R.string.score)
-            .customView(R.layout.track_score_dialog, dialogWrapContent = false)
-            .positiveButton(android.R.string.ok) { dialog ->
-                val view = dialog.getCustomView()
-                // Remove focus to update selected number
-                val np: NumberPicker = view.findViewById(R.id.score_picker)
-                np.clearFocus()
+        val dialog =
+            MaterialDialog(activity!!)
+                .title(R.string.score)
+                .customView(R.layout.track_score_dialog, dialogWrapContent = false)
+                .positiveButton(android.R.string.ok) { dialog ->
+                    val view = dialog.getCustomView()
+                    // Remove focus to update selected number
+                    val np: NumberPicker = view.findViewById(R.id.score_picker)
+                    np.clearFocus()
 
-                (targetController as? Listener)?.setScore(item, np.value)
-            }
-            .negativeButton(android.R.string.cancel)
+                    (targetController as? Listener)?.setScore(item, np.value)
+                }
+                .negativeButton(android.R.string.cancel)
 
         val view = dialog.getCustomView()
         val np: NumberPicker = view.findViewById(R.id.score_picker)
@@ -68,7 +68,10 @@ class SetTrackScoreDialog<T> : DialogController
     }
 
     interface Listener {
-        fun setScore(item: TrackItem, score: Int)
+        fun setScore(
+            item: TrackItem,
+            score: Int
+        )
     }
 
     private companion object {

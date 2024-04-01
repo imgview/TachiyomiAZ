@@ -6,7 +6,10 @@ import java.util.Locale
 /**
  * Metadata utils
  */
-fun humanReadableByteCount(bytes: Long, si: Boolean): String {
+fun humanReadableByteCount(
+    bytes: Long,
+    si: Boolean
+): String {
     val unit = if (si) 1000 else 1024
     if (bytes < unit) return "$bytes B"
     val exp = (Math.log(bytes.toDouble()) / Math.log(unit.toDouble())).toInt()
@@ -35,32 +38,34 @@ fun parseHumanReadableByteCount(arg0: String): Double? {
     return null
 }
 
-fun String?.nullIfBlank(): String? = if (isNullOrBlank()) {
-    null
-} else {
-    this
-}
+fun String?.nullIfBlank(): String? =
+    if (isNullOrBlank()) {
+        null
+    } else {
+        this
+    }
 
 fun <K, V> Set<Map.Entry<K, V>>.forEach(action: (K, V) -> Unit) {
     forEach { action(it.key, it.value) }
 }
 
-val ONGOING_SUFFIX = arrayOf(
-    "[ongoing]",
-    "(ongoing)",
-    "{ongoing}",
-    "<ongoing>",
-    "ongoing",
-    "[incomplete]",
-    "(incomplete)",
-    "{incomplete}",
-    "<incomplete>",
-    "incomplete",
-    "[wip]",
-    "(wip)",
-    "{wip}",
-    "<wip>",
-    "wip"
-)
+val ONGOING_SUFFIX =
+    arrayOf(
+        "[ongoing]",
+        "(ongoing)",
+        "{ongoing}",
+        "<ongoing>",
+        "ongoing",
+        "[incomplete]",
+        "(incomplete)",
+        "{incomplete}",
+        "<incomplete>",
+        "incomplete",
+        "[wip]",
+        "(wip)",
+        "{wip}",
+        "<wip>",
+        "wip"
+    )
 
 val EX_DATE_FORMAT = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US)

@@ -37,7 +37,6 @@ class ExtensionPreferencesController(bundle: Bundle? = null) :
     NucleusController<ExtensionPreferencesControllerBinding, ExtensionPreferencesPresenter>(bundle),
     PreferenceManager.OnDisplayPreferenceDialogListener,
     DialogPreference.TargetFragment {
-
     private var lastOpenPreferencePosition: Int? = null
 
     private var preferenceScreen: PreferenceScreen? = null
@@ -48,7 +47,10 @@ class ExtensionPreferencesController(bundle: Bundle? = null) :
         }
     )
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         val themedInflater = inflater.cloneInContext(getPreferenceThemeContext())
         binding = ExtensionPreferencesControllerBinding.inflate(themedInflater)
         return binding.root
@@ -77,9 +79,10 @@ class ExtensionPreferencesController(bundle: Bundle? = null) :
 
         if (source is ConfigurableSource) {
             try {
-                val dataStore = SharedPreferencesDataStore(
-                    sourcePreferences(source.preferenceKey())
-                )
+                val dataStore =
+                    SharedPreferencesDataStore(
+                        sourcePreferences(source.preferenceKey())
+                    )
                 manager.preferenceDataStore = dataStore
 
                 screen.preferenceCategory {
@@ -129,25 +132,27 @@ class ExtensionPreferencesController(bundle: Bundle? = null) :
 
         val screen = preference.parent!!
 
-        lastOpenPreferencePosition = (0 until screen.preferenceCount).indexOfFirst {
-            screen.getPreference(it) === preference
-        }
+        lastOpenPreferencePosition =
+            (0 until screen.preferenceCount).indexOfFirst {
+                screen.getPreference(it) === preference
+            }
 
-        val f = when (preference) {
-            is EditTextPreference ->
-                EditTextPreferenceDialogController
-                    .newInstance(preference.getKey())
-            is ListPreference ->
-                ListPreferenceDialogController
-                    .newInstance(preference.getKey())
-            is MultiSelectListPreference ->
-                MultiSelectListPreferenceDialogController
-                    .newInstance(preference.getKey())
-            else -> throw IllegalArgumentException(
-                "Tried to display dialog for unknown " +
-                    "preference type. Did you forget to override onDisplayPreferenceDialog()?"
-            )
-        }
+        val f =
+            when (preference) {
+                is EditTextPreference ->
+                    EditTextPreferenceDialogController
+                        .newInstance(preference.getKey())
+                is ListPreference ->
+                    ListPreferenceDialogController
+                        .newInstance(preference.getKey())
+                is MultiSelectListPreference ->
+                    MultiSelectListPreferenceDialogController
+                        .newInstance(preference.getKey())
+                else -> throw IllegalArgumentException(
+                    "Tried to display dialog for unknown " +
+                        "preference type. Did you forget to override onDisplayPreferenceDialog()?"
+                )
+            }
         f.targetController = this
         f.showDialog(router)
     }

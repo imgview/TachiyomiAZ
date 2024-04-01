@@ -51,11 +51,12 @@ private fun getWebViewMajorVersion(webview: WebView): Int {
     webview.settings.userAgentString = null
 
     val uaRegexMatch = WebViewUtil.WEBVIEW_UA_VERSION_REGEX.matchEntire(webview.settings.userAgentString)
-    val webViewVersion: Int = if (uaRegexMatch != null && uaRegexMatch.groupValues.size > 1) {
-        uaRegexMatch.groupValues[1].toInt()
-    } else {
-        0
-    }
+    val webViewVersion: Int =
+        if (uaRegexMatch != null && uaRegexMatch.groupValues.size > 1) {
+            uaRegexMatch.groupValues[1].toInt()
+        } else {
+            0
+        }
 
     // Revert to original UA string
     webview.settings.userAgentString = originalUA

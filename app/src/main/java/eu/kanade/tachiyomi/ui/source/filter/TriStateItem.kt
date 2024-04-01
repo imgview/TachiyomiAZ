@@ -9,13 +9,12 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
-import eu.kanade.tachiyomi.R as TR
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.R as TR
 
 open class TriStateItem(val filter: Filter.TriState) : AbstractFlexibleItem<TriStateItem.Holder>() {
-
     override fun getLayoutRes(): Int {
         return TR.layout.navigation_view_checkedtext
     }
@@ -24,32 +23,42 @@ open class TriStateItem(val filter: Filter.TriState) : AbstractFlexibleItem<TriS
         return 103
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): Holder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): Holder {
         return Holder(view, adapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: Holder, position: Int, payloads: List<Any?>?) {
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+        holder: Holder,
+        position: Int,
+        payloads: List<Any?>?
+    ) {
         val view = holder.text
         view.text = filter.name
 
-        fun getIcon() = VectorDrawableCompat.create(
-            view.resources,
-            when (filter.state) {
-                Filter.TriState.STATE_IGNORE -> TR.drawable.ic_check_box_outline_blank_24dp
-                Filter.TriState.STATE_INCLUDE -> TR.drawable.ic_check_box_24dp
-                Filter.TriState.STATE_EXCLUDE -> TR.drawable.ic_check_box_x_24dp
-                else -> throw Exception("Unknown state")
-            },
-            null
-        )?.apply {
-            val color = if (filter.state == Filter.TriState.STATE_INCLUDE) {
-                view.context.getResourceColor(R.attr.colorAccent)
-            } else {
-                view.context.getResourceColor(R.attr.colorOnBackground, 0.38f)
-            }
+        fun getIcon() =
+            VectorDrawableCompat.create(
+                view.resources,
+                when (filter.state) {
+                    Filter.TriState.STATE_IGNORE -> TR.drawable.ic_check_box_outline_blank_24dp
+                    Filter.TriState.STATE_INCLUDE -> TR.drawable.ic_check_box_24dp
+                    Filter.TriState.STATE_EXCLUDE -> TR.drawable.ic_check_box_x_24dp
+                    else -> throw Exception("Unknown state")
+                },
+                null
+            )?.apply {
+                val color =
+                    if (filter.state == Filter.TriState.STATE_INCLUDE) {
+                        view.context.getResourceColor(R.attr.colorAccent)
+                    } else {
+                        view.context.getResourceColor(R.attr.colorOnBackground, 0.38f)
+                    }
 
-            setTint(color)
-        }
+                setTint(color)
+            }
 
         view.setCompoundDrawablesWithIntrinsicBounds(getIcon(), null, null, null)
         holder.itemView.setOnClickListener {

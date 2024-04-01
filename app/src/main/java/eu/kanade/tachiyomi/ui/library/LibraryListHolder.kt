@@ -25,7 +25,6 @@ class LibraryListHolder(
     private val view: View,
     adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
 ) : LibraryHolder<SourceListItemBinding>(view, adapter) {
-
     override val binding = SourceListItemBinding.bind(view)
 
     /**

@@ -3,13 +3,6 @@ package exh.eh
 import android.util.SparseArray
 import androidx.core.util.AtomicFile
 import com.elvishew.xlog.XLog
-import java.io.Closeable
-import java.io.File
-import java.io.FileNotFoundException
-import java.io.InputStream
-import java.nio.ByteBuffer
-import kotlin.concurrent.thread
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -22,6 +15,13 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.io.Closeable
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.InputStream
+import java.nio.ByteBuffer
+import kotlin.concurrent.thread
+import kotlin.coroutines.CoroutineContext
 
 /**
  * In memory Int -> Obj lookup table implementation that
@@ -52,14 +52,16 @@ class MemAutoFlushingLookupTable<T>(
     // Used to debounce
     @Volatile
     private var writeCounter = Long.MIN_VALUE
+
     @Volatile
     private var flushed = true
 
     private val atomicFile = AtomicFile(file)
 
-    private val shutdownHook = thread(start = false) {
-        if (!flushed) writeSynchronously()
-    }
+    private val shutdownHook =
+        thread(start = false) {
+            if (!flushed) writeSynchronously()
+        }
 
     init {
         initialLoad()
@@ -67,7 +69,10 @@ class MemAutoFlushingLookupTable<T>(
         Runtime.getRuntime().addShutdownHook(shutdownHook)
     }
 
-    private fun InputStream.requireBytes(targetArray: ByteArray, byteCount: Int): Boolean {
+    private fun InputStream.requireBytes(
+        targetArray: ByteArray,
+        byteCount: Int
+    ): Boolean {
         var readIter = 0
         while (true) {
             val readThisIter = read(targetArray, readIter, byteCount - readIter)
@@ -143,7 +148,10 @@ class MemAutoFlushingLookupTable<T>(
         }
     }
 
-    suspend fun put(key: Int, value: T) {
+    suspend fun put(
+        key: Int,
+        value: T
+    ) {
         mutex.withLock { table.put(key, value) }
         tryWrite()
     }

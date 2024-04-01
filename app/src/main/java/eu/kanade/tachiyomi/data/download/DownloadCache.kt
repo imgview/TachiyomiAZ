@@ -7,10 +7,10 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.onEach
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.concurrent.TimeUnit
 
 /**
  * Cache where we dump the downloads directory from the filesystem. This class is needed because
@@ -29,7 +29,6 @@ class DownloadCache(
     private val sourceManager: SourceManager,
     private val preferences: PreferencesHelper = Injekt.get()
 ) {
-
     /**
      * The interval after which this cache should be invalidated. 1 hour shouldn't cause major
      * issues, as the cache is only used for UI feedback.
@@ -69,7 +68,11 @@ class DownloadCache(
      * @param manga the manga of the chapter.
      * @param skipCache whether to skip the directory cache and check in the filesystem.
      */
-    fun isChapterDownloaded(chapter: Chapter, manga: Manga, skipCache: Boolean): Boolean {
+    fun isChapterDownloaded(
+        chapter: Chapter,
+        manga: Manga,
+        skipCache: Boolean
+    ): Boolean {
         if (skipCache) {
             val source = sourceManager.get(manga.source) ?: return false
             return provider.findChapterDir(chapter, manga, source) != null
@@ -126,27 +129,30 @@ class DownloadCache(
         val onlineSources = sourceManager.getVisibleOnlineSources()
         // SY <--
 
-        val sourceDirs = rootDir.dir.listFiles()
-            .orEmpty()
-            .associate { it.name to SourceDirectory(it) }
-            .mapNotNullKeys { entry ->
-                onlineSources.find { provider.getSourceDirName(it) == entry.key }?.id
-            }
+        val sourceDirs =
+            rootDir.dir.listFiles()
+                .orEmpty()
+                .associate { it.name to SourceDirectory(it) }
+                .mapNotNullKeys { entry ->
+                    onlineSources.find { provider.getSourceDirName(it) == entry.key }?.id
+                }
 
         rootDir.files = sourceDirs
 
         sourceDirs.values.forEach { sourceDir ->
-            val mangaDirs = sourceDir.dir.listFiles()
-                .orEmpty()
-                .associateNotNullKeys { it.name to MangaDirectory(it) }
+            val mangaDirs =
+                sourceDir.dir.listFiles()
+                    .orEmpty()
+                    .associateNotNullKeys { it.name to MangaDirectory(it) }
 
             sourceDir.files = mangaDirs
 
             mangaDirs.values.forEach { mangaDir ->
-                val chapterDirs = mangaDir.dir.listFiles()
-                    .orEmpty()
-                    .mapNotNull { it.name }
-                    .toHashSet()
+                val chapterDirs =
+                    mangaDir.dir.listFiles()
+                        .orEmpty()
+                        .mapNotNull { it.name }
+                        .toHashSet()
 
                 mangaDir.files = chapterDirs
             }
@@ -161,7 +167,11 @@ class DownloadCache(
      * @param manga the manga of the chapter.
      */
     @Synchronized
-    fun addChapter(chapterDirName: String, mangaUniFile: UniFile, manga: Manga) {
+    fun addChapter(
+        chapterDirName: String,
+        mangaUniFile: UniFile,
+        manga: Manga
+    ) {
         // Retrieve the cached source directory or cache a new one
         var sourceDir = rootDir.files[manga.source]
         if (sourceDir == null) {
@@ -190,7 +200,10 @@ class DownloadCache(
      * @param manga the manga of the chapter.
      */
     @Synchronized
-    fun removeChapter(chapter: Chapter, manga: Manga) {
+    fun removeChapter(
+        chapter: Chapter,
+        manga: Manga
+    ) {
         val sourceDir = rootDir.files[manga.source] ?: return
         val mangaDir = sourceDir.files[provider.getMangaDirName(manga)] ?: return
         provider.getValidChapterDirNames(chapter).forEach {
@@ -207,7 +220,10 @@ class DownloadCache(
      * @param manga the manga of the chapter.
      */
     @Synchronized
-    fun removeChapters(chapters: List<Chapter>, manga: Manga) {
+    fun removeChapters(
+        chapters: List<Chapter>,
+        manga: Manga
+    ) {
         val sourceDir = rootDir.files[manga.source] ?: return
         val mangaDir = sourceDir.files[provider.getMangaDirName(manga)] ?: return
         chapters.forEach { chapter ->

@@ -36,7 +36,6 @@ open class GlobalSearchController(
 ) : NucleusController<GlobalSearchControllerBinding, GlobalSearchPresenter>(),
     GlobalSearchCardAdapter.OnMangaClickListener,
     GlobalSearchAdapter.OnMoreClickListener {
-
     /**
      * Application preferences.
      */
@@ -58,7 +57,10 @@ open class GlobalSearchController(
      * @param container containing parent views.
      * @return inflated view
      */
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = GlobalSearchControllerBinding.inflate(inflater)
         return binding.root
     }
@@ -102,7 +104,10 @@ open class GlobalSearchController(
      * @param menu menu containing options.
      * @param inflater used to load the menu xml.
      */
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
         // Inflate menu.
         inflater.inflate(R.menu.global_search, menu)
 
@@ -111,17 +116,19 @@ open class GlobalSearchController(
         val searchView = searchItem.actionView as SearchView
         searchView.maxWidth = Int.MAX_VALUE
 
-        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
-            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
-                searchView.onActionViewExpanded() // Required to show the query in the view
-                searchView.setQuery(presenter.query, false)
-                return true
-            }
+        searchItem.setOnActionExpandListener(
+            object : MenuItem.OnActionExpandListener {
+                override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                    searchView.onActionViewExpanded() // Required to show the query in the view
+                    searchView.setQuery(presenter.query, false)
+                    return true
+                }
 
-            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
-                return true
+                override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                    return true
+                }
             }
-        })
+        )
 
         searchView.queryTextEvents()
             .filterIsInstance<QueryTextEvent.QuerySubmitted>()
@@ -153,12 +160,18 @@ open class GlobalSearchController(
         super.onDestroyView(view)
     }
 
-    override fun onSaveViewState(view: View, outState: Bundle) {
+    override fun onSaveViewState(
+        view: View,
+        outState: Bundle
+    ) {
         super.onSaveViewState(view, outState)
         adapter?.onSaveInstanceState(outState)
     }
 
-    override fun onRestoreViewState(view: View, savedViewState: Bundle) {
+    override fun onRestoreViewState(
+        view: View,
+        savedViewState: Bundle
+    ) {
         super.onRestoreViewState(view, savedViewState)
         adapter?.onRestoreInstanceState(savedViewState)
     }
@@ -196,7 +209,10 @@ open class GlobalSearchController(
      *
      * @param manga the initialized manga.
      */
-    fun onMangaInitialized(source: CatalogueSource, manga: Manga) {
+    fun onMangaInitialized(
+        source: CatalogueSource,
+        manga: Manga
+    ) {
         getHolder(source)?.setImage(manga)
     }
 
@@ -207,7 +223,10 @@ open class GlobalSearchController(
     /**
      * Opens a catalogue with the given controller.
      */
-    private fun openCatalogue(source: CatalogueSource, controller: BrowseSourceController) {
+    private fun openCatalogue(
+        source: CatalogueSource,
+        controller: BrowseSourceController
+    ) {
         preferences.lastUsedCatalogueSource().set(source.id)
         router.pushController(controller.withFadeTransaction())
     }

@@ -18,7 +18,6 @@ abstract class LibraryHolder<VB : ViewBinding>(
     view: View,
     val adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
 ) : BaseFlexibleViewHolder(view, adapter) {
-
     abstract val binding: VB
 
     /**

@@ -12,8 +12,8 @@ class MangaHolder(
     view: View,
     adapter: FlexibleAdapter<*>
 ) : BaseFlexibleViewHolder(view, adapter) {
-
     val binding = SourceListItemBinding.bind(view)
+
     fun bind(item: MangaItem) {
         // Update the title of the manga.
         binding.title.text = item.manga.title

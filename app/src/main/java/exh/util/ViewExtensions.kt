@@ -34,7 +34,10 @@ fun View.doOnApplyWindowInsets(f: (View, WindowInsets, ViewPaddingState) -> Unit
 }
 
 object ControllerViewWindowInsetsListener : View.OnApplyWindowInsetsListener {
-    override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
+    override fun onApplyWindowInsets(
+        v: View,
+        insets: WindowInsets
+    ): WindowInsets {
         v.updateLayoutParams<FrameLayout.LayoutParams> {
             val attrsArray = intArrayOf(android.R.attr.actionBarSize)
             val array = v.context.obtainStyledAttributes(attrsArray)
@@ -49,13 +52,15 @@ fun View.requestApplyInsetsWhenAttached() {
     if (isAttachedToWindow) {
         requestApplyInsets()
     } else {
-        addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-            override fun onViewAttachedToWindow(v: View) {
-                v.requestApplyInsets()
-            }
+        addOnAttachStateChangeListener(
+            object : View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(v: View) {
+                    v.requestApplyInsets()
+                }
 
-            override fun onViewDetachedFromWindow(v: View) = Unit
-        })
+                override fun onViewDetachedFromWindow(v: View) = Unit
+            }
+        )
     }
 }
 
@@ -79,14 +84,15 @@ inline fun View.updatePaddingRelative(
     setPaddingRelative(start, top, end, bottom)
 }
 
-private fun createStateForView(view: View) = ViewPaddingState(
-    view.paddingLeft,
-    view.paddingTop,
-    view.paddingRight,
-    view.paddingBottom,
-    view.paddingStart,
-    view.paddingEnd
-)
+private fun createStateForView(view: View) =
+    ViewPaddingState(
+        view.paddingLeft,
+        view.paddingTop,
+        view.paddingRight,
+        view.paddingBottom,
+        view.paddingStart,
+        view.paddingEnd
+    )
 
 data class ViewPaddingState(
     val left: Int,
@@ -98,7 +104,10 @@ data class ViewPaddingState(
 )
 
 object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
-    override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
+    override fun onApplyWindowInsets(
+        v: View,
+        insets: WindowInsets
+    ): WindowInsets {
         v.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
         // v.updatePaddingRelative(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
         return insets
@@ -113,29 +122,35 @@ object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
  * @param onLongClick Optional long click listener for each chip.
  * @param sourceId Optional source check to determine if we need special search functions for each chip.
  */
-fun ChipGroup.setChipsExtended(items: List<String>?, onClick: (item: String) -> Unit = {}, onLongClick: (item: String) -> Unit = {}, sourceId: Long = 0L) {
+fun ChipGroup.setChipsExtended(
+    items: List<String>?,
+    onClick: (item: String) -> Unit = {},
+    onLongClick: (item: String) -> Unit = {},
+    sourceId: Long = 0L
+) {
     removeAllViews()
 
     items?.forEach { item ->
-        val chip = Chip(context).apply {
-            text = item
-            var search = item
-            if (sourceId == EXH_SOURCE_ID || sourceId == EH_SOURCE_ID || sourceId == NHENTAI_SOURCE_ID) {
-                val parsed = parseTag(search)
-                if (sourceId == NHENTAI_SOURCE_ID) {
-                    search = wrapTagNHentai(parsed.first, parsed.second.substringBefore('|').trim())
+        val chip =
+            Chip(context).apply {
+                text = item
+                var search = item
+                if (sourceId == EXH_SOURCE_ID || sourceId == EH_SOURCE_ID || sourceId == NHENTAI_SOURCE_ID) {
+                    val parsed = parseTag(search)
+                    if (sourceId == NHENTAI_SOURCE_ID) {
+                        search = wrapTagNHentai(parsed.first, parsed.second.substringBefore('|').trim())
+                    } else {
+                        search = wrapTag(parsed.first, parsed.second.substringBefore('|').trim())
+                    }
                 } else {
-                    search = wrapTag(parsed.first, parsed.second.substringBefore('|').trim())
+                    search = wrapTag(search)
                 }
-            } else {
-                search = wrapTag(search)
+                setOnClickListener { onClick(search) }
+                setOnLongClickListener {
+                    onLongClick(search)
+                    false
+                }
             }
-            setOnClickListener { onClick(search) }
-            setOnLongClickListener {
-                onLongClick(search)
-                false
-            }
-        }
 
         addView(chip)
     }
@@ -143,19 +158,26 @@ fun ChipGroup.setChipsExtended(items: List<String>?, onClick: (item: String) -> 
 
 private fun parseTag(tag: String) = tag.substringBefore(':').trim() to tag.substringAfter(':').trim()
 
-private fun wrapTag(tag: String) = if (tag.contains(' ')) {
-    "\"$tag\""
-} else {
-    "$tag"
-}
+private fun wrapTag(tag: String) =
+    if (tag.contains(' ')) {
+        "\"$tag\""
+    } else {
+        "$tag"
+    }
 
-private fun wrapTag(namespace: String, tag: String) = if (tag.contains(' ')) {
+private fun wrapTag(
+    namespace: String,
+    tag: String
+) = if (tag.contains(' ')) {
     "$namespace:\"$tag$\""
 } else {
     "$namespace:$tag$"
 }
 
-private fun wrapTagNHentai(namespace: String, tag: String) = if (tag.contains(' ')) {
+private fun wrapTagNHentai(
+    namespace: String,
+    tag: String
+) = if (tag.contains(' ')) {
     if (namespace == "tag") {
         "\"$tag\""
     } else {

@@ -12,8 +12,7 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
  * Dialog to create a new category for the library.
  */
 class CategoryCreateDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
-        where T : Controller, T : CategoryCreateDialog.Listener {
-
+    where T : Controller, T : CategoryCreateDialog.Listener {
     /**
      * Name of the new category. Value updated with each input from the user.
      */

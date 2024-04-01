@@ -17,7 +17,6 @@ data class ExtensionGroupItem(
     val size: Int,
     val showSize: Boolean = false
 ) : AbstractHeaderItem<ExtensionGroupHolder>() {
-
     var actionLabel: String? = null
     var actionOnClick: (View.OnClickListener)? = null
 
@@ -31,7 +30,10 @@ data class ExtensionGroupItem(
     /**
      * Creates a new view holder for this item.
      */
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<androidx.recyclerview.widget.RecyclerView.ViewHolder>>): ExtensionGroupHolder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<androidx.recyclerview.widget.RecyclerView.ViewHolder>>
+    ): ExtensionGroupHolder {
         return ExtensionGroupHolder(view, adapter)
     }
 

@@ -9,7 +9,6 @@ import uy.kohesive.injekt.api.get
  * Configuration used by webtoon viewers.
  */
 class WebtoonConfig(preferences: PreferencesHelper = Injekt.get()) : ViewerConfig(preferences) {
-
     var imageCropBorders = false
         private set
 

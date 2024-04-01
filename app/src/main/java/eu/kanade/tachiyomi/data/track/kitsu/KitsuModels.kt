@@ -22,28 +22,31 @@ class KitsuSearchManga(obj: JsonObject) {
     val subType = obj.get("subtype").nullString
     val original = obj.get("posterImage").nullObj?.get("original")?.asString
     private val synopsis by obj.byString
-    private var startDate = obj.get("startDate").nullString?.let {
-        val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-        outputDf.format(Date(it.toLong() * 1000))
-    }
+    private var startDate =
+        obj.get("startDate").nullString?.let {
+            val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+            outputDf.format(Date(it.toLong() * 1000))
+        }
     private val endDate = obj.get("endDate").nullString
 
     @CallSuper
-    fun toTrack() = TrackSearch.create(TrackManager.KITSU).apply {
-        media_id = this@KitsuSearchManga.id
-        title = canonicalTitle
-        total_chapters = chapterCount ?: 0
-        cover_url = original ?: ""
-        summary = synopsis
-        tracking_url = KitsuApi.mangaUrl(media_id)
-        publishing_status = if (endDate == null) {
-            "Publishing"
-        } else {
-            "Finished"
+    fun toTrack() =
+        TrackSearch.create(TrackManager.KITSU).apply {
+            media_id = this@KitsuSearchManga.id
+            title = canonicalTitle
+            total_chapters = chapterCount ?: 0
+            cover_url = original ?: ""
+            summary = synopsis
+            tracking_url = KitsuApi.mangaUrl(media_id)
+            publishing_status =
+                if (endDate == null) {
+                    "Publishing"
+                } else {
+                    "Finished"
+                }
+            publishing_type = subType ?: ""
+            start_date = startDate ?: ""
         }
-        publishing_type = subType ?: ""
-        start_date = startDate ?: ""
-    }
 }
 
 class KitsuLibManga(obj: JsonObject, manga: JsonObject) {
@@ -59,39 +62,42 @@ class KitsuLibManga(obj: JsonObject, manga: JsonObject) {
     private val ratingTwenty = obj["attributes"].obj.get("ratingTwenty").nullString
     val progress by obj["attributes"].byInt
 
-    fun toTrack() = TrackSearch.create(TrackManager.KITSU).apply {
-        media_id = libraryId
-        title = canonicalTitle
-        total_chapters = chapterCount ?: 0
-        cover_url = original
-        summary = synopsis
-        tracking_url = KitsuApi.mangaUrl(media_id)
-        publishing_status = this@KitsuLibManga.status
-        publishing_type = type
-        start_date = startDate
-        status = toTrackStatus()
-        score = ratingTwenty?.let { it.toInt() / 2f } ?: 0f
-        last_chapter_read = progress
-    }
+    fun toTrack() =
+        TrackSearch.create(TrackManager.KITSU).apply {
+            media_id = libraryId
+            title = canonicalTitle
+            total_chapters = chapterCount ?: 0
+            cover_url = original
+            summary = synopsis
+            tracking_url = KitsuApi.mangaUrl(media_id)
+            publishing_status = this@KitsuLibManga.status
+            publishing_type = type
+            start_date = startDate
+            status = toTrackStatus()
+            score = ratingTwenty?.let { it.toInt() / 2f } ?: 0f
+            last_chapter_read = progress
+        }
 
-    private fun toTrackStatus() = when (status) {
-        "current" -> Kitsu.READING
-        "completed" -> Kitsu.COMPLETED
-        "on_hold" -> Kitsu.ON_HOLD
-        "dropped" -> Kitsu.DROPPED
-        "planned" -> Kitsu.PLAN_TO_READ
+    private fun toTrackStatus() =
+        when (status) {
+            "current" -> Kitsu.READING
+            "completed" -> Kitsu.COMPLETED
+            "on_hold" -> Kitsu.ON_HOLD
+            "dropped" -> Kitsu.DROPPED
+            "planned" -> Kitsu.PLAN_TO_READ
+            else -> throw Exception("Unknown status")
+        }
+}
+
+fun Track.toKitsuStatus() =
+    when (status) {
+        Kitsu.READING -> "current"
+        Kitsu.COMPLETED -> "completed"
+        Kitsu.ON_HOLD -> "on_hold"
+        Kitsu.DROPPED -> "dropped"
+        Kitsu.PLAN_TO_READ -> "planned"
         else -> throw Exception("Unknown status")
     }
-}
-
-fun Track.toKitsuStatus() = when (status) {
-    Kitsu.READING -> "current"
-    Kitsu.COMPLETED -> "completed"
-    Kitsu.ON_HOLD -> "on_hold"
-    Kitsu.DROPPED -> "dropped"
-    Kitsu.PLAN_TO_READ -> "planned"
-    else -> throw Exception("Unknown status")
-}
 
 fun Track.toKitsuScore(): String? {
     return if (score > 0) (score * 2).toInt().toString() else null

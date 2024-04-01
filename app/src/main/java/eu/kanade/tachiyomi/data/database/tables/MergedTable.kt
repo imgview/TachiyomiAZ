@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.database.tables
 
 object MergedTable {
-
     const val TABLE = "merged"
 
     const val COL_MERGE_ID = "mergeID"

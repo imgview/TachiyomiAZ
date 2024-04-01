@@ -25,9 +25,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import rx.Observable
@@ -72,11 +72,12 @@ class BackupTest {
         db = legacyBackupManager.databaseHelper
 
         // Mock the source manager
-        val module = object : InjektModule {
-            override fun InjektRegistrar.registerInjectables() {
-                addSingleton(mock(SourceManager::class.java, RETURNS_DEEP_STUBS))
+        val module =
+            object : InjektModule {
+                override fun InjektRegistrar.registerInjectables() {
+                    addSingleton(mock(SourceManager::class.java, RETURNS_DEEP_STUBS))
+                }
             }
-        }
         Injekt.importModule(module)
 
         source = mock(HttpSource::class.java)

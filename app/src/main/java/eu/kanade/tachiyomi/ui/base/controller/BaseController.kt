@@ -17,45 +17,68 @@ import timber.log.Timber
 abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
     RestoreViewOnCreateController(bundle),
     LayoutContainer {
-
     lateinit var binding: VB
 
     init {
-        addLifecycleListener(object : LifecycleListener() {
-            override fun postCreateView(controller: Controller, view: View) {
-                onViewCreated(view)
-            }
+        addLifecycleListener(
+            object : LifecycleListener() {
+                override fun postCreateView(
+                    controller: Controller,
+                    view: View
+                ) {
+                    onViewCreated(view)
+                }
 
-            override fun preCreateView(controller: Controller) {
-                Timber.d("Create view for ${controller.instance()}")
-            }
+                override fun preCreateView(controller: Controller) {
+                    Timber.d("Create view for ${controller.instance()}")
+                }
 
-            override fun preAttach(controller: Controller, view: View) {
-                Timber.d("Attach view for ${controller.instance()}")
-            }
+                override fun preAttach(
+                    controller: Controller,
+                    view: View
+                ) {
+                    Timber.d("Attach view for ${controller.instance()}")
+                }
 
-            override fun preDetach(controller: Controller, view: View) {
-                Timber.d("Detach view for ${controller.instance()}")
-            }
+                override fun preDetach(
+                    controller: Controller,
+                    view: View
+                ) {
+                    Timber.d("Detach view for ${controller.instance()}")
+                }
 
-            override fun preDestroyView(controller: Controller, view: View) {
-                Timber.d("Destroy view for ${controller.instance()}")
+                override fun preDestroyView(
+                    controller: Controller,
+                    view: View
+                ) {
+                    Timber.d("Destroy view for ${controller.instance()}")
+                }
             }
-        })
+        )
     }
 
     override val containerView: View?
         get() = view
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedViewState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup,
+        savedViewState: Bundle?
+    ): View {
         return inflateView(inflater, container)
     }
 
-    abstract fun inflateView(inflater: LayoutInflater, container: ViewGroup): View
+    abstract fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View
 
     open fun onViewCreated(view: View) {}
 
-    override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
+    override fun onChangeStarted(
+        handler: ControllerChangeHandler,
+        type: ControllerChangeType
+    ) {
         if (type.isEnter) {
             setTitle()
         }
@@ -90,18 +113,23 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
      */
     var expandActionViewFromInteraction = false
 
-    fun MenuItem.fixExpand(onExpand: ((MenuItem) -> Boolean)? = null, onCollapse: ((MenuItem) -> Boolean)? = null) {
-        setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
-            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
-                return onExpand?.invoke(item) ?: true
-            }
+    fun MenuItem.fixExpand(
+        onExpand: ((MenuItem) -> Boolean)? = null,
+        onCollapse: ((MenuItem) -> Boolean)? = null
+    ) {
+        setOnActionExpandListener(
+            object : MenuItem.OnActionExpandListener {
+                override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                    return onExpand?.invoke(item) ?: true
+                }
 
-            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
-                activity?.invalidateOptionsMenu()
+                override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                    activity?.invalidateOptionsMenu()
 
-                return onCollapse?.invoke(item) ?: true
+                    return onCollapse?.invoke(item) ?: true
+                }
             }
-        })
+        )
 
         if (expandActionViewFromInteraction) {
             expandActionViewFromInteraction = false

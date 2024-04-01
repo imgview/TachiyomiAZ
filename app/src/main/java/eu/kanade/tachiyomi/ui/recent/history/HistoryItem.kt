@@ -11,12 +11,14 @@ import eu.kanade.tachiyomi.ui.recent.DateSectionItem
 
 class HistoryItem(val mch: MangaChapterHistory, header: DateSectionItem) :
     AbstractSectionableItem<HistoryHolder, DateSectionItem>(header) {
-
     override fun getLayoutRes(): Int {
         return R.layout.history_item
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): HistoryHolder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): HistoryHolder {
         return HistoryHolder(view, adapter as HistoryAdapter)
     }
 

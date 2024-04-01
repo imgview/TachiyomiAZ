@@ -2,7 +2,6 @@ package exh.util
 
 import com.pushtorefresh.storio.operations.PreparedOperation
 import com.pushtorefresh.storio.sqlite.operations.get.PreparedGetObject
-import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import rx.Completable
 import rx.Observable
@@ -10,6 +9,7 @@ import rx.Scheduler
 import rx.Single
 import rx.Subscription
 import rx.subjects.ReplaySubject
+import kotlin.coroutines.resumeWithException
 
 /**
  * Transform a cold single to a hot single
@@ -37,18 +37,19 @@ suspend fun <T> Single<T>.await(subscribeOn: Scheduler? = null): T {
     return suspendCancellableCoroutine { continuation ->
         val self = if (subscribeOn != null) subscribeOn(subscribeOn) else this
         lateinit var sub: Subscription
-        sub = self.subscribe(
-            {
-                continuation.resume(it) {
-                    sub.unsubscribe()
+        sub =
+            self.subscribe(
+                {
+                    continuation.resume(it) {
+                        sub.unsubscribe()
+                    }
+                },
+                {
+                    if (!continuation.isCancelled) {
+                        continuation.resumeWithException(it)
+                    }
                 }
-            },
-            {
-                if (!continuation.isCancelled) {
-                    continuation.resumeWithException(it)
-                }
-            }
-        )
+            )
 
         continuation.invokeOnCancellation {
             sub.unsubscribe()
@@ -57,24 +58,26 @@ suspend fun <T> Single<T>.await(subscribeOn: Scheduler? = null): T {
 }
 
 suspend fun <T> PreparedOperation<T>.await(): T = asRxSingle().await()
+
 suspend fun <T> PreparedGetObject<T>.await(): T? = asRxSingle().await()
 
 suspend fun Completable.awaitSuspending(subscribeOn: Scheduler? = null) {
     return suspendCancellableCoroutine { continuation ->
         val self = if (subscribeOn != null) subscribeOn(subscribeOn) else this
         lateinit var sub: Subscription
-        sub = self.subscribe(
-            {
-                continuation.resume(Unit) {
-                    sub.unsubscribe()
+        sub =
+            self.subscribe(
+                {
+                    continuation.resume(Unit) {
+                        sub.unsubscribe()
+                    }
+                },
+                {
+                    if (!continuation.isCancelled) {
+                        continuation.resumeWithException(it)
+                    }
                 }
-            },
-            {
-                if (!continuation.isCancelled) {
-                    continuation.resumeWithException(it)
-                }
-            }
-        )
+            )
 
         continuation.invokeOnCancellation {
             sub.unsubscribe()

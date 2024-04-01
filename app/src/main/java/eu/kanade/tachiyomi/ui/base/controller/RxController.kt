@@ -9,7 +9,6 @@ import rx.Subscription
 import rx.subscriptions.CompositeSubscription
 
 abstract class RxController<VB : ViewBinding>(bundle: Bundle? = null) : BaseController<VB>(bundle) {
-
     private var untilDestroySubscriptions = CompositeSubscription()
     private var untilDetachSubscriptions = CompositeSubscription()
 

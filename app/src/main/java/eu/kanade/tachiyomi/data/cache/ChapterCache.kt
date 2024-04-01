@@ -10,8 +10,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.saveTo
-import java.io.File
-import java.io.IOException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -22,6 +20,8 @@ import okio.buffer
 import okio.sink
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
+import java.io.File
+import java.io.IOException
 
 /**
  * Class used to create chapter cache
@@ -145,7 +145,10 @@ class ChapterCache(private val context: Context) {
      * @param chapter the chapter.
      * @param pages list of pages.
      */
-    fun putPageListToCache(chapter: Chapter, pages: List<Page>) {
+    fun putPageListToCache(
+        chapter: Chapter,
+        pages: List<Page>
+    ) {
         // Convert list of pages to json string.
         val cachedValue = gson.toJson(pages)
 
@@ -207,7 +210,10 @@ class ChapterCache(private val context: Context) {
      * @throws IOException image error.
      */
     @Throws(IOException::class)
-    fun putImageToCache(imageUrl: String, response: Response) {
+    fun putImageToCache(
+        imageUrl: String,
+        response: Response
+    ) {
         // Initialize editor (edits the values for an entry).
         var editor: DiskLruCache.Editor? = null
 

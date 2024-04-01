@@ -10,15 +10,15 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.recent.DateSectionItem
 import eu.kanade.tachiyomi.util.lang.toDateKey
-import java.util.Calendar
-import java.util.Date
-import java.util.TreeMap
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Calendar
+import java.util.Date
+import java.util.TreeMap
 
 class UpdatesPresenter(
     val preferences: PreferencesHelper = Injekt.get(),
@@ -26,7 +26,6 @@ class UpdatesPresenter(
     private val downloadManager: DownloadManager = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get()
 ) : BasePresenter<UpdatesController>() {
-
     /**
      * List containing chapter and manga information
      */
@@ -52,17 +51,19 @@ class UpdatesPresenter(
      */
     private fun getUpdatesObservable(): Observable<List<UpdatesItem>> {
         // Set date limit for recent chapters
-        val cal = Calendar.getInstance().apply {
-            time = Date()
-            add(Calendar.MONTH, -1)
-        }
+        val cal =
+            Calendar.getInstance().apply {
+                time = Date()
+                add(Calendar.MONTH, -1)
+            }
 
         return db.getRecentChapters(cal.time).asRxObservable()
             // Convert to a list of recent chapters.
             .map { mangaChapters ->
                 val map = TreeMap<Date, MutableList<MangaChapter>> { d1, d2 -> d2.compareTo(d1) }
-                val byDay = mangaChapters
-                    .groupByTo(map, { it.chapter.date_fetch.toDateKey() })
+                val byDay =
+                    mangaChapters
+                        .groupByTo(map, { it.chapter.date_fetch.toDateKey() })
                 byDay.flatMap { entry ->
                     val dateItem = DateSectionItem(entry.key)
                     entry.value
@@ -134,7 +135,10 @@ class UpdatesPresenter(
      * @param items list of selected chapters
      * @param read read status
      */
-    fun markChapterRead(items: List<UpdatesItem>, read: Boolean) {
+    fun markChapterRead(
+        items: List<UpdatesItem>,
+        read: Boolean
+    ) {
         val chapters = items.map { it.chapter }
         chapters.forEach {
             it.read = read

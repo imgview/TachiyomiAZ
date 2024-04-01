@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.data.updater.UpdateChecker
 import eu.kanade.tachiyomi.data.updater.UpdateResult
 
 class GithubUpdateChecker : UpdateChecker() {
-
     private val service: GithubService = GithubService.create()
 
     override suspend fun checkForUpdate(): UpdateResult {

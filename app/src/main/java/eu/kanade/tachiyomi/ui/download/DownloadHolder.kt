@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.util.view.popupMenu
  */
 class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
     BaseFlexibleViewHolder(view, adapter) {
-
     private val binding = DownloadItemBinding.bind(view)
 
     init {

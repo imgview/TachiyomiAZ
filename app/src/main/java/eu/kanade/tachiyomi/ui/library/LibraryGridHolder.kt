@@ -33,7 +33,6 @@ open class LibraryGridHolder(
     private val view: View,
     adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
 ) : LibraryHolder<SourceCompactGridItemBinding>(view, adapter) {
-
     override val binding = SourceCompactGridItemBinding.bind(view)
 
     private val preferences: PreferencesHelper = Injekt.get()
@@ -78,11 +77,12 @@ open class LibraryGridHolder(
         // set local visibility if its local manga
         binding.localText.visibleIf { item.manga.isLocal() }
 
-        binding.card.radius = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            preferences.eh_library_corner_radius().get().toFloat(),
-            view.context.resources.displayMetrics
-        )
+        binding.card.radius =
+            TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                preferences.eh_library_corner_radius().get().toFloat(),
+                view.context.resources.displayMetrics
+            )
 
         // SY -->
         binding.playLayout.isVisible = (item.manga.unread > 0 && item.startReadingButton)

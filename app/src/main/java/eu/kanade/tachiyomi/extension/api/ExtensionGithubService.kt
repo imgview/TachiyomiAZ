@@ -15,21 +15,23 @@ import uy.kohesive.injekt.injectLazy
  * Used to get the extension repo listing from GitHub.
  */
 interface ExtensionGithubService {
-
     companion object {
         @OptIn(ExperimentalSerializationApi::class)
         fun create(): ExtensionGithubService {
             val network: NetworkHelper by injectLazy()
-            val adapter = Retrofit.Builder()
-                .baseUrl(ExtensionGithubApi.BASE_URL)
-                .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
-                .client(network.client)
-                .build()
+            val adapter =
+                Retrofit.Builder()
+                    .baseUrl(ExtensionGithubApi.BASE_URL)
+                    .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+                    .client(network.client)
+                    .build()
 
             return adapter.create(ExtensionGithubService::class.java)
         }
     }
 
     @GET
-    suspend fun getRepo(@Url url: String): JsonArray
+    suspend fun getRepo(
+        @Url url: String
+    ): JsonArray
 }

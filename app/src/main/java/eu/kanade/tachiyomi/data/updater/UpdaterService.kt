@@ -20,12 +20,11 @@ import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.acquireWakeLock
 import eu.kanade.tachiyomi.util.system.isServiceRunning
-import java.io.File
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import java.io.File
 
 class UpdaterService : Service() {
-
     private val network: NetworkHelper by injectLazy()
 
     /**
@@ -49,7 +48,11 @@ class UpdaterService : Service() {
      */
     override fun onBind(intent: Intent): IBinder? = null
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int
+    ): Int {
         if (intent == null) return START_NOT_STICKY
 
         val url = intent.getStringExtra(EXTRA_DOWNLOAD_URL) ?: return START_NOT_STICKY
@@ -84,27 +87,35 @@ class UpdaterService : Service() {
      *
      * @param url url location of file
      */
-    private suspend fun downloadApk(title: String, url: String) {
+    private suspend fun downloadApk(
+        title: String,
+        url: String
+    ) {
         // Show notification download starting.
         notifier.onDownloadStarted(title)
 
-        val progressListener = object : ProgressListener {
-            // Progress of the download
-            var savedProgress = 0
+        val progressListener =
+            object : ProgressListener {
+                // Progress of the download
+                var savedProgress = 0
 
-            // Keep track of the last notification sent to avoid posting too many.
-            var lastTick = 0L
+                // Keep track of the last notification sent to avoid posting too many.
+                var lastTick = 0L
 
-            override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
-                val progress = (100 * (bytesRead.toFloat() / contentLength)).toInt()
-                val currentTime = System.currentTimeMillis()
-                if (progress > savedProgress && currentTime - 200 > lastTick) {
-                    savedProgress = progress
-                    lastTick = currentTime
-                    notifier.onProgressChange(progress)
+                override fun update(
+                    bytesRead: Long,
+                    contentLength: Long,
+                    done: Boolean
+                ) {
+                    val progress = (100 * (bytesRead.toFloat() / contentLength)).toInt()
+                    val currentTime = System.currentTimeMillis()
+                    if (progress > savedProgress && currentTime - 200 > lastTick) {
+                        savedProgress = progress
+                        lastTick = currentTime
+                        notifier.onProgressChange(progress)
+                    }
                 }
             }
-        }
 
         try {
             // Download the new update.
@@ -127,7 +138,6 @@ class UpdaterService : Service() {
     }
 
     companion object {
-
         internal const val EXTRA_DOWNLOAD_URL = "${BuildConfig.APPLICATION_ID}.UpdaterService.DOWNLOAD_URL"
         internal const val EXTRA_DOWNLOAD_TITLE = "${BuildConfig.APPLICATION_ID}.UpdaterService.DOWNLOAD_TITLE"
 
@@ -137,8 +147,7 @@ class UpdaterService : Service() {
          * @param context the application context.
          * @return true if the service is running, false otherwise.
          */
-        private fun isRunning(context: Context): Boolean =
-            context.isServiceRunning(UpdaterService::class.java)
+        private fun isRunning(context: Context): Boolean = context.isServiceRunning(UpdaterService::class.java)
 
         /**
          * Downloads a new update and let the user install the new version from a notification.
@@ -146,12 +155,17 @@ class UpdaterService : Service() {
          * @param context the application context.
          * @param url the url to the new update.
          */
-        fun start(context: Context, url: String, title: String = context.getString(R.string.app_name)) {
+        fun start(
+            context: Context,
+            url: String,
+            title: String = context.getString(R.string.app_name)
+        ) {
             if (!isRunning(context)) {
-                val intent = Intent(context, UpdaterService::class.java).apply {
-                    putExtra(EXTRA_DOWNLOAD_TITLE, title)
-                    putExtra(EXTRA_DOWNLOAD_URL, url)
-                }
+                val intent =
+                    Intent(context, UpdaterService::class.java).apply {
+                        putExtra(EXTRA_DOWNLOAD_TITLE, title)
+                        putExtra(EXTRA_DOWNLOAD_URL, url)
+                    }
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                     context.startService(intent)
                 } else {
@@ -166,10 +180,14 @@ class UpdaterService : Service() {
          * @param url the url to the new update.
          * @return [PendingIntent]
          */
-        internal fun downloadApkPendingService(context: Context, url: String): PendingIntent {
-            val intent = Intent(context, UpdaterService::class.java).apply {
-                putExtra(EXTRA_DOWNLOAD_URL, url)
-            }
+        internal fun downloadApkPendingService(
+            context: Context,
+            url: String
+        ): PendingIntent {
+            val intent =
+                Intent(context, UpdaterService::class.java).apply {
+                    putExtra(EXTRA_DOWNLOAD_URL, url)
+                }
             return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         }
     }

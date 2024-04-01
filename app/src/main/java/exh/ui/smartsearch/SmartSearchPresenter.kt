@@ -17,7 +17,6 @@ import kotlinx.coroutines.launch
 
 class SmartSearchPresenter(private val source: CatalogueSource?, private val config: SourceController.SmartSearchConfig?) :
     BasePresenter<SmartSearchController>(), CoroutineScope {
-
     override val coroutineContext = Job() + Dispatchers.Main
 
     val smartSearchChannel = Channel<SearchResults>()
@@ -29,21 +28,22 @@ class SmartSearchPresenter(private val source: CatalogueSource?, private val con
 
         if (source != null && config != null) {
             launch(Dispatchers.Default) {
-                val result = try {
-                    val resultManga = smartSearchEngine.smartSearch(source, config.origTitle)
-                    if (resultManga != null) {
-                        val localManga = smartSearchEngine.networkToLocalManga(resultManga, source.id)
-                        SearchResults.Found(localManga)
-                    } else {
-                        SearchResults.NotFound
+                val result =
+                    try {
+                        val resultManga = smartSearchEngine.smartSearch(source, config.origTitle)
+                        if (resultManga != null) {
+                            val localManga = smartSearchEngine.networkToLocalManga(resultManga, source.id)
+                            SearchResults.Found(localManga)
+                        } else {
+                            SearchResults.NotFound
+                        }
+                    } catch (e: Exception) {
+                        if (e is CancellationException) {
+                            throw e
+                        } else {
+                            SearchResults.Error
+                        }
                     }
-                } catch (e: Exception) {
-                    if (e is CancellationException) {
-                        throw e
-                    } else {
-                        SearchResults.Error
-                    }
-                }
 
                 smartSearchChannel.send(result)
             }
@@ -60,7 +60,9 @@ class SmartSearchPresenter(private val source: CatalogueSource?, private val con
 
     sealed class SearchResults {
         data class Found(val manga: Manga) : SearchResults()
+
         object NotFound : SearchResults()
+
         object Error : SearchResults()
     }
 }

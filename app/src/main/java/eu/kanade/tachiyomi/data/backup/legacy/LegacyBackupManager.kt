@@ -52,8 +52,6 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.toSManga
 import eu.kanade.tachiyomi.util.lang.runAsObservable
 import exh.savedsearches.JsonSavedSearch
-import java.lang.RuntimeException
-import kotlin.math.max
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -61,9 +59,10 @@ import rx.Observable
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.lang.RuntimeException
+import kotlin.math.max
 
 class LegacyBackupManager(context: Context, version: Int = CURRENT_VERSION) : AbstractBackupManager(context) {
-
     var parserVersion: Int = version
         private set
 
@@ -79,17 +78,18 @@ class LegacyBackupManager(context: Context, version: Int = CURRENT_VERSION) : Ab
         parser = initParser()
     }
 
-    private fun initParser(): Gson = when (parserVersion) {
-        2 ->
-            GsonBuilder()
-                .registerTypeAdapter<MangaImpl>(MangaTypeAdapter.build())
-                .registerTypeHierarchyAdapter<ChapterImpl>(ChapterTypeAdapter.build())
-                .registerTypeAdapter<CategoryImpl>(CategoryTypeAdapter.build())
-                .registerTypeAdapter<DHistory>(HistoryTypeAdapter.build())
-                .registerTypeHierarchyAdapter<TrackImpl>(TrackTypeAdapter.build())
-                .create()
-        else -> throw Exception("Unknown backup version")
-    }
+    private fun initParser(): Gson =
+        when (parserVersion) {
+            2 ->
+                GsonBuilder()
+                    .registerTypeAdapter<MangaImpl>(MangaTypeAdapter.build())
+                    .registerTypeHierarchyAdapter<ChapterImpl>(ChapterTypeAdapter.build())
+                    .registerTypeAdapter<CategoryImpl>(CategoryTypeAdapter.build())
+                    .registerTypeAdapter<DHistory>(HistoryTypeAdapter.build())
+                    .registerTypeHierarchyAdapter<TrackImpl>(TrackTypeAdapter.build())
+                    .create()
+            else -> throw Exception("Unknown backup version")
+        }
 
     /**
      * Create backup Json file from database
@@ -97,7 +97,11 @@ class LegacyBackupManager(context: Context, version: Int = CURRENT_VERSION) : Ab
      * @param uri path of Uri
      * @param isJob backup called from job
      */
-    override fun createBackup(uri: Uri, flags: Int, isJob: Boolean): String? {
+    override fun createBackup(
+        uri: Uri,
+        flags: Int,
+        isJob: Boolean
+    ): String? {
         // Create root object
         val root = JsonObject()
 
@@ -148,28 +152,29 @@ class LegacyBackupManager(context: Context, version: Int = CURRENT_VERSION) : Ab
         }
 
         try {
-            val file: UniFile = (
-                if (isJob) {
-                    // Get dir of file and create
-                    var dir = UniFile.fromUri(context, uri)
-                    dir = dir.createDirectory("automatic")
+            val file: UniFile =
+                (
+                    if (isJob) {
+                        // Get dir of file and create
+                        var dir = UniFile.fromUri(context, uri)
+                        dir = dir.createDirectory("automatic")
 
-                    // Delete older backups
-                    val numberOfBackups = numberOfBackups()
-                    val backupRegex = Regex("""tachiyomi_\d+-\d+-\d+_\d+-\d+.json""")
-                    dir.listFiles { _, filename -> backupRegex.matches(filename) }
-                        .orEmpty()
-                        .sortedByDescending { it.name }
-                        .drop(numberOfBackups - 1)
-                        .forEach { it.delete() }
+                        // Delete older backups
+                        val numberOfBackups = numberOfBackups()
+                        val backupRegex = Regex("""tachiyomi_\d+-\d+-\d+_\d+-\d+.json""")
+                        dir.listFiles { _, filename -> backupRegex.matches(filename) }
+                            .orEmpty()
+                            .sortedByDescending { it.name }
+                            .drop(numberOfBackups - 1)
+                            .forEach { it.delete() }
 
-                    // Create new file to place backup
-                    dir.createFile(Backup.getDefaultFilename())
-                } else {
-                    UniFile.fromUri(context, uri)
-                }
-                )
-                ?: throw Exception("Couldn't create backup file")
+                        // Create new file to place backup
+                        dir.createFile(Backup.getDefaultFilename())
+                    } else {
+                        UniFile.fromUri(context, uri)
+                    }
+                    )
+                    ?: throw Exception("Couldn't create backup file")
 
             file.openOutputStream().bufferedWriter().use {
                 parser.toJson(root, it)
@@ -181,7 +186,10 @@ class LegacyBackupManager(context: Context, version: Int = CURRENT_VERSION) : Ab
         }
     }
 
-    private fun backupExtensionInfo(root: JsonArray, extensions: Set<String>) {
+    private fun backupExtensionInfo(
+        root: JsonArray,
+        extensions: Set<String>
+    ) {
         extensions.sorted().forEach {
             root.add(it)
         }
@@ -203,7 +211,10 @@ class LegacyBackupManager(context: Context, version: Int = CURRENT_VERSION) : Ab
      * @param manga manga that gets converted
      * @return [JsonElement] containing manga information
      */
-    internal fun backupMangaObject(manga: Manga, options: Int): JsonElement {
+    internal fun backupMangaObject(
+        manga: Manga,
+        options: Int
+    ): JsonElement {
         // Entry for this manga
         val entry = JsonObject()
 
@@ -244,10 +255,11 @@ class LegacyBackupManager(context: Context, version: Int = CURRENT_VERSION) : Ab
         if (options and BACKUP_HISTORY_MASK == BACKUP_HISTORY) {
             val historyForManga = databaseHelper.getHistoryByMangaId(manga.id!!).executeAsBlocking()
             if (historyForManga.isNotEmpty()) {
-                val historyData = historyForManga.mapNotNull { history ->
-                    val url = databaseHelper.getChapter(history.chapter_id).executeAsBlocking()?.url
-                    url?.let { DHistory(url, history.last_read) }
-                }
+                val historyData =
+                    historyForManga.mapNotNull { history ->
+                        val url = databaseHelper.getChapter(history.chapter_id).executeAsBlocking()?.url
+                        url?.let { DHistory(url, history.last_read) }
+                    }
                 val historyJson = parser.toJsonTree(historyData)
                 if (historyJson.asJsonArray.size() > 0) {
                     entry[HISTORY] = historyJson
@@ -258,7 +270,10 @@ class LegacyBackupManager(context: Context, version: Int = CURRENT_VERSION) : Ab
         return entry
     }
 
-    fun restoreMangaNoFetch(manga: Manga, dbManga: Manga) {
+    fun restoreMangaNoFetch(
+        manga: Manga,
+        dbManga: Manga
+    ) {
         manga.id = dbManga.id
         manga.copyFrom(dbManga)
         manga.favorite = true
@@ -272,7 +287,10 @@ class LegacyBackupManager(context: Context, version: Int = CURRENT_VERSION) : Ab
      * @param manga manga that needs updating
      * @return [Observable] that contains manga
      */
-    fun restoreMangaFetchObservable(source: Source, manga: Manga): Observable<Manga> {
+    fun restoreMangaFetchObservable(
+        source: Source,
+        manga: Manga
+    ): Observable<Manga> {
         return runAsObservable({
             val networkManga = source.getMangaDetails(manga.toMangaInfo())
             manga.copyFrom(networkManga.toSManga())
@@ -323,7 +341,10 @@ class LegacyBackupManager(context: Context, version: Int = CURRENT_VERSION) : Ab
      * @param manga the manga whose categories have to be restored.
      * @param categories the categories to restore.
      */
-    internal fun restoreCategoriesForManga(manga: Manga, categories: List<String>) {
+    internal fun restoreCategoriesForManga(
+        manga: Manga,
+        categories: List<String>
+    ) {
         val dbCategories = databaseHelper.getCategories().executeAsBlocking()
         val mangaCategoriesToUpdate = mutableListOf<MangaCategory>()
         for (backupCategoryStr in categories) {
@@ -361,9 +382,10 @@ class LegacyBackupManager(context: Context, version: Int = CURRENT_VERSION) : Ab
             } else {
                 // If not in database create
                 databaseHelper.getChapter(url).executeAsBlocking()?.let {
-                    val historyToAdd = History.create(it).apply {
-                        last_read = lastRead
-                    }
+                    val historyToAdd =
+                        History.create(it).apply {
+                            last_read = lastRead
+                        }
                     historyToBeUpdated.add(historyToAdd)
                 }
             }
@@ -377,7 +399,10 @@ class LegacyBackupManager(context: Context, version: Int = CURRENT_VERSION) : Ab
      * @param manga the manga whose sync have to be restored.
      * @param tracks the track list to restore.
      */
-    internal fun restoreTrackForManga(manga: Manga, tracks: List<Track>) {
+    internal fun restoreTrackForManga(
+        manga: Manga,
+        tracks: List<Track>
+    ) {
         // Fix foreign keys with the current manga id
         tracks.map { it.manga_id = manga.id!! }
 
@@ -424,7 +449,10 @@ class LegacyBackupManager(context: Context, version: Int = CURRENT_VERSION) : Ab
      * @param chapters list containing chapters that get restored
      * @return boolean answering if chapter fetch is not needed
      */
-    internal fun restoreChaptersForManga(manga: Manga, chapters: List<Chapter>): Boolean {
+    internal fun restoreChaptersForManga(
+        manga: Manga,
+        chapters: List<Chapter>
+    ): Boolean {
         val dbChapters = databaseHelper.getChapters(manga).executeAsBlocking()
 
         // Return if fetch is needed
@@ -453,43 +481,47 @@ class LegacyBackupManager(context: Context, version: Int = CURRENT_VERSION) : Ab
     internal fun restoreSavedSearches(jsonSavedSearches: JsonElement) {
         val backupSavedSearches = jsonSavedSearches.asString.split("***").toSet()
 
-        val newSavedSearches = backupSavedSearches.mapNotNull {
-            try {
-                val id = it.substringBefore(':').toLong()
-                val content = Json.decodeFromString<JsonSavedSearch>(it.substringAfter(':'))
-                id to content
-            } catch (t: RuntimeException) {
-                // Load failed
-                Timber.e(t, "Failed to load saved search!")
-                t.printStackTrace()
-                null
-            }
-        }.toMutableList()
+        val newSavedSearches =
+            backupSavedSearches.mapNotNull {
+                try {
+                    val id = it.substringBefore(':').toLong()
+                    val content = Json.decodeFromString<JsonSavedSearch>(it.substringAfter(':'))
+                    id to content
+                } catch (t: RuntimeException) {
+                    // Load failed
+                    Timber.e(t, "Failed to load saved search!")
+                    t.printStackTrace()
+                    null
+                }
+            }.toMutableList()
 
         val currentSources = newSavedSearches.map { it.first }.toSet()
 
-        newSavedSearches += preferences.eh_savedSearches().get().mapNotNull {
-            try {
-                val id = it.substringBefore(':').toLong()
-                val content = Json.decodeFromString<JsonSavedSearch>(it.substringAfter(':'))
-                id to content
-            } catch (t: RuntimeException) {
-                // Load failed
-                Timber.e(t, "Failed to load saved search!")
-                t.printStackTrace()
-                null
+        newSavedSearches +=
+            preferences.eh_savedSearches().get().mapNotNull {
+                try {
+                    val id = it.substringBefore(':').toLong()
+                    val content = Json.decodeFromString<JsonSavedSearch>(it.substringAfter(':'))
+                    id to content
+                } catch (t: RuntimeException) {
+                    // Load failed
+                    Timber.e(t, "Failed to load saved search!")
+                    t.printStackTrace()
+                    null
+                }
+            }.toMutableList()
+
+        val otherSerialized =
+            preferences.eh_savedSearches().get().mapNotNull {
+                val sourceId = it.split(":")[0].toLongOrNull() ?: return@mapNotNull null
+                if (sourceId in currentSources) return@mapNotNull null
+                it
             }
-        }.toMutableList()
 
-        val otherSerialized = preferences.eh_savedSearches().get().mapNotNull {
-            val sourceId = it.split(":")[0].toLongOrNull() ?: return@mapNotNull null
-            if (sourceId in currentSources) return@mapNotNull null
-            it
-        }
-
-        val newSerialized = newSavedSearches.map {
-            "${it.first}:" + Json.encodeToString(it.second)
-        }
+        val newSerialized =
+            newSavedSearches.map {
+                "${it.first}:" + Json.encodeToString(it.second)
+            }
         preferences.eh_savedSearches().set((otherSerialized + newSerialized).toSet())
     }
 }

@@ -16,7 +16,6 @@ class GithubRelease(
     @SerializedName("body") override val info: String,
     @SerializedName("assets") private val assets: List<Assets>
 ) : Release {
-
     /**
      * Get download link of latest release from the assets.
      * @return download link of latest release.
@@ -28,5 +27,7 @@ class GithubRelease(
      * Assets class containing download url.
      * @param downloadLink download url.
      */
-    inner class Assets(@SerializedName("browser_download_url") val downloadLink: String)
+    inner class Assets(
+        @SerializedName("browser_download_url") val downloadLink: String
+    )
 }

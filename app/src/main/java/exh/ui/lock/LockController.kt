@@ -18,13 +18,16 @@ import exh.util.dpToPx
 import uy.kohesive.injekt.injectLazy
 
 class LockController : NucleusController<ActivityLockBinding, LockPresenter>() {
-
     val prefs: PreferencesHelper by injectLazy()
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = ActivityLockBinding.inflate(inflater)
         return binding.root
     }
+
     override fun createPresenter() = LockPresenter()
 
     override fun getTitle() = "Application locked"
@@ -42,27 +45,32 @@ class LockController : NucleusController<ActivityLockBinding, LockPresenter>() {
             binding.pinLockView.attachIndicatorDots(binding.indicatorDots)
 
             binding.pinLockView.pinLength = prefs.eh_lockLength().get()
-            binding.pinLockView.setPinLockListener(object : PinLockListener {
-                override fun onEmpty() {}
+            binding.pinLockView.setPinLockListener(
+                object : PinLockListener {
+                    override fun onEmpty() {}
 
-                override fun onComplete(pin: String) {
-                    if (sha512(pin, prefs.eh_lockSalt().get()) == prefs.eh_lockHash().get()) {
-                        // Yay!
-                        closeLock()
-                    } else {
-                        MaterialDialog(context)
-                            .title(text = "PIN code incorrect")
-                            .message(text = "The PIN code you entered is incorrect. Please try again.")
-                            .cancelable(true)
-                            .cancelOnTouchOutside(true)
-                            .positiveButton(android.R.string.ok)
-                            .show()
-                        binding.pinLockView.resetPinLockView()
+                    override fun onComplete(pin: String) {
+                        if (sha512(pin, prefs.eh_lockSalt().get()) == prefs.eh_lockHash().get()) {
+                            // Yay!
+                            closeLock()
+                        } else {
+                            MaterialDialog(context)
+                                .title(text = "PIN code incorrect")
+                                .message(text = "The PIN code you entered is incorrect. Please try again.")
+                                .cancelable(true)
+                                .cancelOnTouchOutside(true)
+                                .positiveButton(android.R.string.ok)
+                                .show()
+                            binding.pinLockView.resetPinLockView()
+                        }
                     }
-                }
 
-                override fun onPinChange(pinLength: Int, intermediatePin: String?) {}
-            })
+                    override fun onPinChange(
+                        pinLength: Int,
+                        intermediatePin: String?
+                    ) {}
+                }
+            )
         }
     }
 
@@ -75,28 +83,31 @@ class LockController : NucleusController<ActivityLockBinding, LockPresenter>() {
             if (presenter.useFingerprint) {
                 binding.swirlContainer.visibility = View.VISIBLE
                 binding.swirlContainer.removeAllViews()
-                val icon = SwirlView(context).apply {
-                    val size = dpToPx(context, 60)
-                    layoutParams = (
-                        layoutParams ?: ViewGroup.LayoutParams(
-                            size, size
-                        )
-                        ).apply {
-                        width = size
-                        height = size
+                val icon =
+                    SwirlView(context).apply {
+                        val size = dpToPx(context, 60)
+                        layoutParams =
+                            (
+                                layoutParams ?: ViewGroup.LayoutParams(
+                                    size,
+                                    size
+                                )
+                                ).apply {
+                                width = size
+                                height = size
 
-                        val pSize = dpToPx(context, 8)
-                        setPadding(pSize, pSize, pSize, pSize)
+                                val pSize = dpToPx(context, 8)
+                                setPadding(pSize, pSize, pSize, pSize)
+                            }
+                        val lockColor = resolvColor(android.R.attr.windowBackground)
+                        setBackgroundColor(lockColor)
+                        val bgColor = resolvColor(android.R.attr.colorBackground)
+                        // Disable elevation if lock color is same as background color
+                        if (lockColor == bgColor) {
+                            binding.swirlContainer.cardElevation = 0f
+                        }
+                        setState(SwirlView.State.OFF, true)
                     }
-                    val lockColor = resolvColor(android.R.attr.windowBackground)
-                    setBackgroundColor(lockColor)
-                    val bgColor = resolvColor(android.R.attr.colorBackground)
-                    // Disable elevation if lock color is same as background color
-                    if (lockColor == bgColor) {
-                        binding.swirlContainer.cardElevation = 0f
-                    }
-                    setState(SwirlView.State.OFF, true)
-                }
                 binding.swirlContainer.addView(icon)
                 icon.setState(SwirlView.State.ON)
                 RxReprint.authenticate()

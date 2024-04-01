@@ -22,11 +22,10 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.database.models.TrackImpl
 import eu.kanade.tachiyomi.source.Source
 import exh.EXHMigrations
-import java.util.Date
 import rx.Observable
+import java.util.Date
 
 class LegacyBackupRestore(context: Context, notifier: BackupNotifier) : AbstractBackupRestore<LegacyBackupManager>(context, notifier) {
-
     override fun performRestore(uri: Uri): Boolean {
         // SY -->
         throttleManager.resetThrottle()
@@ -81,27 +80,33 @@ class LegacyBackupRestore(context: Context, notifier: BackupNotifier) : Abstract
     // SY <--
 
     private fun restoreManga(mangaJson: JsonObject) {
-        /* SY --> */ var /* SY <-- */ manga = backupManager.parser.fromJson<MangaImpl>(
-            mangaJson.get(
-                Backup.MANGA
+        // SY -->
+        var /* SY <-- */ manga =
+            backupManager.parser.fromJson<MangaImpl>(
+                mangaJson.get(
+                    Backup.MANGA
+                )
             )
-        )
-        val chapters = backupManager.parser.fromJson<List<ChapterImpl>>(
-            mangaJson.get(Backup.CHAPTERS)
-                ?: JsonArray()
-        )
-        val categories = backupManager.parser.fromJson<List<String>>(
-            mangaJson.get(Backup.CATEGORIES)
-                ?: JsonArray()
-        )
-        val history = backupManager.parser.fromJson<List<DHistory>>(
-            mangaJson.get(Backup.HISTORY)
-                ?: JsonArray()
-        )
-        val tracks = backupManager.parser.fromJson<List<TrackImpl>>(
-            mangaJson.get(Backup.TRACK)
-                ?: JsonArray()
-        )
+        val chapters =
+            backupManager.parser.fromJson<List<ChapterImpl>>(
+                mangaJson.get(Backup.CHAPTERS)
+                    ?: JsonArray()
+            )
+        val categories =
+            backupManager.parser.fromJson<List<String>>(
+                mangaJson.get(Backup.CATEGORIES)
+                    ?: JsonArray()
+            )
+        val history =
+            backupManager.parser.fromJson<List<DHistory>>(
+                mangaJson.get(Backup.HISTORY)
+                    ?: JsonArray()
+            )
+        val tracks =
+            backupManager.parser.fromJson<List<TrackImpl>>(
+                mangaJson.get(Backup.TRACK)
+                    ?: JsonArray()
+            )
 
         // EXH -->
         manga = EXHMigrations.migrateBackupEntry(manga)
@@ -217,7 +222,12 @@ class LegacyBackupRestore(context: Context, notifier: BackupNotifier) : Abstract
             .subscribe()
     }
 
-    private fun restoreExtraForManga(manga: Manga, categories: List<String>, history: List<DHistory>, tracks: List<Track>) {
+    private fun restoreExtraForManga(
+        manga: Manga,
+        categories: List<String>,
+        history: List<DHistory>,
+        tracks: List<Track>
+    ) {
         // Restore categories
         backupManager.restoreCategoriesForManga(manga, categories)
 

@@ -11,7 +11,6 @@ import androidx.appcompat.widget.AppCompatButton
  */
 @SuppressLint("ViewConstructor")
 class PagerButton(context: Context, viewer: PagerViewer) : AppCompatButton(context) {
-
     init {
         setOnTouchListener { _, event ->
             viewer.pager.setGestureDetectorEnabled(false)

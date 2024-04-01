@@ -48,10 +48,19 @@ class MergedSource : HttpSource() {
     override val baseUrl = ""
 
     override fun popularMangaRequest(page: Int) = throw UnsupportedOperationException()
+
     override fun popularMangaParse(response: Response) = throw UnsupportedOperationException()
-    override fun searchMangaRequest(page: Int, query: String, filters: FilterList) = throw UnsupportedOperationException()
+
+    override fun searchMangaRequest(
+        page: Int,
+        query: String,
+        filters: FilterList
+    ) = throw UnsupportedOperationException()
+
     override fun searchMangaParse(response: Response) = throw UnsupportedOperationException()
+
     override fun latestUpdatesRequest(page: Int) = throw UnsupportedOperationException()
+
     override fun latestUpdatesParse(response: Response) = throw UnsupportedOperationException()
 
     override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
@@ -71,7 +80,10 @@ class MergedSource : HttpSource() {
                 val loadedMangas = readMangaConfig(manga).load(db, sourceManager).buffer()
                 loadedMangas.map { loadedManga ->
                     async(Dispatchers.IO) {
-                        runAsObservable({ loadedManga.source.getChapterList(loadedManga.manga.toMangaInfo()).map { it.toSChapter() } }).map { chapterList ->
+                        runAsObservable(
+                            { loadedManga.source.getChapterList(loadedManga.manga.toMangaInfo()).map { it.toSChapter() } }
+                        ).map {
+                                chapterList ->
                             chapterList.map { chapter ->
                                 chapter.apply {
                                     url = writeUrlConfig(UrlConfig(loadedManga.source.id, url, loadedManga.manga.url))
@@ -85,6 +97,7 @@ class MergedSource : HttpSource() {
     }
 
     override fun mangaDetailsParse(response: Response) = throw UnsupportedOperationException()
+
     override fun chapterListParse(response: Response) = throw UnsupportedOperationException()
 
     override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
@@ -104,34 +117,46 @@ class MergedSource : HttpSource() {
 
     override fun fetchImageUrl(page: Page): Observable<String> {
         val config = readUrlConfig(page.url)
-        val source = sourceManager.getOrStub(config.source) as? HttpSource
-            ?: throw UnsupportedOperationException("This source does not support this operation!")
+        val source =
+            sourceManager.getOrStub(config.source) as? HttpSource
+                ?: throw UnsupportedOperationException("This source does not support this operation!")
         return source.fetchImageUrl(page.copyWithUrl(config.url))
     }
 
     override fun pageListParse(response: Response) = throw UnsupportedOperationException()
+
     override fun imageUrlParse(response: Response) = throw UnsupportedOperationException()
 
     override fun fetchImage(page: Page): Observable<Response> {
         val config = readUrlConfig(page.url)
-        val source = sourceManager.getOrStub(config.source) as? HttpSource
-            ?: throw UnsupportedOperationException("This source does not support this operation!")
+        val source =
+            sourceManager.getOrStub(config.source) as? HttpSource
+                ?: throw UnsupportedOperationException("This source does not support this operation!")
         return source.fetchImage(page.copyWithUrl(config.url))
     }
 
-    override fun prepareNewChapter(chapter: SChapter, manga: SManga) {
+    override fun prepareNewChapter(
+        chapter: SChapter,
+        manga: SManga
+    ) {
         val chapterConfig = readUrlConfig(chapter.url)
-        val source = sourceManager.getOrStub(chapterConfig.source) as? HttpSource
-            ?: throw UnsupportedOperationException("This source does not support this operation!")
-        val copiedManga = SManga.create().apply {
-            this.copyFrom(manga)
-            url = chapterConfig.mangaUrl
-        }
+        val source =
+            sourceManager.getOrStub(chapterConfig.source) as? HttpSource
+                ?: throw UnsupportedOperationException("This source does not support this operation!")
+        val copiedManga =
+            SManga.create().apply {
+                this.copyFrom(manga)
+                url = chapterConfig.mangaUrl
+            }
         chapter.url = chapterConfig.url
         source.prepareNewChapter(chapter, copiedManga)
         chapter.url = writeUrlConfig(UrlConfig(source.id, chapter.url, chapterConfig.mangaUrl))
-        chapter.scanlator = if (chapter.scanlator.isNullOrBlank()) source.name
-        else "$source: ${chapter.scanlator}"
+        chapter.scanlator =
+            if (chapter.scanlator.isNullOrBlank()) {
+                source.name
+            } else {
+                "$source: ${chapter.scanlator}"
+            }
     }
 
     fun readMangaConfig(manga: SManga): MangaConfig {
@@ -147,13 +172,17 @@ class MergedSource : HttpSource() {
     }
 
     data class LoadedMangaSource(val source: Source, val manga: Manga)
+
     data class MangaSource(
         @SerializedName("s")
         val source: Long,
         @SerializedName("u")
         val url: String
     ) {
-        suspend fun load(db: DatabaseHelper, sourceManager: SourceManager): LoadedMangaSource? {
+        suspend fun load(
+            db: DatabaseHelper,
+            sourceManager: SourceManager
+        ): LoadedMangaSource? {
             val manga = db.getManga(url, source).executeAsBlocking() ?: return null
             val source = sourceManager.getOrStub(source)
             return LoadedMangaSource(source, manga)
@@ -164,7 +193,10 @@ class MergedSource : HttpSource() {
         @SerializedName("c")
         val children: List<MangaSource>
     ) {
-        fun load(db: DatabaseHelper, sourceManager: SourceManager): Flow<LoadedMangaSource> {
+        fun load(
+            db: DatabaseHelper,
+            sourceManager: SourceManager
+        ): Flow<LoadedMangaSource> {
             return children.asFlow().map { mangaSource ->
                 mangaSource.load(db, sourceManager)
                     ?: run {
@@ -180,7 +212,10 @@ class MergedSource : HttpSource() {
         }
 
         companion object {
-            fun readFromUrl(gson: Gson, url: String): MangaConfig {
+            fun readFromUrl(
+                gson: Gson,
+                url: String
+            ): MangaConfig {
                 return gson.fromJson(url)
             }
         }
@@ -195,12 +230,13 @@ class MergedSource : HttpSource() {
         val mangaUrl: String
     )
 
-    fun Page.copyWithUrl(newUrl: String) = Page(
-        index,
-        newUrl,
-        imageUrl,
-        uri
-    )
+    fun Page.copyWithUrl(newUrl: String) =
+        Page(
+            index,
+            newUrl,
+            imageUrl,
+            uri
+        )
 
     override val lang = "all"
     override val supportsLatest = false

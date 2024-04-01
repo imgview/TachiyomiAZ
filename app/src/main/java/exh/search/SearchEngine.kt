@@ -11,20 +11,22 @@ class SearchEngine {
         namespace: String?,
         component: Text?
     ): Pair<String, List<String>>? {
-        val maybeLenientComponent = component?.let {
-            if (!it.exact) {
-                it.asLenientTagQueries()
-            } else {
-                listOf(it.asQuery())
+        val maybeLenientComponent =
+            component?.let {
+                if (!it.exact) {
+                    it.asLenientTagQueries()
+                } else {
+                    listOf(it.asQuery())
+                }
             }
-        }
-        val componentTagQuery = maybeLenientComponent?.let {
-            val params = mutableListOf<String>()
-            it.joinToString(separator = " OR ", prefix = "(", postfix = ")") { q ->
-                params += q
-                "${SearchTagTable.TABLE}.${SearchTagTable.COL_NAME} LIKE ?"
-            } to params
-        }
+        val componentTagQuery =
+            maybeLenientComponent?.let {
+                val params = mutableListOf<String>()
+                it.joinToString(separator = " OR ", prefix = "(", postfix = ")") { q ->
+                    params += q
+                    "${SearchTagTable.TABLE}.${SearchTagTable.COL_NAME} LIKE ?"
+                } to params
+            }
         return when {
             namespace != null -> {
                 var query =
@@ -70,23 +72,26 @@ class SearchEngine {
         val exclude = mutableListOf<Pair<String, List<String>>>()
 
         for (component in q) {
-            val query = if (component is Text) {
-                textToSubQueries(null, component)
-            } else if (component is Namespace) {
-                if (component.namespace == "uploader") {
-                    wheres += "meta.${SearchMetadataTable.COL_UPLOADER} LIKE ?"
-                    whereParams += component.tag!!.rawTextEscapedForLike()
-                    null
-                } else {
-                    if (component.tag!!.components.size > 0) {
-                        // Match namespace + tags
-                        textToSubQueries(component.namespace, component.tag)
+            val query =
+                if (component is Text) {
+                    textToSubQueries(null, component)
+                } else if (component is Namespace) {
+                    if (component.namespace == "uploader") {
+                        wheres += "meta.${SearchMetadataTable.COL_UPLOADER} LIKE ?"
+                        whereParams += component.tag!!.rawTextEscapedForLike()
+                        null
                     } else {
-                        // Perform namespace search
-                        textToSubQueries(component.namespace, null)
+                        if (component.tag!!.components.size > 0) {
+                            // Match namespace + tags
+                            textToSubQueries(component.namespace, component.tag)
+                        } else {
+                            // Perform namespace search
+                            textToSubQueries(component.namespace, null)
+                        }
                     }
+                } else {
+                    error("Unknown query component!")
                 }
-            } else error("Unknown query component!")
 
             if (query != null) {
                 (if (component.excluded) exclude else include) += query
@@ -111,9 +116,10 @@ class SearchEngine {
         }
 
         exclude.forEach {
-            wheres += """
-            (meta.${SearchMetadataTable.COL_MANGA_ID} NOT IN ${it.first})
-            """.trimIndent()
+            wheres +=
+                """
+                (meta.${SearchMetadataTable.COL_MANGA_ID} NOT IN ${it.first})
+                """.trimIndent()
             whereParams += it.second
         }
         if (wheres.isNotEmpty()) {
@@ -126,7 +132,10 @@ class SearchEngine {
         return baseQuery to completeParams
     }
 
-    fun parseQuery(query: String, enableWildcard: Boolean = true) = queryCache.getOrPut(query) {
+    fun parseQuery(
+        query: String,
+        enableWildcard: Boolean = true
+    ) = queryCache.getOrPut(query) {
         val res = mutableListOf<QueryComponent>()
 
         var inQuotes = false
@@ -144,18 +153,20 @@ class SearchEngine {
             }
         }
 
-        fun flushToText() = Text().apply {
-            components += queuedText
-            queuedText.clear()
-        }
+        fun flushToText() =
+            Text().apply {
+                components += queuedText
+                queuedText.clear()
+            }
 
         fun flushAll() {
             flushText()
             if (queuedText.isNotEmpty() || namespace != null) {
-                val component = namespace?.apply {
-                    tag = flushToText()
-                    namespace = null
-                } ?: flushToText()
+                val component =
+                    namespace?.apply {
+                        tag = flushToText()
+                        namespace = null
+                    } ?: flushToText()
                 component.excluded = nextIsExcluded
                 component.exact = nextIsExact
                 res += component
@@ -179,17 +190,18 @@ class SearchEngine {
                 flushText()
                 var flushed = flushToText().rawTextOnly()
                 // Map tag aliases
-                flushed = when (flushed) {
-                    "a" -> "artist"
-                    "c", "char" -> "character"
-                    "f" -> "female"
-                    "g", "creator", "circle" -> "group"
-                    "l", "lang" -> "language"
-                    "m" -> "male"
-                    "p", "series" -> "parody"
-                    "r" -> "reclass"
-                    else -> flushed
-                }
+                flushed =
+                    when (flushed) {
+                        "a" -> "artist"
+                        "c", "char" -> "character"
+                        "f" -> "female"
+                        "g", "creator", "circle" -> "group"
+                        "l", "lang" -> "language"
+                        "m" -> "male"
+                        "p", "series" -> "parody"
+                        "r" -> "reclass"
+                        else -> flushed
+                    }
                 namespace = Namespace(flushed, null)
             } else if (char == ' ' && !inQuotes) {
                 flushAll()

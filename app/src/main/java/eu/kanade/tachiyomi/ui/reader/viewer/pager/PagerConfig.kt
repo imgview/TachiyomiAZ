@@ -10,7 +10,6 @@ import uy.kohesive.injekt.api.get
  */
 class PagerConfig(private val viewer: PagerViewer, preferences: PreferencesHelper = Injekt.get()) :
     ViewerConfig(preferences) {
-
     var usePageTransitions = false
         private set
 
@@ -48,23 +47,27 @@ class PagerConfig(private val viewer: PagerViewer, preferences: PreferencesHelpe
     }
 
     private fun zoomTypeFromPreference(value: Int) {
-        imageZoomType = when (value) {
-            // Auto
-            1 -> when (viewer) {
-                is L2RPagerViewer -> ZoomType.Left
-                is R2LPagerViewer -> ZoomType.Right
+        imageZoomType =
+            when (value) {
+                // Auto
+                1 ->
+                    when (viewer) {
+                        is L2RPagerViewer -> ZoomType.Left
+                        is R2LPagerViewer -> ZoomType.Right
+                        else -> ZoomType.Center
+                    }
+                // Left
+                2 -> ZoomType.Left
+                // Right
+                3 -> ZoomType.Right
+                // Center
                 else -> ZoomType.Center
             }
-            // Left
-            2 -> ZoomType.Left
-            // Right
-            3 -> ZoomType.Right
-            // Center
-            else -> ZoomType.Center
-        }
     }
 
     enum class ZoomType {
-        Left, Center, Right
+        Left,
+        Center,
+        Right
     }
 }

@@ -24,16 +24,15 @@ import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 import eu.kanade.tachiyomi.util.view.visible
 import exh.MERGED_SOURCE_ID
-import java.text.DecimalFormat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
+import java.text.DecimalFormat
 
 class MigrationProcessHolder(
     private val view: View,
     private val adapter: MigrationProcessAdapter
 ) : BaseFlexibleViewHolder(view, adapter) {
-
     private val db: DatabaseHelper by injectLazy()
     private val sourceManager: SourceManager by injectLazy()
     private var item: MigrationProcessItem? = null
@@ -94,12 +93,14 @@ class MigrationProcessHolder(
                     }
                 }*/
 
-                val searchResult = item.manga.searchResult.get()?.let {
-                    db.getManga(it).executeAsBlocking()
-                }
-                val resultSource = searchResult?.source?.let {
-                    sourceManager.get(it)
-                }
+                val searchResult =
+                    item.manga.searchResult.get()?.let {
+                        db.getManga(it).executeAsBlocking()
+                    }
+                val resultSource =
+                    searchResult?.source?.let {
+                        sourceManager.get(it)
+                    }
                 withContext(Dispatchers.Main) {
                     if (item.manga.mangaId != this@MigrationProcessHolder.item?.manga?.mangaId ||
                         item.manga.migrationStatus == MigrationStatus.RUNNUNG
@@ -111,14 +112,16 @@ class MigrationProcessHolder(
                         binding.migrationMangaCardTo.root.setOnClickListener {
                             adapter.controller.router.pushController(
                                 MangaController(
-                                    searchResult, true
+                                    searchResult,
+                                    true
                                 ).withFadeTransaction()
                             )
                         }
                     } else {
                         binding.migrationMangaCardTo.loadingGroup.gone()
-                        binding.migrationMangaCardTo.title.text = view.context.applicationContext
-                            .getString(R.string.no_alternatives_found)
+                        binding.migrationMangaCardTo.title.text =
+                            view.context.applicationContext
+                                .getString(R.string.no_alternatives_found)
                     }
                     binding.migrationMenu.visible()
                     binding.skipManga.gone()
@@ -139,7 +142,10 @@ class MigrationProcessHolder(
         root.setOnClickListener(null)
     }
 
-    private fun MigrationMangaCardBinding.attachManga(manga: Manga, source: Source) {
+    private fun MigrationMangaCardBinding.attachManga(
+        manga: Manga,
+        source: Source
+    ) {
         loadingGroup.gone()
         GlideApp.with(view.context.applicationContext)
             .load(manga.toMangaThumbnail())
@@ -148,18 +154,20 @@ class MigrationProcessHolder(
             .dontAnimate()
             .into(thumbnail)
 
-        title.text = manga.title.ifBlank {
-            view.context.getString(R.string.unknown)
-        }
+        title.text =
+            manga.title.ifBlank {
+                view.context.getString(R.string.unknown)
+            }
 
         gradient.visible()
-        mangaSourceLabel.text = if (source.id == MERGED_SOURCE_ID) {
-            MergedSource.MangaConfig.readFromUrl(gson, manga.url).children.map {
-                sourceManager.getOrStub(it.source).toString()
-            }.distinct().joinToString()
-        } else {
-            source.toString()
-        }
+        mangaSourceLabel.text =
+            if (source.id == MERGED_SOURCE_ID) {
+                MergedSource.MangaConfig.readFromUrl(gson, manga.url).children.map {
+                    sourceManager.getOrStub(it.source).toString()
+                }.distinct().joinToString()
+            } else {
+                source.toString()
+            }
 
         val mangaChaptersDB = db.getChapters(manga).executeAsBlocking()
         mangaChapters.visible()
@@ -167,15 +175,17 @@ class MigrationProcessHolder(
         val latestChapter = mangaChaptersDB.maxByOrNull { it.chapter_number }?.chapter_number ?: -1f
 
         if (latestChapter > 0f) {
-            mangaLastChapterLabel.text = root.context.getString(
-                R.string.latest_,
-                DecimalFormat("#.#").format(latestChapter)
-            )
+            mangaLastChapterLabel.text =
+                root.context.getString(
+                    R.string.latest_,
+                    DecimalFormat("#.#").format(latestChapter)
+                )
         } else {
-            mangaLastChapterLabel.text = root.context.getString(
-                R.string.latest_,
-                root.context.getString(R.string.unknown)
-            )
+            mangaLastChapterLabel.text =
+                root.context.getString(
+                    R.string.latest_,
+                    root.context.getString(R.string.unknown)
+                )
         }
     }
 

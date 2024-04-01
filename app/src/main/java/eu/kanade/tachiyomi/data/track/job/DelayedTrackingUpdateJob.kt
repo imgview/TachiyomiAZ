@@ -11,30 +11,30 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.concurrent.TimeUnit
 
 class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
-
     override suspend fun doWork(): Result {
         val db = Injekt.get<DatabaseHelper>()
         val trackManager = Injekt.get<TrackManager>()
         val delayedTrackingStore = Injekt.get<DelayedTrackingStore>()
 
         withContext(Dispatchers.IO) {
-            val tracks = delayedTrackingStore.getItems().mapNotNull {
-                val manga = db.getManga(it.mangaId).executeAsBlocking() ?: return@withContext
-                db.getTracks(manga).executeAsBlocking()
-                    .find { track -> track.id == it.trackId }
-                    ?.also { track ->
-                        track.last_chapter_read = it.lastChapterRead.toInt()
-                    }
-            }
+            val tracks =
+                delayedTrackingStore.getItems().mapNotNull {
+                    val manga = db.getManga(it.mangaId).executeAsBlocking() ?: return@withContext
+                    db.getTracks(manga).executeAsBlocking()
+                        .find { track -> track.id == it.trackId }
+                        ?.also { track ->
+                            track.last_chapter_read = it.lastChapterRead.toInt()
+                        }
+                }
 
             tracks.forEach { track ->
                 try {
@@ -58,15 +58,17 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
         private const val TAG = "DelayedTrackingUpdate"
 
         fun setupTask(context: Context) {
-            val constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build()
+            val constraints =
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
 
-            val request = OneTimeWorkRequestBuilder<DelayedTrackingUpdateJob>()
-                .setConstraints(constraints)
-                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 20, TimeUnit.SECONDS)
-                .addTag(TAG)
-                .build()
+            val request =
+                OneTimeWorkRequestBuilder<DelayedTrackingUpdateJob>()
+                    .setConstraints(constraints)
+                    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 20, TimeUnit.SECONDS)
+                    .addTag(TAG)
+                    .build()
 
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, request)

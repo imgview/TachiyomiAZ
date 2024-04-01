@@ -27,11 +27,15 @@ class SmartSearchController(bundle: Bundle? = null) : NucleusController<SmartSea
     private val sourceManager: SourceManager by injectLazy()
 
     private val source = sourceManager.get(bundle?.getLong(ARG_SOURCE_ID, -1) ?: -1) as? CatalogueSource
-    private val smartSearchConfig: SourceController.SmartSearchConfig? = bundle?.getParcelable(
-        ARG_SMART_SEARCH_CONFIG
-    )
+    private val smartSearchConfig: SourceController.SmartSearchConfig? =
+        bundle?.getParcelable(
+            ARG_SMART_SEARCH_CONFIG
+        )
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = SmartSearchBinding.inflate(inflater)
         return binding.root
     }

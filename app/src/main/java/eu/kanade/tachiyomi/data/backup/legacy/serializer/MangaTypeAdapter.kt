@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.data.database.models.MangaImpl
  * JSON Serializer used to write / read [MangaImpl] to / from json
  */
 object MangaTypeAdapter {
-
     fun build(): TypeAdapter<MangaImpl> {
         return typeAdapter {
             write {

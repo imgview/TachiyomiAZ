@@ -14,16 +14,20 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
-import kotlin.math.max
-import kotlin.math.min
 import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Implementation of a [BaseViewer] to display pages with a [RecyclerView].
  */
-class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = true, val isHorizontal: Boolean = false, val isReversed: Boolean = false) : BaseViewer {
-
+class WebtoonViewer(
+    val activity: ReaderActivity,
+    val isContinuous: Boolean = true,
+    val isHorizontal: Boolean = false,
+    val isReversed: Boolean = false
+) : BaseViewer {
     /**
      * Recycler view used by this viewer.
      */
@@ -37,7 +41,8 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
     /**
      * Layout manager of the recycler view.
      */
-    private val layoutManager = WebtoonLayoutManager(activity, if (isHorizontal) RecyclerView.HORIZONTAL else RecyclerView.VERTICAL, isReversed)
+    private val layoutManager =
+        WebtoonLayoutManager(activity, if (isHorizontal) RecyclerView.HORIZONTAL else RecyclerView.VERTICAL, isReversed)
 
     /**
      * Adapter of the recycler view.
@@ -52,7 +57,8 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
     /**
      * Currently active item. It can be a chapter page or a chapter transition.
      */
-    /* [EXH] private */ var currentPage: Any? = null
+    // [EXH] private
+    var currentPage: Any? = null
 
     /**
      * Configuration used by this viewer, like allow taps, or crop image borders.
@@ -70,28 +76,34 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
         recycler.itemAnimator = null
         recycler.layoutManager = layoutManager
         recycler.adapter = adapter
-        recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                val position = layoutManager.findLastEndVisibleItemPosition()
-                val item = adapter.items.getOrNull(position)
-                val allowPreload = checkAllowPreload(item as? ReaderPage)
-                if (item != null && currentPage != item) {
-                    currentPage = item
-                    when (item) {
-                        is ReaderPage -> onPageSelected(item, allowPreload)
-                        is ChapterTransition -> onTransitionSelected(item)
+        recycler.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(
+                    recyclerView: RecyclerView,
+                    dx: Int,
+                    dy: Int
+                ) {
+                    val position = layoutManager.findLastEndVisibleItemPosition()
+                    val item = adapter.items.getOrNull(position)
+                    val allowPreload = checkAllowPreload(item as? ReaderPage)
+                    if (item != null && currentPage != item) {
+                        currentPage = item
+                        when (item) {
+                            is ReaderPage -> onPageSelected(item, allowPreload)
+                            is ChapterTransition -> onTransitionSelected(item)
+                        }
                     }
-                }
 
-                if (dy < 0) {
-                    val firstIndex = layoutManager.findFirstVisibleItemPosition()
-                    val firstItem = adapter.items.getOrNull(firstIndex)
-                    if (firstItem is ChapterTransition.Prev && firstItem.to != null) {
-                        activity.requestPreloadChapter(firstItem.to)
+                    if (dy < 0) {
+                        val firstIndex = layoutManager.findFirstVisibleItemPosition()
+                        val firstItem = adapter.items.getOrNull(firstIndex)
+                        if (firstItem is ChapterTransition.Prev && firstItem.to != null) {
+                            activity.requestPreloadChapter(firstItem.to)
+                        }
                     }
                 }
             }
-        })
+        )
         recycler.tapListener = { event ->
             val positionX = event.rawX
             val positionY = event.rawY
@@ -165,7 +177,10 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
      * Called from the RecyclerView listener when a [page] is marked as active. It notifies the
      * activity of the change and requests the preload of the next chapter if this is the last page.
      */
-    private fun onPageSelected(page: ReaderPage, allowPreload: Boolean) {
+    private fun onPageSelected(
+        page: ReaderPage,
+        allowPreload: Boolean
+    ) {
         val pages = page.chapter.pages ?: return
         Timber.d("onPageSelected: ${page.number}/${pages.size}")
         activity.onPageSelected(page)
@@ -238,7 +253,8 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
     /**
      * Scrolls down by [scrollDistance].
      */
-    /* [EXH] private */ fun scrollDown() {
+    // [EXH] private
+    fun scrollDown() {
         recycler.smoothScrollBy(0, scrollDistance)
     }
 
@@ -268,11 +284,13 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
 
             KeyEvent.KEYCODE_DPAD_RIGHT,
             KeyEvent.KEYCODE_DPAD_UP,
-            KeyEvent.KEYCODE_PAGE_UP -> if (isUp) scrollUp()
+            KeyEvent.KEYCODE_PAGE_UP
+            -> if (isUp) scrollUp()
 
             KeyEvent.KEYCODE_DPAD_LEFT,
             KeyEvent.KEYCODE_DPAD_DOWN,
-            KeyEvent.KEYCODE_PAGE_DOWN -> if (isUp) scrollDown()
+            KeyEvent.KEYCODE_PAGE_DOWN
+            -> if (isUp) scrollDown()
             else -> return false
         }
         return true

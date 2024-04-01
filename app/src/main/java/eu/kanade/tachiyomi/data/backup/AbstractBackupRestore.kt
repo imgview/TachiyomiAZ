@@ -11,16 +11,15 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.util.chapter.NoChaptersException
 import exh.eh.EHentaiThrottleManager
+import kotlinx.coroutines.Job
+import rx.Observable
+import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlinx.coroutines.Job
-import rx.Observable
-import uy.kohesive.injekt.injectLazy
 
 abstract class AbstractBackupRestore<T : AbstractBackupManager>(protected val context: Context, protected val notifier: BackupNotifier) {
-
     protected val db: DatabaseHelper by injectLazy()
     protected val trackManager: TrackManager by injectLazy()
 
@@ -69,15 +68,20 @@ abstract class AbstractBackupRestore<T : AbstractBackupManager>(protected val co
      * @param manga manga that needs updating
      * @return [Observable] that contains manga
      */
-    internal fun chapterFetchObservable(source: Source, manga: Manga, chapters: List<Chapter>): Observable<Pair<List<Chapter>, List<Chapter>>> {
+    internal fun chapterFetchObservable(
+        source: Source,
+        manga: Manga,
+        chapters: List<Chapter>
+    ): Observable<Pair<List<Chapter>, List<Chapter>>> {
         return backupManager.restoreChapterFetchObservable(source, manga, chapters /* SY --> */, throttleManager /* SY <-- */)
             // If there's any error, return empty update and continue.
             .onErrorReturn {
-                val errorMessage = if (it is NoChaptersException) {
-                    context.getString(R.string.no_chapters_error)
-                } else {
-                    it.message
-                }
+                val errorMessage =
+                    if (it is NoChaptersException) {
+                        context.getString(R.string.no_chapters_error)
+                    } else {
+                        it.message
+                    }
                 errors.add(Date() to "${manga.title} - $errorMessage")
                 Pair(emptyList(), emptyList())
             }
@@ -89,7 +93,10 @@ abstract class AbstractBackupRestore<T : AbstractBackupManager>(protected val co
      * @param tracks list containing tracks from restore file.
      * @return [Observable] that contains updated track item
      */
-    internal fun trackingFetchObservable(manga: Manga, tracks: List<Track>): Observable<Track> {
+    internal fun trackingFetchObservable(
+        manga: Manga,
+        tracks: List<Track>
+    ): Observable<Track> {
         return Observable.from(tracks)
             .flatMap { track ->
                 val service = trackManager.getService(track.sync_id)

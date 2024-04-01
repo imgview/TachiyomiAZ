@@ -9,10 +9,10 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
 import exh.EH_SOURCE_ID
 import exh.EXH_SOURCE_ID
-import java.util.Date
-import java.util.TreeSet
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Date
+import java.util.TreeSet
 
 /**
  * Helper method for syncing the list of chapters from the source with the ones from the database.
@@ -38,15 +38,16 @@ fun syncChaptersWithSource(
     // Chapters from db.
     val dbChapters = db.getChapters(manga).executeAsBlocking()
 
-    val sourceChapters = rawSourceChapters
-        .distinctBy { it.url }
-        .mapIndexed { i, sChapter ->
-            Chapter.create().apply {
-                copyFrom(sChapter)
-                manga_id = manga.id
-                source_order = i
+    val sourceChapters =
+        rawSourceChapters
+            .distinctBy { it.url }
+            .mapIndexed { i, sChapter ->
+                Chapter.create().apply {
+                    copyFrom(sChapter)
+                    manga_id = manga.id
+                    source_order = i
+                }
             }
-        }
 
     // Chapters from the source not in db.
     val toAdd = mutableListOf<Chapter>()
@@ -90,11 +91,12 @@ fun syncChaptersWithSource(
     }
 
     // Chapters from the db not in the source.
-    val toDelete = dbChapters.filterNot { dbChapter ->
-        sourceChapters.any { sourceChapter ->
-            dbChapter.url == sourceChapter.url
+    val toDelete =
+        dbChapters.filterNot { dbChapter ->
+            sourceChapters.any { sourceChapter ->
+                dbChapter.url == sourceChapter.url
+            }
         }
-    }
 
     // Return if there's nothing to add, delete or change, avoiding unnecessary db transactions.
     if (toAdd.isEmpty() && toDelete.isEmpty() && toChange.isEmpty()) {
@@ -169,7 +171,10 @@ fun syncChaptersWithSource(
 }
 
 // checks if the chapter in db needs updated
-private fun shouldUpdateDbChapter(dbChapter: Chapter, sourceChapter: SChapter): Boolean {
+private fun shouldUpdateDbChapter(
+    dbChapter: Chapter,
+    sourceChapter: SChapter
+): Boolean {
     return dbChapter.scanlator != sourceChapter.scanlator || dbChapter.name != sourceChapter.name ||
         dbChapter.date_upload != sourceChapter.date_upload ||
         dbChapter.chapter_number != sourceChapter.chapter_number

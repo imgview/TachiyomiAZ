@@ -7,7 +7,8 @@ import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 enum class EHLogLevel(val description: String) {
     MINIMAL("critical errors only"),
     EXTRA("log everything"),
-    EXTREME("network inspection mode");
+    EXTREME("network inspection mode")
+    ;
 
     companion object {
         private var curLogLevel: Int? = null
@@ -15,8 +16,9 @@ enum class EHLogLevel(val description: String) {
         val currentLogLevel get() = values()[curLogLevel!!]
 
         fun init(context: Context) {
-            curLogLevel = PreferenceManager.getDefaultSharedPreferences(context)
-                .getInt(PreferenceKeys.eh_logLevel, 0)
+            curLogLevel =
+                PreferenceManager.getDefaultSharedPreferences(context)
+                    .getInt(PreferenceKeys.eh_logLevel, 0)
         }
 
         fun shouldLog(requiredLogLevel: EHLogLevel): Boolean {

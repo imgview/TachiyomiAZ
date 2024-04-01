@@ -15,7 +15,6 @@ import eu.kanade.tachiyomi.databinding.TrackSearchDialogBinding
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.visible
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
@@ -25,9 +24,9 @@ import reactivecircus.flowbinding.android.widget.itemClicks
 import reactivecircus.flowbinding.android.widget.textChanges
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.concurrent.TimeUnit
 
 class TrackSearchDialog : DialogController {
-
     private var binding: TrackSearchDialogBinding? = null
 
     private var adapter: TrackSearchAdapter? = null
@@ -56,18 +55,22 @@ class TrackSearchDialog : DialogController {
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         binding = TrackSearchDialogBinding.inflate(LayoutInflater.from(activity!!))
 
-        val dialog = MaterialDialog(activity!!)
-            .customView(view = binding!!.root)
-            .positiveButton(android.R.string.ok) { onPositiveButtonClick() }
-            .negativeButton(android.R.string.cancel)
-            .neutralButton(R.string.action_remove) { onRemoveButtonClick() }
+        val dialog =
+            MaterialDialog(activity!!)
+                .customView(view = binding!!.root)
+                .positiveButton(android.R.string.ok) { onPositiveButtonClick() }
+                .negativeButton(android.R.string.cancel)
+                .neutralButton(R.string.action_remove) { onRemoveButtonClick() }
 
         onViewCreated(dialog.view, savedViewState)
 
         return dialog
     }
 
-    fun onViewCreated(view: View, savedState: Bundle?) {
+    fun onViewCreated(
+        view: View,
+        savedState: Bundle?
+    ) {
         // Create adapter
         val adapter = TrackSearchAdapter(view.context)
         this.adapter = adapter

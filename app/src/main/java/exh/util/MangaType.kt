@@ -6,9 +6,9 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import java.util.Locale
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Locale
 
 fun Manga.mangaType(context: Context): String {
     return context.getString(
@@ -61,7 +61,9 @@ fun Manga.defaultReaderType(): Int? {
         ReaderActivity.WEBTOON
     /* } else if (type == MangaType.TYPE_MANHUA || (type == MangaType.TYPE_COMIC && !sourceName.contains("tapastic", ignoreCase = true))) {
              ReaderActivity.LEFT_TO_RIGHT*/
-    } else null
+    } else {
+        null
+    }
 }
 
 private fun isMangaTag(tag: String): Boolean {

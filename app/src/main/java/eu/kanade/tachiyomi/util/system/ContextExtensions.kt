@@ -35,10 +35,10 @@ import com.nononsenseapps.filepicker.FilePickerActivity
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.lang.truncateCenter
 import eu.kanade.tachiyomi.widget.CustomLayoutPickerActivity
-import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 /**
  * Display a toast in this context.
@@ -46,7 +46,10 @@ import kotlinx.coroutines.launch
  * @param resource the text resource.
  * @param duration the duration of the toast. Defaults to short.
  */
-fun Context.toast(@StringRes resource: Int, duration: Int = Toast.LENGTH_SHORT) {
+fun Context.toast(
+    @StringRes resource: Int,
+    duration: Int = Toast.LENGTH_SHORT
+) {
     GlobalScope.launch(Dispatchers.Main) {
         Toast.makeText(this@toast, resource, duration).show()
     }
@@ -58,7 +61,10 @@ fun Context.toast(@StringRes resource: Int, duration: Int = Toast.LENGTH_SHORT) 
  * @param text the text to display.
  * @param duration the duration of the toast. Defaults to short.
  */
-fun Context.toast(text: String?, duration: Int = Toast.LENGTH_SHORT) {
+fun Context.toast(
+    text: String?,
+    duration: Int = Toast.LENGTH_SHORT
+) {
     GlobalScope.launch(Dispatchers.Main) {
         Toast.makeText(this@toast, text.orEmpty(), duration).show()
     }
@@ -70,7 +76,10 @@ fun Context.toast(text: String?, duration: Int = Toast.LENGTH_SHORT) {
  * @param label Label to show to the user describing the content
  * @param content the actual text to copy to the board
  */
-fun Context.copyToClipboard(label: String, content: String) {
+fun Context.copyToClipboard(
+    label: String,
+    content: String
+) {
     if (content.isBlank()) return
 
     val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -86,9 +95,13 @@ fun Context.copyToClipboard(label: String, content: String) {
  * @param block the function that will execute inside the builder.
  * @return a notification to be displayed or updated.
  */
-fun Context.notificationBuilder(channelId: String, block: (NotificationCompat.Builder.() -> Unit)? = null): NotificationCompat.Builder {
-    val builder = NotificationCompat.Builder(this, channelId)
-        .setColor(ContextCompat.getColor(this, R.color.colorPrimary))
+fun Context.notificationBuilder(
+    channelId: String,
+    block: (NotificationCompat.Builder.() -> Unit)? = null
+): NotificationCompat.Builder {
+    val builder =
+        NotificationCompat.Builder(this, channelId)
+            .setColor(ContextCompat.getColor(this, R.color.colorPrimary))
     if (block != null) {
         builder.block()
     }
@@ -102,7 +115,10 @@ fun Context.notificationBuilder(channelId: String, block: (NotificationCompat.Bu
  * @param block the function that will execute inside the builder.
  * @return a notification to be displayed or updated.
  */
-fun Context.notification(channelId: String, block: (NotificationCompat.Builder.() -> Unit)?): Notification {
+fun Context.notification(
+    channelId: String,
+    block: (NotificationCompat.Builder.() -> Unit)?
+): Notification {
     val builder = notificationBuilder(channelId, block)
     return builder.build()
 }
@@ -134,7 +150,10 @@ fun Context.hasPermission(permission: String) = ContextCompat.checkSelfPermissio
  * @param resource the attribute.
  * @param alphaFactor the alpha number [0,1].
  */
-@ColorInt fun Context.getResourceColor(@AttrRes resource: Int, alphaFactor: Float = 1f): Int {
+@ColorInt fun Context.getResourceColor(
+    @AttrRes resource: Int,
+    alphaFactor: Float = 1f
+): Int {
     val typedArray = obtainStyledAttributes(intArrayOf(resource))
     val color = typedArray.getColor(0, 0)
     typedArray.recycle()
@@ -226,7 +245,10 @@ fun Context.sendLocalBroadcastSync(intent: Intent) {
  *
  * @param receiver receiver that gets registered.
  */
-fun Context.registerLocalReceiver(receiver: BroadcastReceiver, filter: IntentFilter) {
+fun Context.registerLocalReceiver(
+    receiver: BroadcastReceiver,
+    filter: IntentFilter
+) {
     LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter)
 }
 
@@ -256,9 +278,10 @@ fun Context.isServiceRunning(serviceClass: Class<*>): Boolean {
 fun Context.openInBrowser(url: String) {
     try {
         val parsedUrl = Uri.parse(url)
-        val intent = CustomTabsIntent.Builder()
-            .setToolbarColor(getResourceColor(R.attr.colorPrimary))
-            .build()
+        val intent =
+            CustomTabsIntent.Builder()
+                .setToolbarColor(getResourceColor(R.attr.colorPrimary))
+                .build()
         intent.launchUrl(this, parsedUrl)
     } catch (e: Exception) {
         toast(e.message)
@@ -299,11 +322,12 @@ fun Context.isOnline(): Boolean {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         val networkCapabilities = connectivityManager.activeNetwork ?: return false
         val actNw = connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
-        val maxTransport = when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 -> NetworkCapabilities.TRANSPORT_LOWPAN
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> NetworkCapabilities.TRANSPORT_WIFI_AWARE
-            else -> NetworkCapabilities.TRANSPORT_VPN
-        }
+        val maxTransport =
+            when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 -> NetworkCapabilities.TRANSPORT_LOWPAN
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> NetworkCapabilities.TRANSPORT_WIFI_AWARE
+                else -> NetworkCapabilities.TRANSPORT_VPN
+            }
         return (NetworkCapabilities.TRANSPORT_CELLULAR..maxTransport).any(actNw::hasTransport)
     } else {
         val networkInfo = connectivityManager.activeNetworkInfo ?: return false

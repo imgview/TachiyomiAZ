@@ -18,9 +18,9 @@ import eu.kanade.tachiyomi.util.lang.launchUI
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 import exh.uconfig.WarnConfigureDialogController
-import java.net.HttpCookie
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import java.net.HttpCookie
 
 /**
  * LoginController
@@ -37,7 +37,10 @@ class LoginController : NucleusController<EhActivityLoginBinding, LoginPresenter
 
     override fun createPresenter() = LoginPresenter()
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = EhActivityLoginBinding.inflate(inflater)
         return binding.root
     }
@@ -117,30 +120,34 @@ class LoginController : NucleusController<EhActivityLoginBinding, LoginPresenter
 
         binding.webview.loadUrl("https://forums.e-hentai.org/index.php?act=Login")
 
-        binding.webview.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView, url: String) {
-                super.onPageFinished(view, url)
-                Timber.d(url)
-                val parsedUrl = Uri.parse(url)
-                if (parsedUrl.host.equals("forums.e-hentai.org", ignoreCase = true)) {
-                    // Hide distracting content
-                    if (!parsedUrl.queryParameterNames.contains(PARAM_SKIP_INJECT)) {
-                        view.evaluateJavascript(HIDE_JS, null)
-                    }
-                    // Check login result
+        binding.webview.webViewClient =
+            object : WebViewClient() {
+                override fun onPageFinished(
+                    view: WebView,
+                    url: String
+                ) {
+                    super.onPageFinished(view, url)
+                    Timber.d(url)
+                    val parsedUrl = Uri.parse(url)
+                    if (parsedUrl.host.equals("forums.e-hentai.org", ignoreCase = true)) {
+                        // Hide distracting content
+                        if (!parsedUrl.queryParameterNames.contains(PARAM_SKIP_INJECT)) {
+                            view.evaluateJavascript(HIDE_JS, null)
+                        }
+                        // Check login result
 
-                    if (parsedUrl.getQueryParameter("code")?.toInt() != 0) {
-                        if (checkLoginCookies(url)) view.loadUrl("https://exhentai.org/")
-                    }
-                } else if (parsedUrl.host.equals("exhentai.org", ignoreCase = true)) {
-                    // At ExHentai, check that everything worked out...
-                    if (applyExHentaiCookies(url)) {
-                        preferenceManager.enableExhentai().set(true)
-                        finishLogin()
+                        if (parsedUrl.getQueryParameter("code")?.toInt() != 0) {
+                            if (checkLoginCookies(url)) view.loadUrl("https://exhentai.org/")
+                        }
+                    } else if (parsedUrl.host.equals("exhentai.org", ignoreCase = true)) {
+                        // At ExHentai, check that everything worked out...
+                        if (applyExHentaiCookies(url)) {
+                            preferenceManager.enableExhentai().set(true)
+                            finishLogin()
+                        }
                     }
                 }
             }
-        }
     }
 
     fun finishLogin() {

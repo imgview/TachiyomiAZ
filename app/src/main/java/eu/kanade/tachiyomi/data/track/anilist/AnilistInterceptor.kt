@@ -4,7 +4,6 @@ import okhttp3.Interceptor
 import okhttp3.Response
 
 class AnilistInterceptor(val anilist: Anilist, private var token: String?) : Interceptor {
-
     /**
      * OAuth object used for authenticated requests.
      *
@@ -37,9 +36,10 @@ class AnilistInterceptor(val anilist: Anilist, private var token: String?) : Int
         }
 
         // Add the authorization header to the original request.
-        val authRequest = originalRequest.newBuilder()
-            .addHeader("Authorization", "Bearer ${oauth!!.access_token}")
-            .build()
+        val authRequest =
+            originalRequest.newBuilder()
+                .addHeader("Authorization", "Bearer ${oauth!!.access_token}")
+                .build()
 
         return chain.proceed(authRequest)
     }

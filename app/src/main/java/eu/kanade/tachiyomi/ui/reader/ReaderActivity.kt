@@ -61,10 +61,6 @@ import eu.kanade.tachiyomi.util.view.showBar
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
-import java.io.File
-import java.util.concurrent.TimeUnit
-import kotlin.math.abs
-import kotlin.math.roundToLong
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
@@ -81,6 +77,10 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import java.io.File
+import java.util.concurrent.TimeUnit
+import kotlin.math.abs
+import kotlin.math.roundToLong
 
 /**
  * Activity containing the reader of Tachiyomi. This activity is mostly a container of the
@@ -88,7 +88,6 @@ import uy.kohesive.injekt.injectLazy
  */
 @RequiresPresenter(ReaderPresenter::class)
 class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() {
-
     private val preferences by injectLazy<PreferencesHelper>()
 
     /**
@@ -140,7 +139,11 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
         const val WEBTOON_HORIZ_LTR = 6
         const val WEBTOON_HORIZ_RTL = 7
 
-        fun newIntent(context: Context, manga: Manga, chapter: Chapter): Intent {
+        fun newIntent(
+            context: Context,
+            manga: Manga,
+            chapter: Chapter
+        ): Intent {
             return Intent(context, ReaderActivity::class.java).apply {
                 putExtra("manga", manga.id)
                 putExtra("chapter", chapter.id)
@@ -214,15 +217,19 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
         if (interval == -1f) return
 
         val intervalMs = (interval * 1000).roundToLong()
-        val sub = Observable.interval(intervalMs, intervalMs, TimeUnit.MILLISECONDS)
-            .onBackpressureDrop()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                viewer.let { v ->
-                    if (v is PagerViewer) v.moveToNext()
-                    else if (v is WebtoonViewer) v.scrollDown()
+        val sub =
+            Observable.interval(intervalMs, intervalMs, TimeUnit.MILLISECONDS)
+                .onBackpressureDrop()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    viewer.let { v ->
+                        if (v is PagerViewer) {
+                            v.moveToNext()
+                        } else if (v is WebtoonViewer) {
+                            v.scrollDown()
+                        }
+                    }
                 }
-            }
 
         autoscrollSubscription = sub
         exhSubscriptions += sub
@@ -359,13 +366,19 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
         }
 
         // Init listeners on bottom menu
-        binding.pageSeekbar.setOnSeekBarChangeListener(object : SimpleSeekBarListener() {
-            override fun onProgressChanged(seekBar: SeekBar, value: Int, fromUser: Boolean) {
-                if (viewer != null && fromUser) {
-                    moveToPageIndex(value)
+        binding.pageSeekbar.setOnSeekBarChangeListener(
+            object : SimpleSeekBarListener() {
+                override fun onProgressChanged(
+                    seekBar: SeekBar,
+                    value: Int,
+                    fromUser: Boolean
+                ) {
+                    if (viewer != null && fromUser) {
+                        moveToPageIndex(value)
+                    }
                 }
             }
-        })
+        )
         binding.leftChapter.setOnClickListener {
             if (viewer != null) {
                 if (viewer is R2LPagerViewer) {
@@ -502,10 +515,11 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
         binding.ehBoostPage.clicks()
             .onEach {
                 viewer?.let { _ ->
-                    val curPage = exh_currentPage() ?: run {
-                        toast("This page cannot be boosted (invalid page)!")
-                        return@let
-                    }
+                    val curPage =
+                        exh_currentPage() ?: run {
+                            toast("This page cannot be boosted (invalid page)!")
+                            return@let
+                        }
 
                     if (curPage.status == Page.ERROR) {
                         toast("Page failed to load, press the retry button instead!")
@@ -547,12 +561,13 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
 
     // EXH -->
     private fun exh_currentPage(): ReaderPage? {
-        val currentPage = (
+        val currentPage =
             (
-                (viewer as? PagerViewer)?.currentPage
-                    ?: (viewer as? WebtoonViewer)?.currentPage
-                ) as? ReaderPage
-            )?.index
+                (
+                    (viewer as? PagerViewer)?.currentPage
+                        ?: (viewer as? WebtoonViewer)?.currentPage
+                    ) as? ReaderPage
+                )?.index
         return currentPage?.let { presenter.viewerChaptersRelay.value.currChapter.pages?.getOrNull(it) }
     }
     // EXH <--
@@ -561,7 +576,10 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
      * Sets the visibility of the menu according to [visible] and with an optional parameter to
      * [animate] the views.
      */
-    private fun setMenuVisibility(visible: Boolean, animate: Boolean = true) {
+    private fun setMenuVisibility(
+        visible: Boolean,
+        animate: Boolean = true
+    ) {
         menuVisible = visible
         if (visible) {
             if (preferences.fullscreen().get()) {
@@ -573,12 +591,14 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
 
             if (animate) {
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
-                toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {
-                    override fun onAnimationStart(animation: Animation) {
-                        // Fix status bar being translucent the first time it's opened.
-                        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                toolbarAnimation.setAnimationListener(
+                    object : SimpleAnimationListener() {
+                        override fun onAnimationStart(animation: Animation) {
+                            // Fix status bar being translucent the first time it's opened.
+                            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                        }
                     }
-                })
+                )
                 // EXH -->
                 binding.header.startAnimation(toolbarAnimation)
                 // EXH <--
@@ -599,11 +619,13 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
 
             if (animate) {
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.exit_to_top)
-                toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {
-                    override fun onAnimationEnd(animation: Animation) {
-                        binding.readerMenu.gone()
+                toolbarAnimation.setAnimationListener(
+                    object : SimpleAnimationListener() {
+                        override fun onAnimationEnd(animation: Animation) {
+                            binding.readerMenu.gone()
+                        }
                     }
-                })
+                )
                 // EXH -->
                 binding.header.startAnimation(toolbarAnimation)
                 // EXH <--
@@ -632,15 +654,16 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
      */
     fun setManga(manga: Manga) {
         val prevViewer = viewer
-        val newViewer = when (presenter.getMangaViewer()) {
-            RIGHT_TO_LEFT -> R2LPagerViewer(this)
-            VERTICAL -> VerticalPagerViewer(this)
-            WEBTOON -> WebtoonViewer(this)
-            VERTICAL_PLUS -> WebtoonViewer(this, isContinuous = false)
-            WEBTOON_HORIZ_LTR -> WebtoonViewer(this, isContinuous = true, isHorizontal = true)
-            WEBTOON_HORIZ_RTL -> WebtoonViewer(this, isContinuous = true, isHorizontal = true, isReversed = true)
-            else -> L2RPagerViewer(this)
-        }
+        val newViewer =
+            when (presenter.getMangaViewer()) {
+                RIGHT_TO_LEFT -> R2LPagerViewer(this)
+                VERTICAL -> VerticalPagerViewer(this)
+                WEBTOON -> WebtoonViewer(this)
+                VERTICAL_PLUS -> WebtoonViewer(this, isContinuous = false)
+                WEBTOON_HORIZ_LTR -> WebtoonViewer(this, isContinuous = true, isHorizontal = true)
+                WEBTOON_HORIZ_RTL -> WebtoonViewer(this, isContinuous = true, isHorizontal = true, isReversed = true)
+                else -> L2RPagerViewer(this)
+            }
 
         // Destroy previous viewer if there was one
         if (prevViewer != null) {
@@ -690,11 +713,12 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
     @Suppress("DEPRECATION")
     fun setProgressDialog(show: Boolean) {
         progressDialog?.dismiss()
-        progressDialog = if (show) {
-            ProgressDialog.show(this, null, getString(R.string.loading), true)
-        } else {
-            null
-        }
+        progressDialog =
+            if (show) {
+                ProgressDialog.show(this, null, getString(R.string.loading), true)
+            } else {
+                null
+            }
     }
 
     /**
@@ -805,11 +829,12 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
      */
     fun onShareImageResult(file: File) {
         val stream = file.getUriCompat(this)
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            putExtra(Intent.EXTRA_STREAM, stream)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
-            type = "image/*"
-        }
+        val intent =
+            Intent(Intent.ACTION_SEND).apply {
+                putExtra(Intent.EXTRA_STREAM, stream)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                type = "image/*"
+            }
         startActivity(Intent.createChooser(intent, getString(R.string.action_share)))
     }
 
@@ -877,7 +902,6 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
      * Class that handles the user preferences of the reader.
      */
     private inner class ReaderConfig {
-
         /**
          * Initializes the reader subscriptions.
          */
@@ -932,23 +956,24 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
          * Forces the user preferred [orientation] on the activity.
          */
         private fun setOrientation(orientation: Int) {
-            val newOrientation = when (orientation) {
-                // Lock in current orientation
-                2 -> {
-                    val currentOrientation = resources.configuration.orientation
-                    if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
-                        ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
-                    } else {
-                        ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            val newOrientation =
+                when (orientation) {
+                    // Lock in current orientation
+                    2 -> {
+                        val currentOrientation = resources.configuration.orientation
+                        if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
+                            ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                        } else {
+                            ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                        }
                     }
+                    // Lock in portrait
+                    3 -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                    // Lock in landscape
+                    4 -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                    // Rotation free
+                    else -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                 }
-                // Lock in portrait
-                3 -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
-                // Lock in landscape
-                4 -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-                // Rotation free
-                else -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-            }
 
             if (newOrientation != requestedOrientation) {
                 requestedOrientation = newOrientation
@@ -975,10 +1000,11 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
 
         @TargetApi(Build.VERSION_CODES.P)
         private fun setCutoutShort(enabled: Boolean) {
-            window.attributes.layoutInDisplayCutoutMode = when (enabled) {
-                true -> WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-                false -> WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
-            }
+            window.attributes.layoutInDisplayCutoutMode =
+                when (enabled) {
+                    true -> WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+                    false -> WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+                }
         }
 
         /**
@@ -1028,15 +1054,16 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
          */
         private fun setCustomBrightnessValue(value: Int) {
             // Calculate and set reader brightness.
-            val readerBrightness = when {
-                value > 0 -> {
-                    value / 100f
+            val readerBrightness =
+                when {
+                    value > 0 -> {
+                        value / 100f
+                    }
+                    value < 0 -> {
+                        0.01f
+                    }
+                    else -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
                 }
-                value < 0 -> {
-                    0.01f
-                }
-                else -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
-            }
 
             window.attributes = window.attributes.apply { screenBrightness = readerBrightness }
 

@@ -27,7 +27,6 @@ class MigrationPresenter(
     private val db: DatabaseHelper = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get()
 ) : BasePresenter<MigrationController>() {
-
     var state = ViewState()
         private set(value) {
             field = value
@@ -76,11 +75,18 @@ class MigrationPresenter(
             .map { SourceItem(it, header) }
     }
 
-    private fun libraryToMigrationItem(library: List<Manga>, sourceId: Long): List<MangaItem> {
+    private fun libraryToMigrationItem(
+        library: List<Manga>,
+        sourceId: Long
+    ): List<MangaItem> {
         return library.filter { it.source == sourceId }.map(::MangaItem)
     }
 
-    fun migrateManga(prevManga: Manga, manga: Manga, replace: Boolean) {
+    fun migrateManga(
+        prevManga: Manga,
+        manga: Manga,
+        replace: Boolean
+    ) {
         val source = sourceManager.get(manga.source) ?: return
 
         state = state.copy(isReplacingManga = true)

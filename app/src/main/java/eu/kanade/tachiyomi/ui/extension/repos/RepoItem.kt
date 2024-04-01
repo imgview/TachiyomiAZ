@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.R
  * Repo item for a recycler view.
  */
 class RepoItem(val repo: String) : AbstractFlexibleItem<RepoHolder>() {
-
     /**
      * Whether this item is currently selected.
      */
@@ -30,7 +29,10 @@ class RepoItem(val repo: String) : AbstractFlexibleItem<RepoHolder>() {
      * @param view The view of this item.
      * @param adapter The adapter of this item.
      */
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): RepoHolder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): RepoHolder {
         return RepoHolder(view, adapter as RepoAdapter)
     }
 

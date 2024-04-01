@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.database.tables
 
 object MangaTable {
-
     const val TABLE = "mangas"
 
     const val COL_ID = "_id"
@@ -71,8 +70,9 @@ object MangaTable {
         get() = "CREATE INDEX ${TABLE}_${COL_URL}_index ON $TABLE($COL_URL)"
 
     val createLibraryIndexQuery: String
-        get() = "CREATE INDEX library_${COL_FAVORITE}_index ON $TABLE($COL_FAVORITE) " +
-            "WHERE $COL_FAVORITE = 1"
+        get() =
+            "CREATE INDEX library_${COL_FAVORITE}_index ON $TABLE($COL_FAVORITE) " +
+                "WHERE $COL_FAVORITE = 1"
 
     val addCoverLastModified: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_COVER_LAST_MODIFIED LONG NOT NULL DEFAULT 0"
@@ -84,11 +84,12 @@ object MangaTable {
      * Used with addDateAdded to populate it with the oldest chapter fetch date.
      */
     val backfillDateAdded: String
-        get() = "UPDATE $TABLE SET $COL_DATE_ADDED = " +
-            "(SELECT MIN(${ChapterTable.COL_DATE_FETCH}) " +
-            "FROM $TABLE INNER JOIN ${ChapterTable.TABLE} " +
-            "ON $TABLE.$COL_ID = ${ChapterTable.TABLE}.${ChapterTable.COL_MANGA_ID} " +
-            "GROUP BY $TABLE.$COL_ID)"
+        get() =
+            "UPDATE $TABLE SET $COL_DATE_ADDED = " +
+                "(SELECT MIN(${ChapterTable.COL_DATE_FETCH}) " +
+                "FROM $TABLE INNER JOIN ${ChapterTable.TABLE} " +
+                "ON $TABLE.$COL_ID = ${ChapterTable.TABLE}.${ChapterTable.COL_MANGA_ID} " +
+                "GROUP BY $TABLE.$COL_ID)"
 
     val addUpdateStrategy: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_UPDATE_STRATEGY INTEGER NOT NULL DEFAULT 0"

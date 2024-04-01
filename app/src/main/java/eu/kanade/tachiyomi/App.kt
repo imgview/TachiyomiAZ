@@ -40,11 +40,6 @@ import exh.log.EHLogLevel
 import exh.ui.lock.LockActivityDelegate
 import io.realm.Realm
 import io.realm.RealmConfiguration
-import java.io.File
-import java.security.NoSuchAlgorithmException
-import java.security.Security
-import javax.net.ssl.SSLContext
-import kotlin.concurrent.thread
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.conscrypt.Conscrypt
@@ -52,9 +47,13 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektScope
 import uy.kohesive.injekt.registry.default.DefaultRegistrar
+import java.io.File
+import java.security.NoSuchAlgorithmException
+import java.security.Security
+import javax.net.ssl.SSLContext
+import kotlin.concurrent.thread
 
 open class App : Application(), LifecycleObserver {
-
     override fun onCreate() {
         super.onCreate()
         if (BuildConfig.DEBUG) Timber.plant(Timber.DebugTree())
@@ -157,11 +156,12 @@ open class App : Application(), LifecycleObserver {
 
     // EXH
     private fun deleteOldMetadataRealm() {
-        val config = RealmConfiguration.Builder()
-            .name("gallery-metadata.realm")
-            .schemaVersion(3)
-            .deleteRealmIfMigrationNeeded()
-            .build()
+        val config =
+            RealmConfiguration.Builder()
+                .name("gallery-metadata.realm")
+                .schemaVersion(3)
+                .deleteRealmIfMigrationNeeded()
+                .build()
         Realm.deleteRealm(config)
 
         // Delete old paper db files
@@ -182,37 +182,46 @@ open class App : Application(), LifecycleObserver {
     private fun setupExhLogging() {
         EHLogLevel.init(this)
 
-        val logLevel = if (EHLogLevel.shouldLog(EHLogLevel.EXTRA)) {
-            LogLevel.ALL
-        } else {
-            LogLevel.WARN
-        }
+        val logLevel =
+            if (EHLogLevel.shouldLog(EHLogLevel.EXTRA)) {
+                LogLevel.ALL
+            } else {
+                LogLevel.WARN
+            }
 
-        val logConfig = LogConfiguration.Builder()
-            .logLevel(logLevel)
-            .t()
-            .st(2)
-            .nb()
-            .build()
+        val logConfig =
+            LogConfiguration.Builder()
+                .logLevel(logLevel)
+                .t()
+                .st(2)
+                .nb()
+                .build()
 
         val printers = mutableListOf<Printer>(AndroidPrinter())
 
-        val logFolder = File(
-            Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                getString(R.string.app_name),
-            "logs"
-        )
+        val logFolder =
+            File(
+                Environment.getExternalStorageDirectory().absolutePath + File.separator +
+                    getString(R.string.app_name),
+                "logs"
+            )
 
-        printers += FilePrinter
-            .Builder(logFolder.absolutePath)
-            .fileNameGenerator(object : DateFileNameGenerator() {
-                override fun generateFileName(logLevel: Int, timestamp: Long): String {
-                    return super.generateFileName(logLevel, timestamp) + "-${BuildConfig.BUILD_TYPE}"
-                }
-            })
-            .cleanStrategy(FileLastModifiedCleanStrategy(7.days.inMilliseconds.longValue))
-            .backupStrategy(NeverBackupStrategy())
-            .build()
+        printers +=
+            FilePrinter
+                .Builder(logFolder.absolutePath)
+                .fileNameGenerator(
+                    object : DateFileNameGenerator() {
+                        override fun generateFileName(
+                            logLevel: Int,
+                            timestamp: Long
+                        ): String {
+                            return super.generateFileName(logLevel, timestamp) + "-${BuildConfig.BUILD_TYPE}"
+                        }
+                    }
+                )
+                .cleanStrategy(FileLastModifiedCleanStrategy(7.days.inMilliseconds.longValue))
+                .backupStrategy(NeverBackupStrategy())
+                .build()
 
         // Install Crashlytics in prod
         if (!BuildConfig.DEBUG) {

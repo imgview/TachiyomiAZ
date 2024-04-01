@@ -1,10 +1,10 @@
 package exh.ui.lock
 
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import java.security.MessageDigest
-import kotlin.experimental.and
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.security.MessageDigest
+import kotlin.experimental.and
 
 /**
  * Password hashing utils
@@ -13,7 +13,10 @@ import uy.kohesive.injekt.api.get
 /**
  * Yes, I know SHA512 is fast, but bcrypt on mobile devices is too slow apparently
  */
-fun sha512(passwordToHash: String, salt: String): String {
+fun sha512(
+    passwordToHash: String,
+    salt: String
+): String {
     val md = MessageDigest.getInstance("SHA-512")
     md.update(salt.toByteArray(charset("UTF-8")))
     val bytes = md.digest(passwordToHash.toByteArray(charset("UTF-8")))
@@ -27,5 +30,4 @@ fun sha512(passwordToHash: String, salt: String): String {
 /**
  * Check if lock is enabled
  */
-fun lockEnabled(prefs: PreferencesHelper = Injekt.get()) =
-    prefs.eh_lockLength().get() != -1
+fun lockEnabled(prefs: PreferencesHelper = Injekt.get()) = prefs.eh_lockLength().get() != -1

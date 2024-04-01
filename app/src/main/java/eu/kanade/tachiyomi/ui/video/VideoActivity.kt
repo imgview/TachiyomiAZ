@@ -40,7 +40,11 @@ class VideoActivity : BaseRxActivity<VideoActivityBinding, VideoPresenter>() {
 
     companion object {
         @Suppress("unused")
-        fun newIntent(context: Context, anime: Manga, episode: Chapter): Intent {
+        fun newIntent(
+            context: Context,
+            anime: Manga,
+            episode: Chapter
+        ): Intent {
             return Intent(context, VideoActivity::class.java).apply {
                 putExtra("anime", anime.id)
                 putExtra("episode", episode.id)

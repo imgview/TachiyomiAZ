@@ -6,15 +6,14 @@ import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.LoadResult
 import eu.kanade.tachiyomi.extension.util.ExtensionLoader
 import exh.source.BlacklistedSources
-import java.util.Date
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import uy.kohesive.injekt.injectLazy
+import java.util.Date
 
 internal class ExtensionGithubApi {
-
     private val preferences: PreferencesHelper by injectLazy()
 
     suspend fun findExtensions(): List<Extension.Available> {
@@ -45,11 +44,12 @@ internal class ExtensionGithubApi {
         val blacklistEnabled = preferences.eh_enableSourceBlacklist().get()
         // SY <--
 
-        val installedExtensions = ExtensionLoader.loadExtensions(context)
-            .filterIsInstance<LoadResult.Success>()
-            .map { it.extension }
-            // SY -->
-            .filterNot { it.isBlacklisted(blacklistEnabled) }
+        val installedExtensions =
+            ExtensionLoader.loadExtensions(context)
+                .filterIsInstance<LoadResult.Success>()
+                .map { it.extension }
+                // SY -->
+                .filterNot { it.isBlacklisted(blacklistEnabled) }
         // SY <--
 
         val extensionsWithUpdate = mutableListOf<Extension.Installed>()
@@ -66,7 +66,10 @@ internal class ExtensionGithubApi {
         return extensionsWithUpdate
     }
 
-    private fun parseResponse(json: JsonArray, repoUrl: String): List<Extension.Available> {
+    private fun parseResponse(
+        json: JsonArray,
+        repoUrl: String
+    ): List<Extension.Available> {
         return json
             .filter { element ->
                 val versionName = element.jsonObject["version"]!!.jsonPrimitive.content
@@ -94,9 +97,7 @@ internal class ExtensionGithubApi {
         return "${extension.repoUrl.substringBeforeLast("index.min.json")}apk/${extension.apkName}"
     }
 
-    private fun Extension.isBlacklisted(
-        blacklistEnabled: Boolean = preferences.eh_enableSourceBlacklist().get()
-    ): Boolean {
+    private fun Extension.isBlacklisted(blacklistEnabled: Boolean = preferences.eh_enableSourceBlacklist().get()): Boolean {
         return pkgName in BlacklistedSources.BLACKLISTED_EXTENSIONS && blacklistEnabled
     }
 

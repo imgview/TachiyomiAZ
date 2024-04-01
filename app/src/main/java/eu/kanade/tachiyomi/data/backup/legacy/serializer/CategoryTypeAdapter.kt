@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.data.database.models.CategoryImpl
  * JSON Serializer used to write / read [CategoryImpl] to / from json
  */
 object CategoryTypeAdapter {
-
     fun build(): TypeAdapter<CategoryImpl> {
         return typeAdapter {
             write {

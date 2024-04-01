@@ -27,7 +27,6 @@ class MigrationController :
     FlexibleAdapter.OnItemClickListener,
     SourceAdapter.OnAllClickListener,
     MigrationInterface {
-
     private var adapter: FlexibleAdapter<IFlexible<*>>? = null
 
     private var title: String? = null
@@ -40,7 +39,10 @@ class MigrationController :
         return MigrationPresenter()
     }
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = MigrationControllerBinding.inflate(inflater)
         return binding.root
     }
@@ -104,7 +106,10 @@ class MigrationController :
         }
     }
 
-    override fun onItemClick(view: View?, position: Int): Boolean {
+    override fun onItemClick(
+        view: View?,
+        position: Int
+    ): Boolean {
         val item = adapter?.getItem(position) ?: return false
 
         if (item is MangaItem) {
@@ -123,9 +128,10 @@ class MigrationController :
         val item = adapter?.getItem(position) as? SourceItem ?: return
 
         launchUI {
-            val manga = Injekt.get<DatabaseHelper>().getFavoriteMangas().asRxSingle().await(
-                Schedulers.io()
-            )
+            val manga =
+                Injekt.get<DatabaseHelper>().getFavoriteMangas().asRxSingle().await(
+                    Schedulers.io()
+                )
             val sourceMangas =
                 manga.asSequence().filter { it.source == item.source.id }.map { it.id!! }.toList()
             withContext(Dispatchers.Main) {
@@ -138,12 +144,20 @@ class MigrationController :
         }
     }
 
-    override fun migrateManga(prevManga: Manga, manga: Manga, replace: Boolean): Manga? {
+    override fun migrateManga(
+        prevManga: Manga,
+        manga: Manga,
+        replace: Boolean
+    ): Manga? {
         presenter.migrateManga(prevManga, manga, replace)
         return null
     }
 }
 
 interface MigrationInterface {
-    fun migrateManga(prevManga: Manga, manga: Manga, replace: Boolean): Manga?
+    fun migrateManga(
+        prevManga: Manga,
+        manga: Manga,
+        replace: Boolean
+    ): Manga?
 }

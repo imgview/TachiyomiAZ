@@ -1,8 +1,6 @@
 package xyz.nulldev.ts.api.http.serializer
 
 import eu.kanade.tachiyomi.source.model.Filter
-import kotlin.reflect.KClass
-import kotlin.reflect.KProperty1
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonObjectBuilder
@@ -15,10 +13,16 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
+import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
 
 interface Serializer<in T : Filter<out Any?>> {
     fun JsonObjectBuilder.serialize(filter: T) {}
-    fun deserialize(json: JsonObject, filter: T) {}
+
+    fun deserialize(
+        json: JsonObject,
+        filter: T
+    ) {}
 
     /**
      * Automatic two-way mappings between fields and JSON
@@ -35,11 +39,12 @@ class HelpDialogSerializer(override val serializer: FilterSerializer) : Serializ
     override val type = "HELP_DIALOG"
     override val clazz = Filter.HelpDialog::class
 
-    override fun mappings() = listOf(
-        Pair(NAME, Filter.HelpDialog::name),
-        Pair(DIALOG_TITLE, Filter.HelpDialog::dialogTitle),
-        Pair(MARKDOWN, Filter.HelpDialog::markdown)
-    )
+    override fun mappings() =
+        listOf(
+            Pair(NAME, Filter.HelpDialog::name),
+            Pair(DIALOG_TITLE, Filter.HelpDialog::dialogTitle),
+            Pair(MARKDOWN, Filter.HelpDialog::markdown)
+        )
 
     companion object {
         const val NAME = "name"
@@ -53,9 +58,10 @@ class HeaderSerializer(override val serializer: FilterSerializer) : Serializer<F
     override val type = "HEADER"
     override val clazz = Filter.Header::class
 
-    override fun mappings() = listOf(
-        Pair(NAME, Filter.Header::name)
-    )
+    override fun mappings() =
+        listOf(
+            Pair(NAME, Filter.Header::name)
+        )
 
     companion object {
         const val NAME = "name"
@@ -66,9 +72,10 @@ class SeparatorSerializer(override val serializer: FilterSerializer) : Serialize
     override val type = "SEPARATOR"
     override val clazz = Filter.Separator::class
 
-    override fun mappings() = listOf(
-        Pair(NAME, Filter.Separator::name)
-    )
+    override fun mappings() =
+        listOf(
+            Pair(NAME, Filter.Separator::name)
+        )
 
     companion object {
         const val NAME = "name"
@@ -88,10 +95,11 @@ class SelectSerializer(override val serializer: FilterSerializer) : Serializer<F
         }
     }
 
-    override fun mappings() = listOf(
-        Pair(NAME, Filter.Select<Any>::name),
-        Pair(STATE, Filter.Select<Any>::state)
-    )
+    override fun mappings() =
+        listOf(
+            Pair(NAME, Filter.Select<Any>::name),
+            Pair(STATE, Filter.Select<Any>::state)
+        )
 
     companion object {
         const val NAME = "name"
@@ -104,10 +112,11 @@ class TextSerializer(override val serializer: FilterSerializer) : Serializer<Fil
     override val type = "TEXT"
     override val clazz = Filter.Text::class
 
-    override fun mappings() = listOf(
-        Pair(NAME, Filter.Text::name),
-        Pair(STATE, Filter.Text::state)
-    )
+    override fun mappings() =
+        listOf(
+            Pair(NAME, Filter.Text::name),
+            Pair(STATE, Filter.Text::state)
+        )
 
     companion object {
         const val NAME = "name"
@@ -119,10 +128,11 @@ class CheckboxSerializer(override val serializer: FilterSerializer) : Serializer
     override val type = "CHECKBOX"
     override val clazz = Filter.CheckBox::class
 
-    override fun mappings() = listOf(
-        Pair(NAME, Filter.CheckBox::name),
-        Pair(STATE, Filter.CheckBox::state)
-    )
+    override fun mappings() =
+        listOf(
+            Pair(NAME, Filter.CheckBox::name),
+            Pair(STATE, Filter.CheckBox::state)
+        )
 
     companion object {
         const val NAME = "name"
@@ -134,10 +144,11 @@ class TriStateSerializer(override val serializer: FilterSerializer) : Serializer
     override val type = "TRISTATE"
     override val clazz = Filter.TriState::class
 
-    override fun mappings() = listOf(
-        Pair(NAME, Filter.TriState::name),
-        Pair(STATE, Filter.TriState::state)
-    )
+    override fun mappings() =
+        listOf(
+            Pair(NAME, Filter.TriState::name),
+            Pair(STATE, Filter.TriState::state)
+        )
 
     companion object {
         const val NAME = "name"
@@ -164,7 +175,10 @@ class GroupSerializer(override val serializer: FilterSerializer) : Serializer<Fi
         }
     }
 
-    override fun deserialize(json: JsonObject, filter: Filter.Group<Any?>) {
+    override fun deserialize(
+        json: JsonObject,
+        filter: Filter.Group<Any?>
+    ) {
         json[STATE]!!.jsonArray.forEachIndexed { index, jsonElement ->
             if (jsonElement !is JsonNull) {
                 @Suppress("UNCHECKED_CAST")
@@ -173,9 +187,10 @@ class GroupSerializer(override val serializer: FilterSerializer) : Serializer<Fi
         }
     }
 
-    override fun mappings() = listOf(
-        Pair(NAME, Filter.Group<Any?>::name)
-    )
+    override fun mappings() =
+        listOf(
+            Pair(NAME, Filter.Group<Any?>::name)
+        )
 
     companion object {
         const val NAME = "name"
@@ -204,19 +219,24 @@ class SortSerializer(override val serializer: FilterSerializer) : Serializer<Fil
         )
     }
 
-    override fun deserialize(json: JsonObject, filter: Filter.Sort) {
+    override fun deserialize(
+        json: JsonObject,
+        filter: Filter.Sort
+    ) {
         // Deserialize state
-        filter.state = (json[STATE] as? JsonObject)?.let {
-            Filter.Sort.Selection(
-                it[STATE_INDEX]!!.jsonPrimitive.int,
-                it[STATE_ASCENDING]!!.jsonPrimitive.boolean
-            )
-        }
+        filter.state =
+            (json[STATE] as? JsonObject)?.let {
+                Filter.Sort.Selection(
+                    it[STATE_INDEX]!!.jsonPrimitive.int,
+                    it[STATE_ASCENDING]!!.jsonPrimitive.boolean
+                )
+            }
     }
 
-    override fun mappings() = listOf(
-        Pair(NAME, Filter.Sort::name)
-    )
+    override fun mappings() =
+        listOf(
+            Pair(NAME, Filter.Sort::name)
+        )
 
     companion object {
         const val NAME = "name"

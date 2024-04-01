@@ -45,24 +45,25 @@ open class DatabaseHelper(context: Context) :
     SearchMetadataQueries,
     SearchTagQueries,
     SearchTitleQueries {
+    private val configuration =
+        SupportSQLiteOpenHelper.Configuration.builder(context)
+            .name(DbOpenCallback.DATABASE_NAME)
+            .callback(DbOpenCallback())
+            .build()
 
-    private val configuration = SupportSQLiteOpenHelper.Configuration.builder(context)
-        .name(DbOpenCallback.DATABASE_NAME)
-        .callback(DbOpenCallback())
-        .build()
-
-    override val db = DefaultStorIOSQLite.builder()
-        .sqliteOpenHelper(RequerySQLiteOpenHelperFactory().create(configuration))
-        .addTypeMapping(Manga::class.java, MangaTypeMapping())
-        .addTypeMapping(Chapter::class.java, ChapterTypeMapping())
-        .addTypeMapping(Track::class.java, TrackTypeMapping())
-        .addTypeMapping(Category::class.java, CategoryTypeMapping())
-        .addTypeMapping(MangaCategory::class.java, MangaCategoryTypeMapping())
-        .addTypeMapping(SearchMetadata::class.java, SearchMetadataTypeMapping())
-        .addTypeMapping(History::class.java, HistoryTypeMapping())
-        .addTypeMapping(SearchTag::class.java, SearchTagTypeMapping())
-        .addTypeMapping(SearchTitle::class.java, SearchTitleTypeMapping())
-        .build()
+    override val db =
+        DefaultStorIOSQLite.builder()
+            .sqliteOpenHelper(RequerySQLiteOpenHelperFactory().create(configuration))
+            .addTypeMapping(Manga::class.java, MangaTypeMapping())
+            .addTypeMapping(Chapter::class.java, ChapterTypeMapping())
+            .addTypeMapping(Track::class.java, TrackTypeMapping())
+            .addTypeMapping(Category::class.java, CategoryTypeMapping())
+            .addTypeMapping(MangaCategory::class.java, MangaCategoryTypeMapping())
+            .addTypeMapping(SearchMetadata::class.java, SearchMetadataTypeMapping())
+            .addTypeMapping(History::class.java, HistoryTypeMapping())
+            .addTypeMapping(SearchTag::class.java, SearchTagTypeMapping())
+            .addTypeMapping(SearchTitle::class.java, SearchTitleTypeMapping())
+            .build()
 
     inline fun inTransaction(block: () -> Unit) = db.inTransaction(block)
 

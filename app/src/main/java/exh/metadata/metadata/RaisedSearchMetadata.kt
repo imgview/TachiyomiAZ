@@ -9,12 +9,12 @@ import exh.metadata.sql.models.SearchMetadata
 import exh.metadata.sql.models.SearchTag
 import exh.metadata.sql.models.SearchTitle
 import exh.plusAssign
-import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KProperty
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
 @Serializable
 sealed class RaisedSearchMetadata {
@@ -35,7 +35,10 @@ sealed class RaisedSearchMetadata {
 
     fun getTitleOfType(type: Int): String? = titles.find { it.type == type }?.title
 
-    fun replaceTitleOfType(type: Int, newTitle: String?) {
+    fun replaceTitleOfType(
+        type: Int,
+        newTitle: String?
+    ) {
         titles.removeAll { it.type == type }
         if (newTitle != null) titles += RaisedTitle(newTitle, type)
     }
@@ -49,9 +52,10 @@ sealed class RaisedSearchMetadata {
     fun tagsToDescription() =
         StringBuilder("Tags:\n").apply {
             // BiConsumer only available in Java 8, don't bother calling forEach directly on 'tags'
-            val groupedTags = tags.filter { it.type != TAG_TYPE_VIRTUAL }.groupBy {
-                it.namespace
-            }.entries
+            val groupedTags =
+                tags.filter { it.type != TAG_TYPE_VIRTUAL }.groupBy {
+                    it.namespace
+                }.entries
 
             groupedTags.forEach { namespace, tags ->
                 if (tags.isNotEmpty()) {
@@ -109,42 +113,51 @@ sealed class RaisedSearchMetadata {
         indexedExtra = metadata.metadata.indexedExtra
 
         this.tags.clear()
-        this.tags += metadata.tags.map {
-            RaisedTag(it.namespace, it.name, it.type)
-        }
+        this.tags +=
+            metadata.tags.map {
+                RaisedTag(it.namespace, it.name, it.type)
+            }
 
         this.titles.clear()
-        this.titles += metadata.titles.map {
-            RaisedTitle(it.title, it.type)
-        }
+        this.titles +=
+            metadata.titles.map {
+                RaisedTitle(it.title, it.type)
+            }
     }
 
     companion object {
         // Virtual tags allow searching of otherwise unindexed fields
         const val TAG_TYPE_VIRTUAL = -2
 
-        val raiseFlattenJson = Json {
-            ignoreUnknownKeys = true
-        }
+        val raiseFlattenJson =
+            Json {
+                ignoreUnknownKeys = true
+            }
 
-        fun titleDelegate(type: Int) = object : ReadWriteProperty<RaisedSearchMetadata, String?> {
-            /**
-             * Returns the value of the property for the given object.
-             * @param thisRef the object for which the value is requested.
-             * @param property the metadata for the property.
-             * @return the property value.
-             */
-            override fun getValue(thisRef: RaisedSearchMetadata, property: KProperty<*>) =
-                thisRef.getTitleOfType(type)
+        fun titleDelegate(type: Int) =
+            object : ReadWriteProperty<RaisedSearchMetadata, String?> {
+                /**
+                 * Returns the value of the property for the given object.
+                 * @param thisRef the object for which the value is requested.
+                 * @param property the metadata for the property.
+                 * @return the property value.
+                 */
+                override fun getValue(
+                    thisRef: RaisedSearchMetadata,
+                    property: KProperty<*>
+                ) = thisRef.getTitleOfType(type)
 
-            /**
-             * Sets the value of the property for the given object.
-             * @param thisRef the object for which the value is requested.
-             * @param property the metadata for the property.
-             * @param value the value to set.
-             */
-            override fun setValue(thisRef: RaisedSearchMetadata, property: KProperty<*>, value: String?) =
-                thisRef.replaceTitleOfType(type, value)
-        }
+                /**
+                 * Sets the value of the property for the given object.
+                 * @param thisRef the object for which the value is requested.
+                 * @param property the metadata for the property.
+                 * @param value the value to set.
+                 */
+                override fun setValue(
+                    thisRef: RaisedSearchMetadata,
+                    property: KProperty<*>,
+                    value: String?
+                ) = thisRef.replaceTitleOfType(type, value)
+            }
     }
 }

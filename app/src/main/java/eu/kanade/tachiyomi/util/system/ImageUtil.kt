@@ -12,13 +12,16 @@ import java.net.URLConnection
 import kotlin.math.abs
 
 object ImageUtil {
-
-    fun isImage(name: String, openStream: (() -> InputStream)? = null): Boolean {
-        val contentType = try {
-            URLConnection.guessContentTypeFromName(name)
-        } catch (e: Exception) {
-            null
-        } ?: openStream?.let { findImageType(it)?.mime }
+    fun isImage(
+        name: String,
+        openStream: (() -> InputStream)? = null
+    ): Boolean {
+        val contentType =
+            try {
+                URLConnection.guessContentTypeFromName(name)
+            } catch (e: Exception) {
+                null
+            } ?: openStream?.let { findImageType(it)?.mime }
         return contentType?.startsWith("image/") ?: false
     }
 
@@ -30,12 +33,13 @@ object ImageUtil {
         try {
             val bytes = ByteArray(12)
 
-            val length = if (stream.markSupported()) {
-                stream.mark(bytes.size)
-                stream.read(bytes, 0, bytes.size).also { stream.reset() }
-            } else {
-                stream.read(bytes, 0, bytes.size)
-            }
+            val length =
+                if (stream.markSupported()) {
+                    stream.mark(bytes.size)
+                    stream.read(bytes, 0, bytes.size).also { stream.reset() }
+                } else {
+                    stream.read(bytes, 0, bytes.size)
+                }
 
             if (length == -1) {
                 return null
@@ -54,11 +58,11 @@ object ImageUtil {
                 return ImageType.WEBP
             }
             if (bytes.comparesWithAnyOf(
-                listOf(
-                    charByteArrayOf(0xFF, 0x0A),
-                    charByteArrayOf(0x00, 0x00, 0x00, 0x0C, 0x4A, 0x58, 0x4C, 0x20, 0x0D, 0x0A, 0x87, 0x0A)
+                    listOf(
+                            charByteArrayOf(0xFF, 0x0A),
+                            charByteArrayOf(0x00, 0x00, 0x00, 0x0C, 0x4A, 0x58, 0x4C, 0x20, 0x0D, 0x0A, 0x87, 0x0A)
+                        )
                 )
-            )
             ) {
                 return ImageType.JXL
             }
@@ -66,12 +70,12 @@ object ImageUtil {
                 if (bytes.compareWith("avi".toByteArray(), 8)) {
                     return ImageType.AVIF
                 } else if (bytes.getSlice(8, 4).comparesWithAnyOf(
-                    listOf(
-                        "hei".toByteArray(),
-                        "mif1".toByteArray(),
-                        "hev".toByteArray()
+                        listOf(
+                                "hei".toByteArray(),
+                                "mif1".toByteArray(),
+                                "hev".toByteArray()
+                            )
                     )
-                )
                 ) {
                     return ImageType.HEIF
                 }
@@ -89,16 +93,24 @@ object ImageUtil {
         }
         return false
     }
-    private fun ByteArray.compareWith(magic: ByteArray, offset: Int = 0): Boolean {
+
+    private fun ByteArray.compareWith(
+        magic: ByteArray,
+        offset: Int = 0
+    ): Boolean {
         for (i in magic.indices) {
             if (this[i + offset] != magic[i]) return false
         }
         return true
     }
 
-    private fun ByteArray.getSlice(offset: Int, length: Int): ByteArray {
+    private fun ByteArray.getSlice(
+        offset: Int,
+        length: Int
+    ): ByteArray {
         return this.slice(IntRange(offset, offset + length - 1)).toByteArray()
     }
+
     private fun charByteArrayOf(vararg bytes: Int): ByteArray {
         return ByteArray(bytes.size).apply {
             for (i in bytes.indices) {
@@ -118,10 +130,17 @@ object ImageUtil {
     }
 
     // SY -->
-    fun autoSetBackground(image: Bitmap?, alwaysUseWhite: Boolean, context: Context): Drawable {
-        val backgroundColor = if (alwaysUseWhite) Color.WHITE else {
-            context.getResourceColor(R.attr.colorPrimary)
-        }
+    fun autoSetBackground(
+        image: Bitmap?,
+        alwaysUseWhite: Boolean,
+        context: Context
+    ): Drawable {
+        val backgroundColor =
+            if (alwaysUseWhite) {
+                Color.WHITE
+            } else {
+                context.getResourceColor(R.attr.colorPrimary)
+            }
         if (image == null) return ColorDrawable(backgroundColor)
         if (image.width < 50 || image.height < 50) {
             return ColorDrawable(backgroundColor)
@@ -142,8 +161,9 @@ object ImageUtil {
         val botLeftIsDark = isDark(image.getPixel(left, bot))
         val botRightIsDark = isDark(image.getPixel(right, bot))
 
-        var darkBG = (topLeftIsDark && (botLeftIsDark || botRightIsDark || topRightIsDark || midLeftIsDark || topMidIsDark)) ||
-            (topRightIsDark && (botRightIsDark || botLeftIsDark || midRightIsDark || topMidIsDark))
+        var darkBG =
+            (topLeftIsDark && (botLeftIsDark || botRightIsDark || topRightIsDark || midLeftIsDark || topMidIsDark)) ||
+                (topRightIsDark && (botRightIsDark || botLeftIsDark || midRightIsDark || topMidIsDark))
 
         if (!isWhite(image.getPixel(left, top)) && pixelIsClose(image.getPixel(left, top), image.getPixel(midX, top)) &&
             !isWhite(image.getPixel(midX, top)) && pixelIsClose(image.getPixel(midX, top), image.getPixel(right, top)) &&
@@ -163,13 +183,14 @@ object ImageUtil {
             darkBG = false
         }
 
-        var blackPixel = when {
-            topLeftIsDark -> image.getPixel(left, top)
-            topRightIsDark -> image.getPixel(right, top)
-            botLeftIsDark -> image.getPixel(left, bot)
-            botRightIsDark -> image.getPixel(right, bot)
-            else -> backgroundColor
-        }
+        var blackPixel =
+            when {
+                topLeftIsDark -> image.getPixel(left, top)
+                topRightIsDark -> image.getPixel(right, top)
+                botLeftIsDark -> image.getPixel(left, bot)
+                botRightIsDark -> image.getPixel(right, bot)
+                else -> backgroundColor
+            }
 
         var overallWhitePixels = 0
         var overallBlackPixels = 0
@@ -227,11 +248,12 @@ object ImageUtil {
             when {
                 blackPixels > 22 -> {
                     if (x == right || x == right + offsetX) {
-                        blackPixel = when {
-                            topRightIsDark -> image.getPixel(right, top)
-                            botRightIsDark -> image.getPixel(right, bot)
-                            else -> blackPixel
-                        }
+                        blackPixel =
+                            when {
+                                topRightIsDark -> image.getPixel(right, top)
+                                botRightIsDark -> image.getPixel(right, bot)
+                                else -> blackPixel
+                            }
                     }
                     darkBG = true
                     overallWhitePixels = 0
@@ -240,11 +262,12 @@ object ImageUtil {
                 blackStreak -> {
                     darkBG = true
                     if (x == right || x == right + offsetX) {
-                        blackPixel = when {
-                            topRightIsDark -> image.getPixel(right, top)
-                            botRightIsDark -> image.getPixel(right, bot)
-                            else -> blackPixel
-                        }
+                        blackPixel =
+                            when {
+                                topRightIsDark -> image.getPixel(right, top)
+                                botRightIsDark -> image.getPixel(right, bot)
+                                else -> blackPixel
+                            }
                     }
                     if (blackPixels > 18) {
                         overallWhitePixels = 0
@@ -274,7 +297,9 @@ object ImageUtil {
                     GradientDrawable.Orientation.TOP_BOTTOM,
                     intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel)
                 )
-            } else ColorDrawable(blackPixel)
+            } else {
+                ColorDrawable(blackPixel)
+            }
         }
         if (topIsBlackStreak || (
             topLeftIsDark && topRightIsDark &&
@@ -311,7 +336,10 @@ object ImageUtil {
 
     private fun Boolean.toInt() = if (this) 1 else 0
 
-    private fun pixelIsClose(color1: Int, color2: Int): Boolean {
+    private fun pixelIsClose(
+        color1: Int,
+        color2: Int
+    ): Boolean {
         return abs(Color.red(color1) - Color.red(color2)) < 30 &&
             abs(Color.green(color1) - Color.green(color2)) < 30 &&
             abs(Color.blue(color1) - Color.blue(color2)) < 30

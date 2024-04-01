@@ -11,28 +11,29 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.asObservableSuccess
-import java.net.URLEncoder
 import okhttp3.CacheControl
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
+import java.net.URLEncoder
 
 class BangumiApi(private val client: OkHttpClient, interceptor: BangumiInterceptor) {
-
     private val gson: Gson by injectLazy()
     private val authClient = client.newBuilder().addInterceptor(interceptor).build()
 
     fun addLibManga(track: Track): Observable<Track> {
-        val body = FormBody.Builder()
-            .add("rating", track.score.toInt().toString())
-            .add("status", track.toBangumiStatus())
-            .build()
-        val request = Request.Builder()
-            .url("$apiUrl/collection/${track.media_id}/update")
-            .post(body)
-            .build()
+        val body =
+            FormBody.Builder()
+                .add("rating", track.score.toInt().toString())
+                .add("status", track.toBangumiStatus())
+                .build()
+        val request =
+            Request.Builder()
+                .url("$apiUrl/collection/${track.media_id}/update")
+                .post(body)
+                .build()
         return authClient.newCall(request)
             .asObservableSuccess()
             .map {
@@ -42,22 +43,26 @@ class BangumiApi(private val client: OkHttpClient, interceptor: BangumiIntercept
 
     fun updateLibManga(track: Track): Observable<Track> {
         // chapter update
-        val body = FormBody.Builder()
-            .add("watched_eps", track.last_chapter_read.toString())
-            .build()
-        val request = Request.Builder()
-            .url("$apiUrl/subject/${track.media_id}/update/watched_eps")
-            .post(body)
-            .build()
+        val body =
+            FormBody.Builder()
+                .add("watched_eps", track.last_chapter_read.toString())
+                .build()
+        val request =
+            Request.Builder()
+                .url("$apiUrl/subject/${track.media_id}/update/watched_eps")
+                .post(body)
+                .build()
 
         // read status update
-        val sbody = FormBody.Builder()
-            .add("status", track.toBangumiStatus())
-            .build()
-        val srequest = Request.Builder()
-            .url("$apiUrl/collection/${track.media_id}/update")
-            .post(sbody)
-            .build()
+        val sbody =
+            FormBody.Builder()
+                .add("status", track.toBangumiStatus())
+                .build()
+        val srequest =
+            Request.Builder()
+                .url("$apiUrl/collection/${track.media_id}/update")
+                .post(sbody)
+                .build()
         return authClient.newCall(srequest)
             .asObservableSuccess()
             .map {
@@ -72,15 +77,17 @@ class BangumiApi(private val client: OkHttpClient, interceptor: BangumiIntercept
     }
 
     fun search(search: String): Observable<List<TrackSearch>> {
-        val url = Uri.parse(
-            "$apiUrl/search/subject/${URLEncoder.encode(search, Charsets.UTF_8.name())}"
-        ).buildUpon()
-            .appendQueryParameter("max_results", "20")
-            .build()
-        val request = Request.Builder()
-            .url(url.toString())
-            .get()
-            .build()
+        val url =
+            Uri.parse(
+                "$apiUrl/search/subject/${URLEncoder.encode(search, Charsets.UTF_8.name())}"
+            ).buildUpon()
+                .appendQueryParameter("max_results", "20")
+                .build()
+        val request =
+            Request.Builder()
+                .url(url.toString())
+                .get()
+                .build()
         return authClient.newCall(request)
             .asObservableSuccess()
             .map { netResponse ->
@@ -110,15 +117,16 @@ class BangumiApi(private val client: OkHttpClient, interceptor: BangumiIntercept
         return Track.create(TrackManager.BANGUMI).apply {
             title = mangas["name"].asString
             media_id = mangas["id"].asInt
-            score = if (mangas["rating"] != null) {
-                if (mangas["rating"].isJsonObject) {
-                    mangas["rating"].obj["score"].asFloat
+            score =
+                if (mangas["rating"] != null) {
+                    if (mangas["rating"].isJsonObject) {
+                        mangas["rating"].obj["score"].asFloat
+                    } else {
+                        0f
+                    }
                 } else {
                     0f
                 }
-            } else {
-                0f
-            }
             status = Bangumi.DEFAULT_STATUS
             tracking_url = mangas["url"].asString
         }
@@ -126,10 +134,11 @@ class BangumiApi(private val client: OkHttpClient, interceptor: BangumiIntercept
 
     fun findLibManga(track: Track): Observable<Track?> {
         val urlMangas = "$apiUrl/subject/${track.media_id}"
-        val requestMangas = Request.Builder()
-            .url(urlMangas)
-            .get()
-            .build()
+        val requestMangas =
+            Request.Builder()
+                .url(urlMangas)
+                .get()
+                .build()
 
         return authClient.newCall(requestMangas)
             .asObservableSuccess()
@@ -142,11 +151,12 @@ class BangumiApi(private val client: OkHttpClient, interceptor: BangumiIntercept
 
     fun statusLibManga(track: Track): Observable<Track?> {
         val urlUserRead = "$apiUrl/collection/${track.media_id}"
-        val requestUserRead = Request.Builder()
-            .url(urlUserRead)
-            .cacheControl(CacheControl.FORCE_NETWORK)
-            .get()
-            .build()
+        val requestUserRead =
+            Request.Builder()
+                .url(urlUserRead)
+                .cacheControl(CacheControl.FORCE_NETWORK)
+                .get()
+                .build()
 
         // todo get user readed chapter here
         return authClient.newCall(requestUserRead)
@@ -170,16 +180,18 @@ class BangumiApi(private val client: OkHttpClient, interceptor: BangumiIntercept
         }
     }
 
-    private fun accessTokenRequest(code: String) = POST(
-        oauthUrl,
-        body = FormBody.Builder()
-            .add("grant_type", "authorization_code")
-            .add("client_id", clientId)
-            .add("client_secret", clientSecret)
-            .add("code", code)
-            .add("redirect_uri", redirectUrl)
-            .build()
-    )
+    private fun accessTokenRequest(code: String) =
+        POST(
+            oauthUrl,
+            body =
+            FormBody.Builder()
+                .add("grant_type", "authorization_code")
+                .add("client_id", clientId)
+                .add("client_secret", clientSecret)
+                .add("code", code)
+                .add("redirect_uri", redirectUrl)
+                .build()
+        )
 
     companion object {
         private const val clientId = "bgm10555cda0762e80ca"
@@ -204,15 +216,17 @@ class BangumiApi(private val client: OkHttpClient, interceptor: BangumiIntercept
                 .appendQueryParameter("redirect_uri", redirectUrl)
                 .build()
 
-        fun refreshTokenRequest(token: String) = POST(
-            oauthUrl,
-            body = FormBody.Builder()
-                .add("grant_type", "refresh_token")
-                .add("client_id", clientId)
-                .add("client_secret", clientSecret)
-                .add("refresh_token", token)
-                .add("redirect_uri", redirectUrl)
-                .build()
-        )
+        fun refreshTokenRequest(token: String) =
+            POST(
+                oauthUrl,
+                body =
+                FormBody.Builder()
+                    .add("grant_type", "refresh_token")
+                    .add("client_id", clientId)
+                    .add("client_secret", clientSecret)
+                    .add("refresh_token", token)
+                    .add("redirect_uri", redirectUrl)
+                    .build()
+            )
     }
 }

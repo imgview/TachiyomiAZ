@@ -12,40 +12,40 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class ExtensionFilterController : SettingsController() {
+    override fun setupPreferenceScreen(screen: PreferenceScreen) =
+        with(screen) {
+            titleRes = R.string.action_filter
 
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        titleRes = R.string.action_filter
+            val activeLangs = preferences.enabledLanguages().get()
 
-        val activeLangs = preferences.enabledLanguages().get()
+            val availableLangs =
+                Injekt.get<ExtensionManager>().availableExtensions.groupBy {
+                    it.lang
+                }.keys.minus("all").partition {
+                    it in activeLangs
+                }.let {
+                    it.first + it.second
+                }
 
-        val availableLangs =
-            Injekt.get<ExtensionManager>().availableExtensions.groupBy {
-                it.lang
-            }.keys.minus("all").partition {
-                it in activeLangs
-            }.let {
-                it.first + it.second
-            }
+            availableLangs.forEach {
+                switchPreference {
+                    preferenceScreen.addPreference(this)
+                    title = LocaleHelper.getSourceDisplayName(it, context)
+                    isPersistent = false
+                    isChecked = it in activeLangs
 
-        availableLangs.forEach {
-            switchPreference {
-                preferenceScreen.addPreference(this)
-                title = LocaleHelper.getSourceDisplayName(it, context)
-                isPersistent = false
-                isChecked = it in activeLangs
+                    onChange { newValue ->
+                        val checked = newValue as Boolean
+                        val currentActiveLangs = preferences.enabledLanguages().get()
 
-                onChange { newValue ->
-                    val checked = newValue as Boolean
-                    val currentActiveLangs = preferences.enabledLanguages().get()
-
-                    if (checked) {
-                        preferences.enabledLanguages().set(currentActiveLangs + it)
-                    } else {
-                        preferences.enabledLanguages().set(currentActiveLangs - it)
+                        if (checked) {
+                            preferences.enabledLanguages().set(currentActiveLangs + it)
+                        } else {
+                            preferences.enabledLanguages().set(currentActiveLangs - it)
+                        }
+                        true
                     }
-                    true
                 }
             }
         }
-    }
 }

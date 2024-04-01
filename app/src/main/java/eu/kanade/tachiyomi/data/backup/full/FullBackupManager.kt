@@ -37,7 +37,6 @@ import exh.metadata.metadata.base.getFlatMetadataForManga
 import exh.metadata.metadata.base.insertFlatMetadata
 import exh.savedsearches.JsonSavedSearch
 import exh.source.getMainSource
-import kotlin.math.max
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -48,10 +47,10 @@ import okio.gzip
 import okio.sink
 import rx.Observable
 import timber.log.Timber
+import kotlin.math.max
 
 @OptIn(ExperimentalSerializationApi::class)
 class FullBackupManager(context: Context) : AbstractBackupManager(context) {
-
     val parser = ProtoBuf
 
     /**
@@ -60,45 +59,51 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
      * @param uri path of Uri
      * @param isJob backup called from job
      */
-    override fun createBackup(uri: Uri, flags: Int, isJob: Boolean): String? {
+    override fun createBackup(
+        uri: Uri,
+        flags: Int,
+        isJob: Boolean
+    ): String? {
         // Create root object
         var backup: Backup? = null
 
         databaseHelper.inTransaction {
             val databaseManga = getFavoriteManga()
 
-            backup = Backup(
-                backupManga(databaseManga, flags),
-                backupCategories(),
-                backupExtensionInfo(databaseManga),
-                backupSavedSearches()
-            )
+            backup =
+                Backup(
+                    backupManga(databaseManga, flags),
+                    backupCategories(),
+                    backupExtensionInfo(databaseManga),
+                    backupSavedSearches()
+                )
         }
 
         try {
-            val file: UniFile = (
-                if (isJob) {
-                    // Get dir of file and create
-                    var dir = UniFile.fromUri(context, uri)
-                    dir = dir.createDirectory("automatic")
+            val file: UniFile =
+                (
+                    if (isJob) {
+                        // Get dir of file and create
+                        var dir = UniFile.fromUri(context, uri)
+                        dir = dir.createDirectory("automatic")
 
-                    // Delete older backups
-                    val numberOfBackups = numberOfBackups()
-                    val oldBackupRegex = Regex("""tachiyomi_full_\d+-\d+-\d+_\d+-\d+.proto.gz""")
-                    val newBackupRegex = Regex("""tachiyomi_full_\d+-\d+-\d+_\d+-\d+.tachibk""")
-                    dir.listFiles { _, filename -> (oldBackupRegex.matches(filename) || newBackupRegex.matches(filename)) }
-                        .orEmpty()
-                        .sortedByDescending { it.name }
-                        .drop(numberOfBackups - 1)
-                        .forEach { it.delete() }
+                        // Delete older backups
+                        val numberOfBackups = numberOfBackups()
+                        val oldBackupRegex = Regex("""tachiyomi_full_\d+-\d+-\d+_\d+-\d+.proto.gz""")
+                        val newBackupRegex = Regex("""tachiyomi_full_\d+-\d+-\d+_\d+-\d+.tachibk""")
+                        dir.listFiles { _, filename -> (oldBackupRegex.matches(filename) || newBackupRegex.matches(filename)) }
+                            .orEmpty()
+                            .sortedByDescending { it.name }
+                            .drop(numberOfBackups - 1)
+                            .forEach { it.delete() }
 
-                    // Create new file to place backup
-                    dir.createFile(BackupFull.getDefaultFilename())
-                } else {
-                    UniFile.fromUri(context, uri)
-                }
-                )
-                ?: throw Exception("Couldn't create backup file")
+                        // Create new file to place backup
+                        dir.createFile(BackupFull.getDefaultFilename())
+                    } else {
+                        UniFile.fromUri(context, uri)
+                    }
+                    )
+                    ?: throw Exception("Couldn't create backup file")
 
             val byteArray = parser.encodeToByteArray(BackupSerializer, backup!!)
             file.openOutputStream().sink().gzip().buffer().use { it.write(byteArray) }
@@ -109,7 +114,10 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
         }
     }
 
-    private fun backupManga(mangas: List<Manga>, flags: Int): List<BackupManga> {
+    private fun backupManga(
+        mangas: List<Manga>,
+        flags: Int
+    ): List<BackupManga> {
         return mangas.map {
             backupMangaObject(it, flags)
         }
@@ -137,6 +145,7 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
     }
 
     // SY -->
+
     /**
      * Backup the saved searches from sources
      *
@@ -163,7 +172,10 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
      * @param options options for the backup
      * @return [BackupManga] containing manga in a serializable form
      */
-    private fun backupMangaObject(manga: Manga, options: Int): BackupManga {
+    private fun backupMangaObject(
+        manga: Manga,
+        options: Int
+    ): BackupManga {
         // Entry for this manga
         val mangaObject = BackupManga.copyFrom(manga)
 
@@ -208,10 +220,11 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
         if (options and BACKUP_HISTORY_MASK == BACKUP_HISTORY) {
             val historyForManga = databaseHelper.getHistoryByMangaId(manga.id!!).executeAsBlocking()
             if (historyForManga.isNotEmpty()) {
-                val history = historyForManga.mapNotNull { history ->
-                    val url = databaseHelper.getChapter(history.chapter_id).executeAsBlocking()?.url
-                    url?.let { BackupHistory(url, history.last_read) }
-                }
+                val history =
+                    historyForManga.mapNotNull { history ->
+                        val url = databaseHelper.getChapter(history.chapter_id).executeAsBlocking()?.url
+                        url?.let { BackupHistory(url, history.last_read) }
+                    }
                 if (history.isNotEmpty()) {
                     mangaObject.history = history
                 }
@@ -221,7 +234,10 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
         return mangaObject
     }
 
-    fun restoreMangaNoFetch(manga: Manga, dbManga: Manga) {
+    fun restoreMangaNoFetch(
+        manga: Manga,
+        dbManga: Manga
+    ) {
         manga.id = dbManga.id
         manga.copyFrom(dbManga)
         insertManga(manga)
@@ -234,7 +250,11 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
      * @param manga manga that needs updating
      * @return [Observable] that contains manga
      */
-    fun restoreMangaFetchObservable(source: Source?, manga: Manga, online: Boolean): Observable<Manga> {
+    fun restoreMangaFetchObservable(
+        source: Source?,
+        manga: Manga,
+        online: Boolean
+    ): Observable<Manga> {
         return if (online && source != null) {
             return runAsObservable({
                 val networkManga = source.getMangaDetails(manga.toMangaInfo())
@@ -293,7 +313,11 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
      * @param manga the manga whose categories have to be restored.
      * @param categories the categories to restore.
      */
-    internal fun restoreCategoriesForManga(manga: Manga, categories: List<Int>, backupCategories: List<BackupCategory>) {
+    internal fun restoreCategoriesForManga(
+        manga: Manga,
+        categories: List<Int>,
+        backupCategories: List<BackupCategory>
+    ) {
         val dbCategories = databaseHelper.getCategories().executeAsBlocking()
         val mangaCategoriesToUpdate = mutableListOf<MangaCategory>()
         categories.forEach { backupCategoryOrder ->
@@ -334,9 +358,10 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
             } else {
                 // If not in database create
                 databaseHelper.getChapter(url).executeAsBlocking()?.let {
-                    val historyToAdd = History.create(it).apply {
-                        last_read = lastRead
-                    }
+                    val historyToAdd =
+                        History.create(it).apply {
+                            last_read = lastRead
+                        }
                     historyToBeUpdated.add(historyToAdd)
                 }
             }
@@ -350,7 +375,10 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
      * @param manga the manga whose sync have to be restored.
      * @param tracks the track list to restore.
      */
-    internal fun restoreTrackForManga(manga: Manga, tracks: List<Track>) {
+    internal fun restoreTrackForManga(
+        manga: Manga,
+        tracks: List<Track>
+    ) {
         // Fix foreign keys with the current manga id
         tracks.map { it.manga_id = manga.id!! }
 
@@ -397,7 +425,10 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
      * @param chapters list containing chapters that get restored
      * @return boolean answering if chapter fetch is not needed
      */
-    internal fun restoreChaptersForManga(manga: Manga, chapters: List<Chapter>): Boolean {
+    internal fun restoreChaptersForManga(
+        manga: Manga,
+        chapters: List<Chapter>
+    ): Boolean {
         val dbChapters = databaseHelper.getChapters(manga).executeAsBlocking()
 
         // Return if fetch is needed
@@ -430,7 +461,10 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
         return true
     }
 
-    internal fun restoreChaptersForMangaOffline(manga: Manga, chapters: List<Chapter>) {
+    internal fun restoreChaptersForMangaOffline(
+        manga: Manga,
+        chapters: List<Chapter>
+    ) {
         val dbChapters = databaseHelper.getChapters(manga).executeAsBlocking()
 
         chapters.forEach { chapter ->
@@ -458,36 +492,44 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
 
     // SY -->
     internal fun restoreSavedSearches(backupSavedSearches: List<BackupSavedSearch>) {
-        val currentSavedSearches = preferences.eh_savedSearches().get().map {
-            val sourceId = it.substringBefore(':').toLong()
-            val content = Json.decodeFromString<JsonSavedSearch>(it.substringAfter(':'))
-            BackupSavedSearch(
-                content.name,
-                content.query,
-                content.filters.toString(),
-                sourceId
-            )
-        }
+        val currentSavedSearches =
+            preferences.eh_savedSearches().get().map {
+                val sourceId = it.substringBefore(':').toLong()
+                val content = Json.decodeFromString<JsonSavedSearch>(it.substringAfter(':'))
+                BackupSavedSearch(
+                    content.name,
+                    content.query,
+                    content.filters.toString(),
+                    sourceId
+                )
+            }
 
         preferences.eh_savedSearches()
             .set(
                 (
-                    backupSavedSearches.filter { backupSavedSearch -> currentSavedSearches.none { it.name == backupSavedSearch.name && it.source == backupSavedSearch.source } }
+                    backupSavedSearches.filter {
+                            backupSavedSearch ->
+                        currentSavedSearches.none { it.name == backupSavedSearch.name && it.source == backupSavedSearch.source }
+                    }
                         .map {
-                            "${it.source}:" + Json.encodeToString(
-                                JsonSavedSearch(
-                                    it.name,
-                                    it.query,
-                                    Json.decodeFromString(it.filterList)
+                            "${it.source}:" +
+                                Json.encodeToString(
+                                    JsonSavedSearch(
+                                        it.name,
+                                        it.query,
+                                        Json.decodeFromString(it.filterList)
+                                    )
                                 )
-                            )
                         } + preferences.eh_savedSearches().get()
                     )
                     .toSet()
             )
     }
 
-    internal fun restoreFlatMetadata(manga: Manga, backupFlatMetadata: BackupFlatMetadata) {
+    internal fun restoreFlatMetadata(
+        manga: Manga,
+        backupFlatMetadata: BackupFlatMetadata
+    ) {
         manga.id?.let { mangaId ->
             databaseHelper.getFlatMetadataForManga(mangaId).executeAsBlocking().let {
                 if (it == null) {

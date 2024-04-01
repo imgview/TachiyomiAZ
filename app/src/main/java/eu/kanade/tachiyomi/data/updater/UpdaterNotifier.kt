@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.util.system.notificationManager
  * @param context context of application.
  */
 internal class UpdaterNotifier(private val context: Context) {
-
     private val notificationBuilder = context.notificationBuilder(Notifications.CHANNEL_COMMON)
 
     /**

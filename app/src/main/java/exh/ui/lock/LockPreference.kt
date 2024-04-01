@@ -9,16 +9,17 @@ import com.afollestad.materialdialogs.input.input
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.preference.onChange
-import java.math.BigInteger
-import java.security.SecureRandom
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.injectLazy
+import java.math.BigInteger
+import java.security.SecureRandom
 
-class LockPreference @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+class LockPreference
+@JvmOverloads
+constructor(context: Context, attrs: AttributeSet? = null) :
     SwitchPreferenceCompat(context, attrs) {
-
     private val secureRandom by lazy { SecureRandom() }
 
     val prefs: PreferencesHelper by injectLazy()
@@ -48,9 +49,10 @@ class LockPreference @JvmOverloads constructor(context: Context, attrs: Attribut
             .title(text = "Lock application")
             .message(text = "Enter a pin to lock the application. Enter nothing to disable the pin lock.")
             .input(maxLength = 10, inputType = InputType.TYPE_CLASS_NUMBER, allowEmpty = true) { _, c ->
-                val progressDialog = MaterialDialog(context)
-                    .title(text = "Saving password")
-                    .cancelable(false)
+                val progressDialog =
+                    MaterialDialog(context)
+                        .title(text = "Saving password")
+                        .cancelable(false)
                 progressDialog.show()
                 Observable.fromCallable {
                     savePassword(c.toString())

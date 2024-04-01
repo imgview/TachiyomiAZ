@@ -7,13 +7,12 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import java.text.DecimalFormat
 import rx.Completable
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
+import java.text.DecimalFormat
 
 class Kitsu(private val context: Context, id: Int) : TrackService(id) {
-
     companion object {
         const val READING = 1
         const val COMPLETED = 2
@@ -41,16 +40,17 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
         return listOf(READING, PLAN_TO_READ, COMPLETED, ON_HOLD, DROPPED)
     }
 
-    override fun getStatus(status: Int): String = with(context) {
-        when (status) {
-            READING -> getString(R.string.currently_reading)
-            PLAN_TO_READ -> getString(R.string.want_to_read)
-            COMPLETED -> getString(R.string.completed)
-            ON_HOLD -> getString(R.string.on_hold)
-            DROPPED -> getString(R.string.dropped)
-            else -> ""
+    override fun getStatus(status: Int): String =
+        with(context) {
+            when (status) {
+                READING -> getString(R.string.currently_reading)
+                PLAN_TO_READ -> getString(R.string.want_to_read)
+                COMPLETED -> getString(R.string.completed)
+                ON_HOLD -> getString(R.string.on_hold)
+                DROPPED -> getString(R.string.dropped)
+                else -> ""
+            }
         }
-    }
 
     override fun getCompletionStatus(): Int = COMPLETED
 
@@ -104,7 +104,10 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
             }
     }
 
-    override fun login(username: String, password: String): Completable {
+    override fun login(
+        username: String,
+        password: String
+    ): Completable {
         return api.login(username, password)
             .doOnNext { interceptor.newAuth(it) }
             .flatMap { api.getCurrentUser() }

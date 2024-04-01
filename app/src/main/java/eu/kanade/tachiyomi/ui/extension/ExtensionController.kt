@@ -35,7 +35,6 @@ open class ExtensionController :
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
     ExtensionTrustDialog.Listener {
-
     /**
      * Adapter containing the list of manga from the catalogue.
      */
@@ -57,7 +56,10 @@ open class ExtensionController :
         return ExtensionPresenter()
     }
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = ExtensionControllerBinding.inflate(inflater)
         return binding.root
     }
@@ -99,7 +101,10 @@ open class ExtensionController :
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
+    override fun onChangeStarted(
+        handler: ControllerChangeHandler,
+        type: ControllerChangeType
+    ) {
         super.onChangeStarted(handler, type)
         if (!type.isPush && handler is SettingsExtensionsFadeChangeHandler) {
             presenter.findAvailableExtensions()
@@ -130,7 +135,10 @@ open class ExtensionController :
         presenter.cancelInstallUpdateExtension(extension)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
         inflater.inflate(R.menu.extension_main, menu)
 
         val searchItem = menu.findItem(R.id.action_search)
@@ -155,7 +163,10 @@ open class ExtensionController :
         searchItem.fixExpand(onExpand = { invalidateMenuOnExpand() })
     }
 
-    override fun onItemClick(view: View, position: Int): Boolean {
+    override fun onItemClick(
+        view: View,
+        position: Int
+    ): Boolean {
         val extension = (adapter?.getItem(position) as? ExtensionItem)?.extension ?: return false
         if (extension is Extension.Installed) {
             openDetails(extension)

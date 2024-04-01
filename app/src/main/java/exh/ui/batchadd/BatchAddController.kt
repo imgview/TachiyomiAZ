@@ -19,7 +19,10 @@ import rx.subscriptions.CompositeSubscription
  * Batch add screen
  */
 class BatchAddController : NucleusController<EhFragmentBatchAddBinding, BatchAddPresenter>() {
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = EhFragmentBatchAddBinding.inflate(inflater)
         return binding.root
     }
@@ -53,36 +56,39 @@ class BatchAddController : NucleusController<EhFragmentBatchAddBinding, BatchAdd
                     progressSubscriptions.clear()
                     if (it == BatchAddPresenter.STATE_INPUT_TO_PROGRESS) {
                         showProgress(this)
-                        progressSubscriptions += presenter.progressRelay
-                            .onBackpressureBuffer()
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .combineLatest(presenter.progressTotalRelay) { progress, total ->
-                                // Show hide dismiss button
-                                binding.progressDismissBtn.visibility =
-                                    if (progress == total) {
-                                        View.VISIBLE
-                                    } else {
-                                        View.GONE
-                                    }
+                        progressSubscriptions +=
+                            presenter.progressRelay
+                                .onBackpressureBuffer()
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .combineLatest(presenter.progressTotalRelay) { progress, total ->
+                                    // Show hide dismiss button
+                                    binding.progressDismissBtn.visibility =
+                                        if (progress == total) {
+                                            View.VISIBLE
+                                        } else {
+                                            View.GONE
+                                        }
 
-                                formatProgress(progress, total)
-                            }.subscribeUntilDestroy {
-                                binding.progressText.text = it
-                            }
+                                    formatProgress(progress, total)
+                                }.subscribeUntilDestroy {
+                                    binding.progressText.text = it
+                                }
 
-                        progressSubscriptions += presenter.progressTotalRelay
-                            .onBackpressureBuffer()
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribeUntilDestroy {
-                                binding.progressBar.max = it
-                            }
+                        progressSubscriptions +=
+                            presenter.progressTotalRelay
+                                .onBackpressureBuffer()
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribeUntilDestroy {
+                                    binding.progressBar.max = it
+                                }
 
-                        progressSubscriptions += presenter.progressRelay
-                            .onBackpressureBuffer()
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribeUntilDestroy {
-                                binding.progressBar.progress = it
-                            }
+                        progressSubscriptions +=
+                            presenter.progressRelay
+                                .onBackpressureBuffer()
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribeUntilDestroy {
+                                    binding.progressBar.progress = it
+                                }
 
                         presenter.eventRelay
                             ?.onBackpressureBuffer()
@@ -90,8 +96,8 @@ class BatchAddController : NucleusController<EhFragmentBatchAddBinding, BatchAdd
                             ?.subscribeUntilDestroy {
                                 binding.progressLog.append("$it\n")
                             }?.let {
-                            progressSubscriptions += it
-                        }
+                                progressSubscriptions += it
+                            }
                     } else if (it == BatchAddPresenter.STATE_PROGRESS_TO_INPUT) {
                         hideProgress(this)
                         presenter.currentlyAddingRelay.call(BatchAddPresenter.STATE_IDLE)
@@ -101,20 +107,22 @@ class BatchAddController : NucleusController<EhFragmentBatchAddBinding, BatchAdd
     }
 
     private val View.progressViews
-        get() = listOf(
-            binding.progressTitleView,
-            binding.progressLogWrapper,
-            binding.progressBar,
-            binding.progressText,
-            binding.progressDismissBtn
-        )
+        get() =
+            listOf(
+                binding.progressTitleView,
+                binding.progressLogWrapper,
+                binding.progressBar,
+                binding.progressText,
+                binding.progressDismissBtn
+            )
 
     private val View.inputViews
-        get() = listOf(
-            binding.inputTitleView,
-            binding.galleriesBox,
-            binding.btnAddGalleries
-        )
+        get() =
+            listOf(
+                binding.inputTitleView,
+                binding.galleriesBox,
+                binding.btnAddGalleries
+            )
 
     private val View.progressLog
         get() = binding.progressLog
@@ -124,7 +132,9 @@ class BatchAddController : NucleusController<EhFragmentBatchAddBinding, BatchAdd
 
     private var List<View>.visibility: Int
         get() = throw UnsupportedOperationException()
-        set(v) { forEach { it.visibility = v } }
+        set(v) {
+            forEach { it.visibility = v }
+        }
 
     private fun showProgress(target: View? = view) {
         target?.apply {
@@ -140,7 +150,10 @@ class BatchAddController : NucleusController<EhFragmentBatchAddBinding, BatchAdd
         }?.galleriesBox?.setText("", TextView.BufferType.EDITABLE)
     }
 
-    private fun formatProgress(progress: Int, total: Int) = "$progress/$total"
+    private fun formatProgress(
+        progress: Int,
+        total: Int
+    ) = "$progress/$total"
 
     private fun addGalleries(galleries: String) {
         // Check text box has content

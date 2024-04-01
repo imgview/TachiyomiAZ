@@ -39,6 +39,7 @@ class VideoPresenter(
                 VideoActivity::initError
             )
     }
+
     fun init(initEpisode: Chapter) {
         episode = initEpisode
     }

@@ -24,12 +24,13 @@ import kotlin.math.min
  * the feedback to the user that the application isn't 'stuck', and by making it determinate the
  * user also approximately knows how much the operation will take.
  */
-class ReaderProgressBar @JvmOverloads constructor(
+class ReaderProgressBar
+@JvmOverloads
+constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
-
     /**
      * The current sweep angle. It always starts at 10% because otherwise the bar and the rotation
      * wouldn't be visible.
@@ -44,12 +45,13 @@ class ReaderProgressBar @JvmOverloads constructor(
     /**
      * The paint to use to draw the progress bar.
      */
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = context.getResourceColor(R.attr.colorAccent)
-        isAntiAlias = true
-        strokeCap = Paint.Cap.ROUND
-        style = Paint.Style.STROKE
-    }
+    private val paint =
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = context.getResourceColor(R.attr.colorAccent)
+            isAntiAlias = true
+            strokeCap = Paint.Cap.ROUND
+            style = Paint.Style.STROKE
+        }
 
     /**
      * The rectangle of the canvas where the progress bar should be drawn. This is calculated on
@@ -62,9 +64,12 @@ class ReaderProgressBar @JvmOverloads constructor(
      */
     private val rotationAnimation by lazy {
         RotateAnimation(
-            0f, 360f,
-            Animation.RELATIVE_TO_SELF, 0.5f,
-            Animation.RELATIVE_TO_SELF, 0.5f
+            0f,
+            360f,
+            Animation.RELATIVE_TO_SELF,
+            0.5f,
+            Animation.RELATIVE_TO_SELF,
+            0.5f
         ).apply {
             interpolator = LinearInterpolator()
             repeatCount = Animation.INFINITE
@@ -75,7 +80,13 @@ class ReaderProgressBar @JvmOverloads constructor(
     /**
      * Called when the view is layout. The position and thickness of the progress bar is calculated.
      */
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+    override fun onLayout(
+        changed: Boolean,
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int
+    ) {
         super.onLayout(changed, left, top, right, bottom)
 
         val diameter = min(width, height)
@@ -162,16 +173,18 @@ class ReaderProgressBar @JvmOverloads constructor(
             ObjectAnimator.ofFloat(this, "alpha", 1f, 0f).apply {
                 interpolator = DecelerateInterpolator()
                 duration = 1000
-                addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        gone()
-                        alpha = 1f
-                    }
+                addListener(
+                    object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator) {
+                            gone()
+                            alpha = 1f
+                        }
 
-                    override fun onAnimationCancel(animation: Animator) {
-                        alpha = 1f
+                        override fun onAnimationCancel(animation: Animator) {
+                            alpha = 1f
+                        }
                     }
-                })
+                )
                 start()
             }
         }

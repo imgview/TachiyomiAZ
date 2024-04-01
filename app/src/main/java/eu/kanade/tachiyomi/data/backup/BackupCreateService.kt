@@ -19,7 +19,6 @@ import eu.kanade.tachiyomi.util.system.isServiceRunning
  * Service for backing up library information to a JSON file.
  */
 class BackupCreateService : Service() {
-
     companion object {
         // Filter options
         internal const val BACKUP_CATEGORY = 0x1
@@ -38,8 +37,7 @@ class BackupCreateService : Service() {
          * @param context the application context.
          * @return true if the service is running, false otherwise.
          */
-        fun isRunning(context: Context): Boolean =
-            context.isServiceRunning(BackupCreateService::class.java)
+        fun isRunning(context: Context): Boolean = context.isServiceRunning(BackupCreateService::class.java)
 
         /**
          * Make a backup from library
@@ -48,13 +46,19 @@ class BackupCreateService : Service() {
          * @param uri path of Uri
          * @param flags determines what to backup
          */
-        fun start(context: Context, uri: Uri, flags: Int, type: Int) {
+        fun start(
+            context: Context,
+            uri: Uri,
+            flags: Int,
+            type: Int
+        ) {
             if (!isRunning(context)) {
-                val intent = Intent(context, BackupCreateService::class.java).apply {
-                    putExtra(BackupConst.EXTRA_URI, uri)
-                    putExtra(BackupConst.EXTRA_FLAGS, flags)
-                    putExtra(BackupConst.EXTRA_TYPE, type)
-                }
+                val intent =
+                    Intent(context, BackupCreateService::class.java).apply {
+                        putExtra(BackupConst.EXTRA_URI, uri)
+                        putExtra(BackupConst.EXTRA_FLAGS, flags)
+                        putExtra(BackupConst.EXTRA_TYPE, type)
+                    }
                 ContextCompat.startForegroundService(context, intent)
             }
         }
@@ -97,17 +101,22 @@ class BackupCreateService : Service() {
      */
     override fun onBind(intent: Intent): IBinder? = null
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int
+    ): Int {
         if (intent == null) return START_NOT_STICKY
 
         try {
             val uri = intent.getParcelableExtra<Uri>(BackupConst.EXTRA_URI)!!
             val backupFlags = intent.getIntExtra(BackupConst.EXTRA_FLAGS, 0)
             val backupType = intent.getIntExtra(BackupConst.EXTRA_TYPE, BackupConst.BACKUP_TYPE_LEGACY)
-            val backupManager = when (backupType) {
-                BackupConst.BACKUP_TYPE_FULL -> FullBackupManager(this)
-                else -> LegacyBackupManager(this)
-            }
+            val backupManager =
+                when (backupType) {
+                    BackupConst.BACKUP_TYPE_FULL -> FullBackupManager(this)
+                    else -> LegacyBackupManager(this)
+                }
 
             val backupFileUri = backupManager.createBackup(uri, backupFlags, false)?.toUri()
             val unifile = UniFile.fromUri(this, backupFileUri)

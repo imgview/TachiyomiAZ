@@ -12,8 +12,8 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.ChaptersItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import java.util.Date
 import uy.kohesive.injekt.injectLazy
+import java.util.Date
 
 class ChapterHolder(
     private val view: View,
@@ -22,6 +22,7 @@ class ChapterHolder(
     private val prefs: PreferencesHelper by injectLazy()
 
     val binding = ChaptersItemBinding.bind(view)
+
     init {
         // We need to post a Runnable to show the popup to make sure that the PopupMenu is
         // correctly positioned. The reason being that the view may change position before the
@@ -29,16 +30,20 @@ class ChapterHolder(
         binding.chapterMenu.setOnClickListener { it.post { showPopupMenu(it) } }
     }
 
-    fun bind(item: ChapterItem, manga: Manga) {
+    fun bind(
+        item: ChapterItem,
+        manga: Manga
+    ) {
         val chapter = item.chapter
 
-        binding.chapterTitle.text = when (manga.displayMode) {
-            Manga.DISPLAY_NUMBER -> {
-                val number = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
-                itemView.context.getString(R.string.display_mode_chapter, number)
+        binding.chapterTitle.text =
+            when (manga.displayMode) {
+                Manga.DISPLAY_NUMBER -> {
+                    val number = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
+                    itemView.context.getString(R.string.display_mode_chapter, number)
+                }
+                else -> chapter.name
             }
-            else -> chapter.name
-        }
 
         // Set correct text color
         val chapterColor = if (chapter.read) adapter.readColor else adapter.unreadColor
@@ -55,9 +60,10 @@ class ChapterHolder(
         }
 
         if ((!chapter.read /* --> EH */ || prefs.eh_preserveReadingPosition().getOrDefault()) /* <-- EH */ && chapter.last_page_read > 0) {
-            val lastPageRead = SpannableString(itemView.context.getString(R.string.chapter_progress, chapter.last_page_read + 1)).apply {
-                setSpan(ForegroundColorSpan(adapter.readColor), 0, length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
-            }
+            val lastPageRead =
+                SpannableString(itemView.context.getString(R.string.chapter_progress, chapter.last_page_read + 1)).apply {
+                    setSpan(ForegroundColorSpan(adapter.readColor), 0, length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
             descriptions.add(lastPageRead)
         }
         if (!chapter.scanlator.isNullOrBlank()) {
@@ -73,15 +79,16 @@ class ChapterHolder(
         notifyStatus(item.status)
     }
 
-    fun notifyStatus(status: Int) = with(binding.downloadText) {
-        when (status) {
-            Download.QUEUE -> setText(R.string.chapter_queued)
-            Download.DOWNLOADING -> setText(R.string.chapter_downloading)
-            Download.DOWNLOADED -> setText(R.string.chapter_downloaded)
-            Download.ERROR -> setText(R.string.chapter_error)
-            else -> text = ""
+    fun notifyStatus(status: Int) =
+        with(binding.downloadText) {
+            when (status) {
+                Download.QUEUE -> setText(R.string.chapter_queued)
+                Download.DOWNLOADING -> setText(R.string.chapter_downloading)
+                Download.DOWNLOADED -> setText(R.string.chapter_downloaded)
+                Download.ERROR -> setText(R.string.chapter_error)
+                else -> text = ""
+            }
         }
-    }
 
     private fun showPopupMenu(view: View) {
         val item = adapter.getItem(adapterPosition) ?: return
@@ -106,9 +113,10 @@ class ChapterHolder(
 
         // Hide mark as unread when the chapter is unread
         if (!chapter.read && (
-            chapter.last_page_read == 0 /* --> EH */ || prefs.eh_preserveReadingPosition()
-                .getOrDefault()
-            ) /* <-- EH */
+            chapter.last_page_read == 0 /* --> EH */ ||
+                prefs.eh_preserveReadingPosition()
+                    .getOrDefault()
+            ) // <-- EH
         ) {
             popup.menu.findItem(R.id.action_mark_as_unread).isVisible = false
         }

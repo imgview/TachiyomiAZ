@@ -9,7 +9,6 @@ import rx.Observable
  * A general pager for source requests (latest updates, popular, search)
  */
 abstract class Pager(var currentPage: Int = 1) {
-
     var hasNextPage = true
         protected set
 
@@ -20,6 +19,7 @@ abstract class Pager(var currentPage: Int = 1) {
     }
 
     abstract suspend fun requestNextPage()
+
     open fun onPageReceived(mangasPage: MangasPage) {
         val page = currentPage
         currentPage++

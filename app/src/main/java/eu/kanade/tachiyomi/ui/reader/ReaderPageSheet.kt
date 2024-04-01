@@ -16,7 +16,6 @@ class ReaderPageSheet(
     private val activity: ReaderActivity,
     private val page: ReaderPage
 ) : BottomSheetDialog(activity) {
-
     /**
      * View used on this sheet.
      */

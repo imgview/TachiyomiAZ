@@ -21,7 +21,6 @@ import reactivecircus.flowbinding.android.view.clicks
 class ExtensionDetailsController(bundle: Bundle? = null) :
     NucleusController<ExtensionDetailControllerBinding, ExtensionDetailsPresenter>(bundle),
     FlexibleAdapter.OnItemClickListener {
-
     constructor(pkgName: String) : this(
         Bundle().apply {
             putString(PKGNAME_KEY, pkgName)
@@ -34,7 +33,11 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     private var adapter: ExtensionDetailsPrefsButtonAdapter? = null
 
     private var sources: List<ConfigurableSource>? = null
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = ExtensionDetailControllerBinding.inflate(inflater)
         return binding.root
     }
@@ -56,7 +59,11 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
 
         binding.extensionTitle.text = extension.name
         binding.extensionVersion.text = context.getString(R.string.ext_version_info, extension.versionName)
-        binding.extensionLang.text = context.getString(R.string.ext_language_info, LocaleHelper.getSourceDisplayName(extension.lang, context))
+        binding.extensionLang.text =
+            context.getString(
+                R.string.ext_language_info,
+                LocaleHelper.getSourceDisplayName(extension.lang, context)
+            )
         binding.extensionPkg.text = extension.pkgName
         extension.getApplicationIcon(context)?.let { binding.extensionIcon.setImageDrawable(it) }
         binding.extensionUninstallButton.clicks()
@@ -96,7 +103,10 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         super.onDestroyView(view)
     }
 
-    override fun onItemClick(view: View?, position: Int): Boolean {
+    override fun onItemClick(
+        view: View?,
+        position: Int
+    ): Boolean {
         val id = sources?.get(position)?.id
         return if (id != null) {
             openPreferences(id)

@@ -7,9 +7,9 @@ import exh.EH_SOURCE_ID
 import exh.EXH_SOURCE_ID
 import exh.NHENTAI_SOURCE_ID
 import exh.lewdDelegatedSourceIds
-import java.util.Locale
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Locale
 
 fun Manga.isLewd(): Boolean {
     val sourceName = Injekt.get<SourceManager>().getOrStub(source).name

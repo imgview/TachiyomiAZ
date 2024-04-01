@@ -33,9 +33,7 @@ import uy.kohesive.injekt.injectLazy
  * While the downloader is running, a wake lock will be held.
  */
 class DownloadService : Service() {
-
     companion object {
-
         /**
          * Relay used to know when the service is running.
          */
@@ -103,7 +101,11 @@ class DownloadService : Service() {
     /**
      * Not used.
      */
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int
+    ): Int {
         return START_NOT_STICKY
     }
 
@@ -120,18 +122,19 @@ class DownloadService : Service() {
      * @see onNetworkStateChanged
      */
     private fun listenNetworkChanges() {
-        subscriptions += ReactiveNetwork.observeNetworkConnectivity(applicationContext)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                { state ->
-                    onNetworkStateChanged(state)
-                },
-                {
-                    toast(R.string.download_queue_error)
-                    stopSelf()
-                }
-            )
+        subscriptions +=
+            ReactiveNetwork.observeNetworkConnectivity(applicationContext)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    { state ->
+                        onNetworkStateChanged(state)
+                    },
+                    {
+                        toast(R.string.download_queue_error)
+                        stopSelf()
+                    }
+                )
     }
 
     /**
@@ -153,7 +156,7 @@ class DownloadService : Service() {
                 downloadManager.stopDownloads(getString(R.string.download_notifier_no_network))
             }
             else -> {
-                /* Do nothing */
+                // Do nothing
             }
         }
     }
@@ -162,13 +165,14 @@ class DownloadService : Service() {
      * Listens to downloader status. Enables or disables the wake lock depending on the status.
      */
     private fun listenDownloaderState() {
-        subscriptions += downloadManager.runningRelay.subscribe { running ->
-            if (running) {
-                wakeLock.acquireIfNeeded()
-            } else {
-                wakeLock.releaseIfNeeded()
+        subscriptions +=
+            downloadManager.runningRelay.subscribe { running ->
+                if (running) {
+                    wakeLock.acquireIfNeeded()
+                } else {
+                    wakeLock.releaseIfNeeded()
+                }
             }
-        }
     }
 
     /**

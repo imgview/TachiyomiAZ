@@ -11,7 +11,6 @@ class ExtensionDetailsPresenter(
     val pkgName: String,
     private val extensionManager: ExtensionManager = Injekt.get()
 ) : BasePresenter<ExtensionDetailsController>() {
-
     val extension = extensionManager.installedExtensions.find { it.pkgName == pkgName }
 
     override fun onCreate(savedState: Bundle?) {

@@ -9,12 +9,14 @@ import eu.kanade.tachiyomi.R
 
 class MigrationProcessItem(val manga: MigratingManga) :
     AbstractFlexibleItem<MigrationProcessHolder>() {
-
     override fun getLayoutRes(): Int {
         return R.layout.migration_process_item
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): MigrationProcessHolder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): MigrationProcessHolder {
         return MigrationProcessHolder(view, adapter as MigrationProcessAdapter)
     }
 

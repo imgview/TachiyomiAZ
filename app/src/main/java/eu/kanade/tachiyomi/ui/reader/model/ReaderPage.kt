@@ -13,8 +13,6 @@ class ReaderPage(
     var bgType: Int? = null,
     // SY <--
     var stream: (() -> InputStream)? = null
-
 ) : Page(index, url, imageUrl, null) {
-
     lateinit var chapter: ReaderChapter
 }

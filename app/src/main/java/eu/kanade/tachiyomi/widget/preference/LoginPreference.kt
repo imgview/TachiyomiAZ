@@ -7,9 +7,10 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import eu.kanade.tachiyomi.R
 
-class LoginPreference @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+class LoginPreference
+@JvmOverloads
+constructor(context: Context, attrs: AttributeSet? = null) :
     Preference(context, attrs) {
-
     init {
         widgetLayoutResource = R.layout.pref_widget_imageview
     }

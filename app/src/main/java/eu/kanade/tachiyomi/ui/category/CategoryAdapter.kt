@@ -9,7 +9,6 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
  */
 class CategoryAdapter(controller: CategoryController) :
     FlexibleAdapter<CategoryItem>(null, controller, true) {
-
     /**
      * Listener called when an item of the list is released.
      */

@@ -25,14 +25,17 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 abstract class SettingsController : PreferenceController() {
-
     val preferences: PreferencesHelper = Injekt.get()
     val scope = CoroutineScope(Job() + Dispatchers.Main)
 
     var untilDestroySubscriptions = CompositeSubscription()
         private set
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup,
+        savedInstanceState: Bundle?
+    ): View {
         if (untilDestroySubscriptions.isUnsubscribed) {
             untilDestroySubscriptions = CompositeSubscription()
         }
@@ -44,7 +47,10 @@ abstract class SettingsController : PreferenceController() {
         untilDestroySubscriptions.unsubscribe()
     }
 
-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+    override fun onCreatePreferences(
+        savedInstanceState: Bundle?,
+        rootKey: String?
+    ) {
         val screen = preferenceManager.createPreferenceScreen(getThemedContext())
         preferenceScreen = screen
         setupPreferenceScreen(screen)
@@ -74,7 +80,10 @@ abstract class SettingsController : PreferenceController() {
         (activity as? AppCompatActivity)?.supportActionBar?.title = getTitle()
     }
 
-    override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
+    override fun onChangeStarted(
+        handler: ControllerChangeHandler,
+        type: ControllerChangeType
+    ) {
         if (type.isEnter) {
             setTitle()
         }

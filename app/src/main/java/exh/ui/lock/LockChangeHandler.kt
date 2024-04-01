@@ -18,7 +18,13 @@ class LockChangeHandler : AnimatorChangeHandler {
 
     constructor(duration: Long, removesFromViewOnPush: Boolean) : super(duration, removesFromViewOnPush)
 
-    override fun getAnimator(container: ViewGroup, from: View?, to: View?, isPush: Boolean, toAddedToContainer: Boolean): Animator {
+    override fun getAnimator(
+        container: ViewGroup,
+        from: View?,
+        to: View?,
+        isPush: Boolean,
+        toAddedToContainer: Boolean
+    ): Animator {
         val animator = AnimatorSet()
         val viewAnimators = ArrayList<Animator>()
 
@@ -34,6 +40,5 @@ class LockChangeHandler : AnimatorChangeHandler {
 
     override fun resetFromView(from: View) {}
 
-    override fun copy(): ControllerChangeHandler =
-        LockChangeHandler(animationDuration, removesFromViewOnPush())
+    override fun copy(): ControllerChangeHandler = LockChangeHandler(animationDuration, removesFromViewOnPush())
 }

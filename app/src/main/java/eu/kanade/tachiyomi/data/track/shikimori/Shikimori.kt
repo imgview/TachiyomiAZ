@@ -12,7 +12,6 @@ import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
 class Shikimori(private val context: Context, id: Int) : TrackService(id) {
-
     companion object {
         const val READING = 1
         const val COMPLETED = 2
@@ -88,21 +87,25 @@ class Shikimori(private val context: Context, id: Int) : TrackService(id) {
         return listOf(READING, COMPLETED, ON_HOLD, DROPPED, PLANNING, REPEATING)
     }
 
-    override fun getStatus(status: Int): String = with(context) {
-        when (status) {
-            READING -> getString(R.string.reading)
-            COMPLETED -> getString(R.string.completed)
-            ON_HOLD -> getString(R.string.on_hold)
-            DROPPED -> getString(R.string.dropped)
-            PLANNING -> getString(R.string.plan_to_read)
-            REPEATING -> getString(R.string.repeating)
-            else -> ""
+    override fun getStatus(status: Int): String =
+        with(context) {
+            when (status) {
+                READING -> getString(R.string.reading)
+                COMPLETED -> getString(R.string.completed)
+                ON_HOLD -> getString(R.string.on_hold)
+                DROPPED -> getString(R.string.dropped)
+                PLANNING -> getString(R.string.plan_to_read)
+                REPEATING -> getString(R.string.repeating)
+                else -> ""
+            }
         }
-    }
 
     override fun getCompletionStatus(): Int = COMPLETED
 
-    override fun login(username: String, password: String) = login(password)
+    override fun login(
+        username: String,
+        password: String
+    ) = login(password)
 
     fun login(code: String): Completable {
         return api.accessToken(code).map { oauth: OAuth? ->

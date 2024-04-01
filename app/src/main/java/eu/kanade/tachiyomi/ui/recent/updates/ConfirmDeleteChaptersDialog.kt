@@ -8,8 +8,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 
 class ConfirmDeleteChaptersDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
-        where T : Controller, T : ConfirmDeleteChaptersDialog.Listener {
-
+    where T : Controller, T : ConfirmDeleteChaptersDialog.Listener {
     private var chaptersToDelete = emptyList<UpdatesItem>()
 
     constructor(target: T, chaptersToDelete: List<UpdatesItem>) : this() {

@@ -29,7 +29,6 @@ class LibraryComfortableGridHolder(
     private val view: View,
     adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
 ) : LibraryHolder<SourceComfortableGridItemBinding>(view, adapter) {
-
     override val binding = SourceComfortableGridItemBinding.bind(view)
 
     var manga: Manga? = null

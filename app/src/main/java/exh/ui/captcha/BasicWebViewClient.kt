@@ -8,7 +8,10 @@ open class BasicWebViewClient(
     protected val verifyComplete: (String) -> Boolean,
     private val injectScript: String?
 ) : WebViewClient() {
-    override fun onPageFinished(view: WebView, url: String) {
+    override fun onPageFinished(
+        view: WebView,
+        url: String
+    ) {
         super.onPageFinished(view, url)
 
         if (verifyComplete(url)) {

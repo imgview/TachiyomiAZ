@@ -16,27 +16,28 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
 import eu.kanade.tachiyomi.util.system.notification
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.coroutineScope
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.concurrent.TimeUnit
 
 class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
+    override suspend fun doWork(): Result =
+        coroutineScope {
+            val pendingUpdates =
+                try {
+                    ExtensionGithubApi().checkForUpdates(context)
+                } catch (e: Exception) {
+                    return@coroutineScope Result.failure()
+                }
 
-    override suspend fun doWork(): Result = coroutineScope {
-        val pendingUpdates = try {
-            ExtensionGithubApi().checkForUpdates(context)
-        } catch (e: Exception) {
-            return@coroutineScope Result.failure()
+            if (pendingUpdates.isNotEmpty()) {
+                createUpdateNotification(pendingUpdates.map { it.name })
+            }
+
+            Result.success()
         }
-
-        if (pendingUpdates.isNotEmpty()) {
-            createUpdateNotification(pendingUpdates.map { it.name })
-        }
-
-        Result.success()
-    }
 
     private fun createUpdateNotification(names: List<String>) {
         NotificationManagerCompat.from(context).apply {
@@ -64,21 +65,28 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
     companion object {
         private const val TAG = "ExtensionUpdate"
 
-        fun setupTask(context: Context, forceAutoUpdateJob: Boolean? = null) {
+        fun setupTask(
+            context: Context,
+            forceAutoUpdateJob: Boolean? = null
+        ) {
             val preferences = Injekt.get<PreferencesHelper>()
             val autoUpdateJob = forceAutoUpdateJob ?: preferences.automaticExtUpdates().get()
             if (autoUpdateJob) {
-                val constraints = Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build()
+                val constraints =
+                    Constraints.Builder()
+                        .setRequiredNetworkType(NetworkType.CONNECTED)
+                        .build()
 
-                val request = PeriodicWorkRequestBuilder<ExtensionUpdateJob>(
-                    12, TimeUnit.HOURS,
-                    1, TimeUnit.HOURS
-                )
-                    .addTag(TAG)
-                    .setConstraints(constraints)
-                    .build()
+                val request =
+                    PeriodicWorkRequestBuilder<ExtensionUpdateJob>(
+                        12,
+                        TimeUnit.HOURS,
+                        1,
+                        TimeUnit.HOURS
+                    )
+                        .addTag(TAG)
+                        .setConstraints(constraints)
+                        .build()
 
                 WorkManager.getInstance(context).enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
             } else {

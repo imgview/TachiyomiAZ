@@ -32,6 +32,9 @@ subprojects {
         outputToConsole.set(true)
         ignoreFailures.set(false)
         enableExperimentalRules.set(true)
+
+        disabledRules.set(setOf("standard:comment-wrapping", "experimental:comment-wrapping", "standard:enum-entry-name-case"))
+
         filter {
             exclude("**/generated/**")
             include("**/kotlin/**")

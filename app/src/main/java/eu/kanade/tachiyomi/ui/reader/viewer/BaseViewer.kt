@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
  * Interface for implementing a viewer.
  */
 interface BaseViewer {
-
     /**
      * Returns the view this viewer uses.
      */

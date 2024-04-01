@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import java.io.File
 
 object Migrations {
-
     // TODO NATIVE TACHIYOMI MIGRATIONS ARE FUCKED UP DUE TO DIFFERING VERSION NUMBERS
 
     /**

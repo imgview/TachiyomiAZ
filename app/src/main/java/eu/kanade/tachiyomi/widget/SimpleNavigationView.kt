@@ -16,19 +16,20 @@ import androidx.core.view.ViewCompat
 import com.google.android.material.R
 import com.google.android.material.internal.ScrimInsetsFrameLayout
 import com.google.android.material.textfield.TextInputLayout
-import eu.kanade.tachiyomi.R as TR
 import eu.kanade.tachiyomi.util.view.inflate
 import kotlin.math.min
+import eu.kanade.tachiyomi.R as TR
 
 @Suppress("LeakingThis")
 @SuppressLint("PrivateResource", "RestrictedApi")
-open class SimpleNavigationView @JvmOverloads constructor(
+open class SimpleNavigationView
+@JvmOverloads
+constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) :
     ScrimInsetsFrameLayout(context, attrs, defStyleAttr) {
-
     /**
      * Max width of the navigation view.
      */
@@ -41,21 +42,26 @@ open class SimpleNavigationView @JvmOverloads constructor(
 
     init {
         // Custom attributes
-        val a = TintTypedArray.obtainStyledAttributes(
-            context, attrs,
-            R.styleable.NavigationView, defStyleAttr,
-            R.style.Widget_Design_NavigationView
-        )
+        val a =
+            TintTypedArray.obtainStyledAttributes(
+                context,
+                attrs,
+                R.styleable.NavigationView,
+                defStyleAttr,
+                R.style.Widget_Design_NavigationView
+            )
 
         ViewCompat.setBackground(
-            this, a.getDrawable(R.styleable.NavigationView_android_background)
+            this,
+            a.getDrawable(R.styleable.NavigationView_android_background)
         )
 
         if (a.hasValue(R.styleable.NavigationView_elevation)) {
             ViewCompat.setElevation(
                 this,
                 a.getDimensionPixelSize(
-                    R.styleable.NavigationView_elevation, 0
+                    R.styleable.NavigationView_elevation,
+                    0
                 ).toFloat()
             )
         }
@@ -77,14 +83,20 @@ open class SimpleNavigationView @JvmOverloads constructor(
      * Overriden to measure the width of the navigation view.
      */
     @SuppressLint("SwitchIntDef")
-    override fun onMeasure(widthSpec: Int, heightSpec: Int) {
-        val width = when (MeasureSpec.getMode(widthSpec)) {
-            MeasureSpec.AT_MOST -> MeasureSpec.makeMeasureSpec(
-                min(MeasureSpec.getSize(widthSpec), maxWidth), MeasureSpec.EXACTLY
-            )
-            MeasureSpec.UNSPECIFIED -> MeasureSpec.makeMeasureSpec(maxWidth, MeasureSpec.EXACTLY)
-            else -> widthSpec
-        }
+    override fun onMeasure(
+        widthSpec: Int,
+        heightSpec: Int
+    ) {
+        val width =
+            when (MeasureSpec.getMode(widthSpec)) {
+                MeasureSpec.AT_MOST ->
+                    MeasureSpec.makeMeasureSpec(
+                        min(MeasureSpec.getSize(widthSpec), maxWidth),
+                        MeasureSpec.EXACTLY
+                    )
+                MeasureSpec.UNSPECIFIED -> MeasureSpec.makeMeasureSpec(maxWidth, MeasureSpec.EXACTLY)
+                else -> widthSpec
+            }
         // Let super sort out the height
         super.onMeasure(width, heightSpec)
     }
@@ -105,7 +117,6 @@ open class SimpleNavigationView @JvmOverloads constructor(
      */
     class HeaderHolder(parent: ViewGroup) :
         Holder(parent.inflate(TR.layout.navigation_view_group)) {
-
         val title: TextView = itemView.findViewById(TR.id.title)
     }
 
@@ -123,7 +134,6 @@ open class SimpleNavigationView @JvmOverloads constructor(
      */
     class RadioHolder(parent: ViewGroup, listener: OnClickListener?) :
         ClickableHolder(parent.inflate(TR.layout.navigation_view_radio), listener) {
-
         val radio: RadioButton = itemView.findViewById(TR.id.nav_view_item)
     }
 
@@ -132,7 +142,6 @@ open class SimpleNavigationView @JvmOverloads constructor(
      */
     class CheckboxHolder(parent: ViewGroup, listener: OnClickListener?) :
         ClickableHolder(parent.inflate(TR.layout.navigation_view_checkbox), listener) {
-
         val check: CheckBox = itemView.findViewById(TR.id.nav_view_item)
     }
 
@@ -141,20 +150,17 @@ open class SimpleNavigationView @JvmOverloads constructor(
      */
     class MultiStateHolder(parent: ViewGroup, listener: OnClickListener?) :
         ClickableHolder(parent.inflate(TR.layout.navigation_view_checkedtext), listener) {
-
         val text: CheckedTextView = itemView.findViewById(TR.id.nav_view_item)
     }
 
     class SpinnerHolder(parent: ViewGroup, listener: OnClickListener? = null) :
         ClickableHolder(parent.inflate(TR.layout.navigation_view_spinner), listener) {
-
         val text: TextView = itemView.findViewById(TR.id.nav_view_item_text)
         val spinner: Spinner = itemView.findViewById(TR.id.nav_view_item)
     }
 
     class EditTextHolder(parent: ViewGroup) :
         Holder(parent.inflate(TR.layout.navigation_view_text)) {
-
         val wrapper: TextInputLayout = itemView.findViewById(TR.id.nav_view_item_wrapper)
         val edit: EditText = itemView.findViewById(TR.id.nav_view_item)
     }

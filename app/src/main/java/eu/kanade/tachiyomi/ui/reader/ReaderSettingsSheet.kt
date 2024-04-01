@@ -6,7 +6,6 @@ import android.widget.CompoundButton
 import android.widget.Spinner
 import androidx.annotation.ArrayRes
 import androidx.core.widget.NestedScrollView
-import com.f2prateek.rx.preferences.Preference as RxPreference
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.tfcporciuncula.flow.Preference
 import eu.kanade.tachiyomi.R
@@ -19,15 +18,16 @@ import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
 import uy.kohesive.injekt.injectLazy
+import com.f2prateek.rx.preferences.Preference as RxPreference
 
 /**
  * Sheet to show reader and viewer preferences.
  */
 class ReaderSettingsSheet(private val activity: ReaderActivity) : BottomSheetDialog(activity) {
-
     private val preferences by injectLazy<PreferencesHelper>()
 
     private val binding = ReaderSettingsSheetBinding.inflate(layoutInflater)
+
     init {
         // Use activity theme for this layout
         val view = binding.root
@@ -54,16 +54,17 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) : BottomSheetDia
      * Init general reader preferences.
      */
     private fun initGeneralPreferences() {
-        binding.viewer.onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
-            activity.presenter.setMangaViewer(position)
+        binding.viewer.onItemSelectedListener =
+            IgnoreFirstSpinnerListener { position ->
+                activity.presenter.setMangaViewer(position)
 
-            val mangaViewer = activity.presenter.getMangaViewer()
-            if (mangaViewer == ReaderActivity.WEBTOON || mangaViewer == ReaderActivity.VERTICAL_PLUS || mangaViewer == ReaderActivity.WEBTOON_HORIZ_LTR || mangaViewer == ReaderActivity.WEBTOON_HORIZ_RTL) {
-                initWebtoonPreferences()
-            } else {
-                initPagerPreferences()
+                val mangaViewer = activity.presenter.getMangaViewer()
+                if (mangaViewer == ReaderActivity.WEBTOON || mangaViewer == ReaderActivity.VERTICAL_PLUS || mangaViewer == ReaderActivity.WEBTOON_HORIZ_LTR || mangaViewer == ReaderActivity.WEBTOON_HORIZ_RTL) {
+                    initWebtoonPreferences()
+                } else {
+                    initPagerPreferences()
+                }
             }
-        }
         binding.viewer.setSelection(activity.presenter.manga?.viewer ?: 0, false)
 
         binding.rotationMode.bindToPreference(preferences.rotation(), 1)
@@ -71,8 +72,9 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) : BottomSheetDia
         binding.showPageNumber.bindToPreference(preferences.showPageNumber())
         binding.fullscreen.bindToPreference(preferences.fullscreen())
 
-        val hasDisplayCutout = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
-            activity.window?.decorView?.rootWindowInsets?.displayCutout != null
+        val hasDisplayCutout =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
+                activity.window?.decorView?.rootWindowInsets?.displayCutout != null
         if (hasDisplayCutout) {
             binding.cutoutShort.visible()
             binding.cutoutShort.bindToPreference(preferences.cutoutShort())
@@ -124,20 +126,28 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) : BottomSheetDia
     /**
      * Binds a spinner to an int preference with an optional offset for the value.
      */
-    private fun Spinner.bindToPreference(pref: RxPreference<Int>, offset: Int = 0) {
-        onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
-            pref.set(position + offset)
-        }
+    private fun Spinner.bindToPreference(
+        pref: RxPreference<Int>,
+        offset: Int = 0
+    ) {
+        onItemSelectedListener =
+            IgnoreFirstSpinnerListener { position ->
+                pref.set(position + offset)
+            }
         setSelection(pref.getOrDefault() - offset, false)
     }
 
     /**
      * Binds a spinner to an int preference with an optional offset for the value.
      */
-    private fun Spinner.bindToPreference(pref: Preference<Int>, offset: Int = 0) {
-        onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
-            pref.set(position + offset)
-        }
+    private fun Spinner.bindToPreference(
+        pref: Preference<Int>,
+        offset: Int = 0
+    ) {
+        onItemSelectedListener =
+            IgnoreFirstSpinnerListener { position ->
+                pref.set(position + offset)
+            }
         setSelection(pref.get() - offset, false)
     }
 
@@ -146,11 +156,15 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) : BottomSheetDia
      * correlate with the [intValues] resource item (in arrays.xml), which is a <string-array>
      * of int values that will be parsed here and applied to the preference.
      */
-    private fun Spinner.bindToIntPreference(pref: Preference<Int>, @ArrayRes intValuesResource: Int) {
+    private fun Spinner.bindToIntPreference(
+        pref: Preference<Int>,
+        @ArrayRes intValuesResource: Int
+    ) {
         val intValues = resources.getStringArray(intValuesResource).map { it.toIntOrNull() }
-        onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
-            pref.set(intValues[position]!!)
-        }
+        onItemSelectedListener =
+            IgnoreFirstSpinnerListener { position ->
+                pref.set(intValues[position]!!)
+            }
         setSelection(intValues.indexOf(pref.get()), false)
     }
 }

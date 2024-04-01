@@ -3,9 +3,9 @@ package eu.kanade.tachiyomi.ui.recent.history
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.source.SourceManager
+import uy.kohesive.injekt.injectLazy
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
-import uy.kohesive.injekt.injectLazy
 
 /**
  * Adapter of HistoryHolder.
@@ -17,7 +17,6 @@ import uy.kohesive.injekt.injectLazy
  */
 class HistoryAdapter(controller: HistoryController) :
     FlexibleAdapter<IFlexible<*>>(null, controller, true) {
-
     val sourceManager by injectLazy<SourceManager>()
 
     val resumeClickListener: OnResumeClickListener = controller
@@ -27,11 +26,12 @@ class HistoryAdapter(controller: HistoryController) :
     /**
      * DecimalFormat used to display correct chapter number
      */
-    val decimalFormat = DecimalFormat(
-        "#.###",
-        DecimalFormatSymbols()
-            .apply { decimalSeparator = '.' }
-    )
+    val decimalFormat =
+        DecimalFormat(
+            "#.###",
+            DecimalFormatSymbols()
+                .apply { decimalSeparator = '.' }
+        )
 
     init {
         setDisplayHeadersAtStartUp(true)

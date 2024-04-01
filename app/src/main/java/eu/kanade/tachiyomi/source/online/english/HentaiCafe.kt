@@ -27,16 +27,20 @@ class HentaiCafe(delegate: HttpSource) :
      * An ISO 639-1 compliant language code (two letters in lower case).
      */
     override val lang = "en"
+
     /**
      * The class of the metadata used by this source
      */
     override val metaClass = HentaiCafeSearchMetadata::class
 
     // Support direct URL importing
-    override fun fetchSearchManga(page: Int, query: String, filters: FilterList) =
-        urlImportFetchSearchManga(query) {
-            super.fetchSearchManga(page, query, filters)
-        }
+    override fun fetchSearchManga(
+        page: Int,
+        query: String,
+        filters: FilterList
+    ) = urlImportFetchSearchManga(query) {
+        super.fetchSearchManga(page, query, filters)
+    }
 
     override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
         return client.newCall(mangaDetailsRequest(manga))
@@ -55,51 +59,59 @@ class HentaiCafe(delegate: HttpSource) :
     /**
      * Parse the supplied input into the supplied metadata object
      */
-    override fun parseIntoMetadata(metadata: HentaiCafeSearchMetadata, input: Document) {
+    override fun parseIntoMetadata(
+        metadata: HentaiCafeSearchMetadata,
+        input: Document
+    ) {
         with(metadata) {
             url = input.location()
             title = input.select("h3").text()
             val contentElement = input.select(".entry-content").first()
             thumbnailUrl = contentElement!!.child(0).child(0).attr("src")
 
-            fun filterableTagsOfType(type: String) = contentElement.select("a")
-                .filter { "$baseUrl/hc.fyi/$type/" in it.attr("href") }
-                .map { it.text() }
+            fun filterableTagsOfType(type: String) =
+                contentElement.select("a")
+                    .filter { "$baseUrl/hc.fyi/$type/" in it.attr("href") }
+                    .map { it.text() }
 
             tags.clear()
-            tags += filterableTagsOfType("tag").map {
-                RaisedTag(null, it, TAG_TYPE_DEFAULT)
-            }
+            tags +=
+                filterableTagsOfType("tag").map {
+                    RaisedTag(null, it, TAG_TYPE_DEFAULT)
+                }
 
             val artists = filterableTagsOfType("artist")
 
             artist = artists.joinToString()
-            tags += artists.map {
-                RaisedTag("artist", it, TAG_TYPE_VIRTUAL)
-            }
+            tags +=
+                artists.map {
+                    RaisedTag("artist", it, TAG_TYPE_VIRTUAL)
+                }
 
             readerId = input.select("[title=Read]").attr("href").toHttpUrlOrNull()!!.pathSegments[2]
         }
     }
 
-    override fun fetchChapterList(manga: SManga) = getOrLoadMetadata(manga.id) {
-        client.newCall(mangaDetailsRequest(manga))
-            .asObservableSuccess()
-            .map { it.asJsoup() }
-            .toSingle()
-    }.map {
-        listOf(
-            SChapter.create().apply {
-                setUrlWithoutDomain("/manga/read/${it.readerId}/en/0/1/")
-                name = "Chapter"
-                chapter_number = 0.0f
-            }
-        )
-    }.toObservable()
+    override fun fetchChapterList(manga: SManga) =
+        getOrLoadMetadata(manga.id) {
+            client.newCall(mangaDetailsRequest(manga))
+                .asObservableSuccess()
+                .map { it.asJsoup() }
+                .toSingle()
+        }.map {
+            listOf(
+                SChapter.create().apply {
+                    setUrlWithoutDomain("/manga/read/${it.readerId}/en/0/1/")
+                    name = "Chapter"
+                    chapter_number = 0.0f
+                }
+            )
+        }.toObservable()
 
-    override val matchingHosts = listOf(
-        "hentai.cafe"
-    )
+    override val matchingHosts =
+        listOf(
+            "hentai.cafe"
+        )
 
     override fun mapUrlToMangaUrl(uri: Uri): String? {
         val lcFirstPathSegment = uri.pathSegments.firstOrNull()?.lowercase() ?: return null

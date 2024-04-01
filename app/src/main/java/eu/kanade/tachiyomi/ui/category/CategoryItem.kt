@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.data.database.models.Category
  * Category item for a recycler view.
  */
 class CategoryItem(val category: Category) : AbstractFlexibleItem<CategoryHolder>() {
-
     /**
      * Whether this item is currently selected.
      */
@@ -30,7 +29,10 @@ class CategoryItem(val category: Category) : AbstractFlexibleItem<CategoryHolder
      * @param view The view of this item.
      * @param adapter The adapter of this item.
      */
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<androidx.recyclerview.widget.RecyclerView.ViewHolder>>): CategoryHolder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<androidx.recyclerview.widget.RecyclerView.ViewHolder>>
+    ): CategoryHolder {
         return CategoryHolder(view, adapter as CategoryAdapter)
     }
 

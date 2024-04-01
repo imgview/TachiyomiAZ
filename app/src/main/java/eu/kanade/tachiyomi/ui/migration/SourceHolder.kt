@@ -11,12 +11,12 @@ import io.github.mthli.slice.Slice
 class SourceHolder(view: View, override val adapter: SourceAdapter) :
     BaseFlexibleViewHolder(view, adapter),
     SlicedHolder {
-
     private val binding = SourceMainControllerCardItemBinding.bind(view)
 
-    override val slice = Slice(binding.card).apply {
-        setColor(adapter.cardBackground)
-    }
+    override val slice =
+        Slice(binding.card).apply {
+            setColor(adapter.cardBackground)
+        }
 
     override val viewToSlice: View
         get() = binding.card

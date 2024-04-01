@@ -12,11 +12,10 @@ import eu.kanade.tachiyomi.source.online.UrlImportableSource
 import eu.kanade.tachiyomi.source.online.all.EHentai
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.lang.runAsObservable
-import java.util.Date
 import uy.kohesive.injekt.injectLazy
+import java.util.Date
 
 class GalleryAdder {
-
     private val db: DatabaseHelper by injectLazy()
 
     private val sourceManager: SourceManager by injectLazy()
@@ -32,58 +31,65 @@ class GalleryAdder {
             val uri = Uri.parse(url)
 
             // Find matching source
-            val source = if (forceSource != null) {
-                try {
-                    if (forceSource.matchesUri(uri)) forceSource
-                    else return GalleryAddEvent.Fail.UnknownType(url)
-                } catch (e: Exception) {
-                    XLog.e("Source URI match check error!", e)
-                    return GalleryAddEvent.Fail.UnknownType(url)
+            val source =
+                if (forceSource != null) {
+                    try {
+                        if (forceSource.matchesUri(uri)) {
+                            forceSource
+                        } else {
+                            return GalleryAddEvent.Fail.UnknownType(url)
+                        }
+                    } catch (e: Exception) {
+                        XLog.e("Source URI match check error!", e)
+                        return GalleryAddEvent.Fail.UnknownType(url)
+                    }
+                } else {
+                    sourceManager.getVisibleCatalogueSources()
+                        .filterIsInstance<UrlImportableSource>()
+                        .find {
+                            try {
+                                it.matchesUri(uri)
+                            } catch (e: Exception) {
+                                XLog.e("Source URI match check error!", e)
+                                false
+                            }
+                        } ?: sourceManager.getDelegatedCatalogueSources()
+                        .filterIsInstance<UrlImportableSource>()
+                        .find {
+                            try {
+                                it.matchesUri(uri)
+                            } catch (e: Exception) {
+                                XLog.e("Source URI match check error!", e)
+                                false
+                            }
+                        } ?: return GalleryAddEvent.Fail.UnknownType(url)
                 }
-            } else {
-                sourceManager.getVisibleCatalogueSources()
-                    .filterIsInstance<UrlImportableSource>()
-                    .find {
-                        try {
-                            it.matchesUri(uri)
-                        } catch (e: Exception) {
-                            XLog.e("Source URI match check error!", e)
-                            false
-                        }
-                    } ?: sourceManager.getDelegatedCatalogueSources()
-                    .filterIsInstance<UrlImportableSource>()
-                    .find {
-                        try {
-                            it.matchesUri(uri)
-                        } catch (e: Exception) {
-                            XLog.e("Source URI match check error!", e)
-                            false
-                        }
-                    } ?: return GalleryAddEvent.Fail.UnknownType(url)
-            }
 
             // Map URL to manga URL
-            val realUrl = try {
-                source.mapUrlToMangaUrl(uri)
-            } catch (e: Exception) {
-                XLog.e("Source URI map-to-manga error!", e)
-                null
-            } ?: return GalleryAddEvent.Fail.UnknownType(url)
+            val realUrl =
+                try {
+                    source.mapUrlToMangaUrl(uri)
+                } catch (e: Exception) {
+                    XLog.e("Source URI map-to-manga error!", e)
+                    null
+                } ?: return GalleryAddEvent.Fail.UnknownType(url)
 
             // Clean URL
-            val cleanedUrl = try {
-                source.cleanMangaUrl(realUrl)
-            } catch (e: Exception) {
-                XLog.e("Source URI clean error!", e)
-                null
-            } ?: return GalleryAddEvent.Fail.UnknownType(url)
+            val cleanedUrl =
+                try {
+                    source.cleanMangaUrl(realUrl)
+                } catch (e: Exception) {
+                    XLog.e("Source URI clean error!", e)
+                    null
+                } ?: return GalleryAddEvent.Fail.UnknownType(url)
 
             // Use manga in DB if possible, otherwise, make a new manga
-            val manga = db.getManga(cleanedUrl, source.id).executeAsBlocking()
-                ?: Manga.create(source.id).apply {
-                    this.url = cleanedUrl
-                    title = realUrl
-                }
+            val manga =
+                db.getManga(cleanedUrl, source.id).executeAsBlocking()
+                    ?: Manga.create(source.id).apply {
+                        this.url = cleanedUrl
+                        title = realUrl
+                    }
 
             // Insert created manga if not in DB before fetching details
             // This allows us to keep the metadata when fetching details
@@ -107,11 +113,12 @@ class GalleryAdder {
 
             // Fetch and copy chapters
             try {
-                val chapterListObs = if (source is EHentai) {
-                    source.fetchChapterList(manga, throttleFunc)
-                } else {
-                    runAsObservable({ source.getChapterList(manga.toMangaInfo()).map { it.toSChapter() } })
-                }
+                val chapterListObs =
+                    if (source is EHentai) {
+                        source.fetchChapterList(manga, throttleFunc)
+                    } else {
+                        runAsObservable({ source.getChapterList(manga.toMangaInfo()).map { it.toSChapter() } })
+                    }
                 chapterListObs.map {
                     syncChaptersWithSource(db, it, manga, source)
                 }.toBlocking().first()

@@ -20,7 +20,6 @@ import kotlinx.coroutines.async
  */
 internal class ExtensionInstallReceiver(private val listener: Listener) :
     BroadcastReceiver() {
-
     /**
      * Registers this broadcast receiver
      */
@@ -32,27 +31,33 @@ internal class ExtensionInstallReceiver(private val listener: Listener) :
      * Returns the intent filter this receiver should subscribe to.
      */
     private val filter
-        get() = IntentFilter().apply {
-            addAction(Intent.ACTION_PACKAGE_ADDED)
-            addAction(Intent.ACTION_PACKAGE_REPLACED)
-            addAction(Intent.ACTION_PACKAGE_REMOVED)
-            addDataScheme("package")
-        }
+        get() =
+            IntentFilter().apply {
+                addAction(Intent.ACTION_PACKAGE_ADDED)
+                addAction(Intent.ACTION_PACKAGE_REPLACED)
+                addAction(Intent.ACTION_PACKAGE_REMOVED)
+                addDataScheme("package")
+            }
 
     /**
      * Called when one of the events of the [filter] is received. When the package is an extension,
      * it's loaded in background and it notifies the [listener] when finished.
      */
-    override fun onReceive(context: Context, intent: Intent?) {
+    override fun onReceive(
+        context: Context,
+        intent: Intent?
+    ) {
         if (intent == null) return
 
         when (intent.action) {
             Intent.ACTION_PACKAGE_ADDED -> {
-                if (!isReplacing(intent)) launchNow {
-                    when (val result = getExtensionFromIntent(context, intent)) {
-                        is LoadResult.Success -> listener.onExtensionInstalled(result.extension)
-                        is LoadResult.Untrusted -> listener.onExtensionUntrusted(result.extension)
-                        else -> {}
+                if (!isReplacing(intent)) {
+                    launchNow {
+                        when (val result = getExtensionFromIntent(context, intent)) {
+                            is LoadResult.Success -> listener.onExtensionInstalled(result.extension)
+                            is LoadResult.Untrusted -> listener.onExtensionUntrusted(result.extension)
+                            else -> {}
+                        }
                     }
                 }
             }
@@ -93,10 +98,17 @@ internal class ExtensionInstallReceiver(private val listener: Listener) :
      * @param context The application context.
      * @param intent The intent containing the package name of the extension.
      */
-    private suspend fun getExtensionFromIntent(context: Context, intent: Intent?): LoadResult {
-        val pkgName = getPackageNameFromIntent(intent)
-            ?: return LoadResult.Error("Package name not found")
-        return GlobalScope.async(Dispatchers.Default, CoroutineStart.DEFAULT) { ExtensionLoader.loadExtensionFromPkgName(context, pkgName) }.await()
+    private suspend fun getExtensionFromIntent(
+        context: Context,
+        intent: Intent?
+    ): LoadResult {
+        val pkgName =
+            getPackageNameFromIntent(intent)
+                ?: return LoadResult.Error("Package name not found")
+        return GlobalScope.async(
+            Dispatchers.Default,
+            CoroutineStart.DEFAULT
+        ) { ExtensionLoader.loadExtensionFromPkgName(context, pkgName) }.await()
     }
 
     /**
@@ -111,8 +123,11 @@ internal class ExtensionInstallReceiver(private val listener: Listener) :
      */
     interface Listener {
         fun onExtensionInstalled(extension: Extension.Installed)
+
         fun onExtensionUpdated(extension: Extension.Installed)
+
         fun onExtensionUntrusted(extension: Extension.Untrusted)
+
         fun onPackageUninstalled(pkgName: String)
     }
 }

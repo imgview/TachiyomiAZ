@@ -29,8 +29,6 @@ import exh.metadata.metadata.base.insertFlatMetadata
 import exh.util.await
 import exh.util.cancellable
 import exh.util.jobScheduler
-import java.util.ArrayList
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -44,6 +42,8 @@ import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.util.ArrayList
+import kotlin.coroutines.CoroutineContext
 
 class EHentaiUpdateWorker : JobService(), CoroutineScope {
     override val coroutineContext: CoroutineContext
@@ -136,27 +136,30 @@ class EHentaiUpdateWorker : JobService(), CoroutineScope {
 
         logger.d("Filtering manga and raising metadata...")
         val curTime = System.currentTimeMillis()
-        val allMeta = metadataManga.asFlow().cancellable().mapNotNull { manga ->
-            if (manga.source != EH_SOURCE_ID && manga.source != EXH_SOURCE_ID) {
-                return@mapNotNull null
-            }
+        val allMeta =
+            metadataManga.asFlow().cancellable().mapNotNull { manga ->
+                if (manga.source != EH_SOURCE_ID && manga.source != EXH_SOURCE_ID) {
+                    return@mapNotNull null
+                }
 
-            val meta = db.getFlatMetadataForManga(manga.id!!).asRxSingle().await()
-                ?: return@mapNotNull null
+                val meta =
+                    db.getFlatMetadataForManga(manga.id!!).asRxSingle().await()
+                        ?: return@mapNotNull null
 
-            val raisedMeta = meta.raise<EHentaiSearchMetadata>()
+                val raisedMeta = meta.raise<EHentaiSearchMetadata>()
 
-            // Don't update galleries too frequently
-            if (raisedMeta.aged || (curTime - raisedMeta.lastUpdateCheck < MIN_BACKGROUND_UPDATE_FREQ && DebugToggles.RESTRICT_EXH_GALLERY_UPDATE_CHECK_FREQUENCY.enabled)) {
-                return@mapNotNull null
-            }
+                // Don't update galleries too frequently
+                if (raisedMeta.aged || (curTime - raisedMeta.lastUpdateCheck < MIN_BACKGROUND_UPDATE_FREQ && DebugToggles.RESTRICT_EXH_GALLERY_UPDATE_CHECK_FREQUENCY.enabled)) {
+                    return@mapNotNull null
+                }
 
-            val chapter = db.getChaptersByMangaId(manga.id!!).asRxSingle().await().minByOrNull {
-                it.date_upload
-            }
+                val chapter =
+                    db.getChaptersByMangaId(manga.id!!).asRxSingle().await().minByOrNull {
+                        it.date_upload
+                    }
 
-            UpdateEntry(manga, raisedMeta, chapter)
-        }.toList().sortedBy { it.meta.lastUpdateCheck }
+                UpdateEntry(manga, raisedMeta, chapter)
+            }.toList().sortedBy { it.meta.lastUpdateCheck }
 
         logger.d("Found %s manga to update, starting updates!", allMeta.size)
         val mangaMetaToUpdateThisIter = allMeta.take(UPDATES_PER_ITERATION)
@@ -191,24 +194,25 @@ class EHentaiUpdateWorker : JobService(), CoroutineScope {
                     continue
                 }
 
-                val (new, chapters) = try {
-                    updateEntryAndGetChapters(manga)
-                } catch (e: GalleryNotUpdatedException) {
-                    if (e.network) {
-                        failuresThisIteration++
+                val (new, chapters) =
+                    try {
+                        updateEntryAndGetChapters(manga)
+                    } catch (e: GalleryNotUpdatedException) {
+                        if (e.network) {
+                            failuresThisIteration++
 
-                        logger.e("> Network error while updating gallery!", e)
-                        logger.e(
-                            "> (manga.id: %s, meta.gId: %s, meta.gToken: %s, failures-so-far: %s)",
-                            manga.id,
-                            meta.gId,
-                            meta.gToken,
-                            failuresThisIteration
-                        )
+                            logger.e("> Network error while updating gallery!", e)
+                            logger.e(
+                                "> (manga.id: %s, meta.gId: %s, meta.gToken: %s, failures-so-far: %s)",
+                                manga.id,
+                                meta.gId,
+                                meta.gToken,
+                                failuresThisIteration
+                            )
+                        }
+
+                        continue
                     }
-
-                    continue
-                }
 
                 if (chapters.isEmpty()) {
                     logger.e(
@@ -255,8 +259,9 @@ class EHentaiUpdateWorker : JobService(), CoroutineScope {
 
     // New, current
     suspend fun updateEntryAndGetChapters(manga: Manga): Pair<List<Chapter>, List<Chapter>> {
-        val source = sourceManager.get(manga.source) as? EHentai
-            ?: throw GalleryNotUpdatedException(false, IllegalStateException("Missing EH-based source (${manga.source})!"))
+        val source =
+            sourceManager.get(manga.source) as? EHentai
+                ?: throw GalleryNotUpdatedException(false, IllegalStateException("Missing EH-based source (${manga.source})!"))
 
         try {
             val updatedManga = source.fetchMangaDetails(manga).toSingle().await(Schedulers.io())
@@ -297,8 +302,11 @@ class EHentaiUpdateWorker : JobService(), CoroutineScope {
 
         private fun Context.baseBackgroundJobInfo(isTest: Boolean): JobInfo.Builder {
             return JobInfo.Builder(
-                if (isTest) JOB_ID_UPDATE_BACKGROUND_TEST
-                else JOB_ID_UPDATE_BACKGROUND,
+                if (isTest) {
+                    JOB_ID_UPDATE_BACKGROUND_TEST
+                } else {
+                    JOB_ID_UPDATE_BACKGROUND
+                },
                 componentName()
             )
         }
@@ -312,8 +320,11 @@ class EHentaiUpdateWorker : JobService(), CoroutineScope {
                 .setPeriodic(period)
                 .setPersisted(true)
                 .setRequiredNetworkType(
-                    if (requireUnmetered) JobInfo.NETWORK_TYPE_UNMETERED
-                    else JobInfo.NETWORK_TYPE_ANY
+                    if (requireUnmetered) {
+                        JobInfo.NETWORK_TYPE_UNMETERED
+                    } else {
+                        JobInfo.NETWORK_TYPE_ANY
+                    }
                 )
                 .apply {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -348,7 +359,10 @@ class EHentaiUpdateWorker : JobService(), CoroutineScope {
             }
         }
 
-        fun scheduleBackground(context: Context, prefInterval: Int? = null) {
+        fun scheduleBackground(
+            context: Context,
+            prefInterval: Int? = null
+        ) {
             cancelBackground(context)
 
             val preferences = Injekt.get<PreferencesHelper>()
@@ -358,11 +372,12 @@ class EHentaiUpdateWorker : JobService(), CoroutineScope {
                 val acRestriction = "ac" in restrictions
                 val wifiRestriction = "wifi" in restrictions
 
-                val jobInfo = context.periodicBackgroundJobInfo(
-                    interval.hours.inMilliseconds.longValue,
-                    acRestriction,
-                    wifiRestriction
-                )
+                val jobInfo =
+                    context.periodicBackgroundJobInfo(
+                        interval.hours.inMilliseconds.longValue,
+                        acRestriction,
+                        wifiRestriction
+                    )
 
                 if (context.jobScheduler.schedule(jobInfo) == JobScheduler.RESULT_FAILURE) {
                     logger.e("Failed to schedule background update job!")

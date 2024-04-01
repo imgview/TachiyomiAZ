@@ -5,7 +5,6 @@ import nucleus.factory.PresenterFactory
 import nucleus.presenter.Presenter
 
 class NucleusConductorDelegate<P : Presenter<*>>(private val factory: PresenterFactory<P>) {
-
     var presenter: P? = null
         get() {
             if (field == null) {

@@ -12,7 +12,6 @@ import java.io.IOException
 import java.io.InputStream
 
 class PassthroughModelLoader : ModelLoader<InputStream, InputStream> {
-
     override fun buildLoadData(
         model: InputStream,
         width: Int,
@@ -27,7 +26,6 @@ class PassthroughModelLoader : ModelLoader<InputStream, InputStream> {
     }
 
     class Fetcher(private val stream: InputStream) : DataFetcher<InputStream> {
-
         override fun getDataClass(): Class<InputStream> {
             return InputStream::class.java
         }
@@ -60,10 +58,7 @@ class PassthroughModelLoader : ModelLoader<InputStream, InputStream> {
      * Factory class for creating [PassthroughModelLoader] instances.
      */
     class Factory : ModelLoaderFactory<InputStream, InputStream> {
-
-        override fun build(
-            multiFactory: MultiModelLoaderFactory
-        ): ModelLoader<InputStream, InputStream> {
+        override fun build(multiFactory: MultiModelLoaderFactory): ModelLoader<InputStream, InputStream> {
             return PassthroughModelLoader()
         }
 

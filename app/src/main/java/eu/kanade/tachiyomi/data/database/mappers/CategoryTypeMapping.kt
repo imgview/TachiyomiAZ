@@ -25,45 +25,47 @@ class CategoryTypeMapping : SQLiteTypeMapping<Category>(
 )
 
 class CategoryPutResolver : DefaultPutResolver<Category>() {
+    override fun mapToInsertQuery(obj: Category) =
+        InsertQuery.builder()
+            .table(TABLE)
+            .build()
 
-    override fun mapToInsertQuery(obj: Category) = InsertQuery.builder()
-        .table(TABLE)
-        .build()
+    override fun mapToUpdateQuery(obj: Category) =
+        UpdateQuery.builder()
+            .table(TABLE)
+            .where("$COL_ID = ?")
+            .whereArgs(obj.id)
+            .build()
 
-    override fun mapToUpdateQuery(obj: Category) = UpdateQuery.builder()
-        .table(TABLE)
-        .where("$COL_ID = ?")
-        .whereArgs(obj.id)
-        .build()
-
-    override fun mapToContentValues(obj: Category) = ContentValues(4).apply {
-        put(COL_ID, obj.id)
-        put(COL_NAME, obj.name)
-        put(COL_ORDER, obj.order)
-        put(COL_FLAGS, obj.flags)
-        val orderString = obj.mangaOrder.joinToString("/")
-        put(COL_MANGA_ORDER, orderString)
-    }
+    override fun mapToContentValues(obj: Category) =
+        ContentValues(4).apply {
+            put(COL_ID, obj.id)
+            put(COL_NAME, obj.name)
+            put(COL_ORDER, obj.order)
+            put(COL_FLAGS, obj.flags)
+            val orderString = obj.mangaOrder.joinToString("/")
+            put(COL_MANGA_ORDER, orderString)
+        }
 }
 
 class CategoryGetResolver : DefaultGetResolver<Category>() {
+    override fun mapFromCursor(cursor: Cursor): Category =
+        CategoryImpl().apply {
+            id = cursor.getInt(cursor.getColumnIndex(COL_ID))
+            name = cursor.getString(cursor.getColumnIndex(COL_NAME))
+            order = cursor.getInt(cursor.getColumnIndex(COL_ORDER))
+            flags = cursor.getInt(cursor.getColumnIndex(COL_FLAGS))
 
-    override fun mapFromCursor(cursor: Cursor): Category = CategoryImpl().apply {
-        id = cursor.getInt(cursor.getColumnIndex(COL_ID))
-        name = cursor.getString(cursor.getColumnIndex(COL_NAME))
-        order = cursor.getInt(cursor.getColumnIndex(COL_ORDER))
-        flags = cursor.getInt(cursor.getColumnIndex(COL_FLAGS))
-
-        val orderString = cursor.getString(cursor.getColumnIndex(COL_MANGA_ORDER))
-        mangaOrder = orderString?.split("/")?.mapNotNull { it.toLongOrNull() } ?: emptyList()
-    }
+            val orderString = cursor.getString(cursor.getColumnIndex(COL_MANGA_ORDER))
+            mangaOrder = orderString?.split("/")?.mapNotNull { it.toLongOrNull() } ?: emptyList()
+        }
 }
 
 class CategoryDeleteResolver : DefaultDeleteResolver<Category>() {
-
-    override fun mapToDeleteQuery(obj: Category) = DeleteQuery.builder()
-        .table(TABLE)
-        .where("$COL_ID = ?")
-        .whereArgs(obj.id)
-        .build()
+    override fun mapToDeleteQuery(obj: Category) =
+        DeleteQuery.builder()
+            .table(TABLE)
+            .where("$COL_ID = ?")
+            .whereArgs(obj.id)
+            .build()
 }

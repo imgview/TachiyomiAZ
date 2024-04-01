@@ -12,9 +12,10 @@ fun Response.interceptAsHtml(block: (Document) -> Unit): Response {
         body.contentType()?.subtype == "html"
     ) {
         val bodyString = body.string()
-        val rebuiltResponse = newBuilder()
-            .body(bodyString.toResponseBody(body.contentType()))
-            .build()
+        val rebuiltResponse =
+            newBuilder()
+                .body(bodyString.toResponseBody(body.contentType()))
+                .build()
         try {
             // Search for captcha
             val parsed = asJsoup(html = bodyString)

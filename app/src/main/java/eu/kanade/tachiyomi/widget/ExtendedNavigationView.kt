@@ -14,13 +14,14 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
  * An alternative implementation of [com.google.android.material.navigation.NavigationView], without menu
  * inflation and allowing customizable items (multiple selections, custom views, etc).
  */
-open class ExtendedNavigationView @JvmOverloads constructor(
+open class ExtendedNavigationView
+@JvmOverloads
+constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) :
     SimpleNavigationView(context, attrs, defStyleAttr) {
-
     /**
      * Every item of the nav view. Generic items must belong to this list, custom items could be
      * implemented by an abstract class. If more customization is needed in the future, this can be
@@ -59,7 +60,6 @@ open class ExtendedNavigationView @JvmOverloads constructor(
          * An item with which needs more than two states (selected/deselected).
          */
         abstract class MultiState(val resTitle: Int, var state: Int = 0) : Item() {
-
             /**
              * Returns the drawable associated to every possible each state.
              */
@@ -71,7 +71,10 @@ open class ExtendedNavigationView @JvmOverloads constructor(
              * @param context any context.
              * @param resId the vector resource to load and tint
              */
-            fun tintVector(context: Context, resId: Int): Drawable {
+            fun tintVector(
+                context: Context,
+                resId: Int
+            ): Drawable {
                 return VectorDrawableCompat.create(context.resources, resId, context.theme)!!.apply {
                     setTint(context.getResourceColor(R.attr.colorAccent))
                 }
@@ -83,7 +86,11 @@ open class ExtendedNavigationView @JvmOverloads constructor(
              * @param context any context.
              * @param resId the vector resource to load and tint
              */
-            fun tintVector(context: Context, resId: Int, colorId: Int): Drawable {
+            fun tintVector(
+                context: Context,
+                resId: Int,
+                colorId: Int
+            ): Drawable {
                 return VectorDrawableCompat.create(context.resources, resId, context.theme)!!.apply {
                     setTint(context.getResourceColor(colorId))
                 }
@@ -101,7 +108,6 @@ open class ExtendedNavigationView @JvmOverloads constructor(
          * A multistate item for sorting lists (unselected, ascending, descending).
          */
         class MultiSort(resId: Int, group: Group) : MultiStateGroup(resId, group) {
-
             companion object {
                 const val SORT_NONE = 0
                 const val SORT_ASC = 1
@@ -119,7 +125,6 @@ open class ExtendedNavigationView @JvmOverloads constructor(
         }
 
         class TriStateGroup(resId: Int, group: Group) : MultiStateGroup(resId, group) {
-
             companion object {
                 const val STATE_IGNORE = 0
                 const val STATE_INCLUDE = 1
@@ -129,14 +134,18 @@ open class ExtendedNavigationView @JvmOverloads constructor(
             override fun getStateDrawable(context: Context): Drawable? {
                 return when (state) {
                     STATE_INCLUDE -> tintVector(context, R.drawable.ic_check_box_24dp)
-                    STATE_EXCLUDE -> tintVector(
-                        context, R.drawable.ic_check_box_x_24dp,
-                        android.R.attr.textColorSecondary
-                    )
-                    else -> tintVector(
-                        context, R.drawable.ic_check_box_outline_blank_24dp,
-                        android.R.attr.textColorSecondary
-                    )
+                    STATE_EXCLUDE ->
+                        tintVector(
+                            context,
+                            R.drawable.ic_check_box_x_24dp,
+                            android.R.attr.textColorSecondary
+                        )
+                    else ->
+                        tintVector(
+                            context,
+                            R.drawable.ic_check_box_outline_blank_24dp,
+                            android.R.attr.textColorSecondary
+                        )
                 }
             }
         }
@@ -153,7 +162,6 @@ open class ExtendedNavigationView @JvmOverloads constructor(
      * A group containing a list of items.
      */
     interface Group {
-
         /**
          * An optional header for the group, typically a [Item.Header].
          */
@@ -193,12 +201,12 @@ open class ExtendedNavigationView @JvmOverloads constructor(
      * [Item].
      */
     abstract inner class Adapter(private val items: List<Item>) : androidx.recyclerview.widget.RecyclerView.Adapter<Holder>() {
-
-        private val onClick = OnClickListener {
-            val pos = recycler.getChildAdapterPosition(it)
-            val item = items[pos]
-            onItemClicked(item)
-        }
+        private val onClick =
+            OnClickListener {
+                val pos = recycler.getChildAdapterPosition(it)
+                val item = items[pos]
+                onItemClicked(item)
+            }
 
         fun notifyItemChanged(item: Item) {
             val pos = items.indexOf(item)
@@ -221,7 +229,10 @@ open class ExtendedNavigationView @JvmOverloads constructor(
         }
 
         @CallSuper
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
+        override fun onCreateViewHolder(
+            parent: ViewGroup,
+            viewType: Int
+        ): Holder {
             return when (viewType) {
                 VIEW_TYPE_HEADER -> HeaderHolder(parent)
                 VIEW_TYPE_SEPARATOR -> SeparatorHolder(parent)
@@ -233,7 +244,10 @@ open class ExtendedNavigationView @JvmOverloads constructor(
         }
 
         @CallSuper
-        override fun onBindViewHolder(holder: Holder, position: Int) {
+        override fun onBindViewHolder(
+            holder: Holder,
+            position: Int
+        ) {
             when (holder) {
                 is HeaderHolder -> {
                     val item = items[position] as Item.Header

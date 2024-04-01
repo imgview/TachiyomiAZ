@@ -10,7 +10,6 @@ abstract class BaseFlexibleViewHolder(
     adapter: FlexibleAdapter<*>,
     stickyHeader: Boolean = false
 ) : FlexibleViewHolder(view, adapter, stickyHeader), LayoutContainer {
-
     override val containerView: View?
         get() = itemView
 }

@@ -15,21 +15,25 @@ class ChapterLoadBySource {
  * Load strategy using unique chapter numbers with same scanlator preference.
  */
 class ChapterLoadByNumber {
-    fun get(allChapters: List<Chapter>, selectedChapter: Chapter): List<Chapter> {
+    fun get(
+        allChapters: List<Chapter>,
+        selectedChapter: Chapter
+    ): List<Chapter> {
         val chapters = mutableListOf<Chapter>()
         val chaptersByNumber = allChapters.groupBy { it.chapter_number }
 
         for ((number, chaptersForNumber) in chaptersByNumber) {
-            val preferredChapter = when {
-                // Make sure the selected chapter is always present
-                number == selectedChapter.chapter_number -> selectedChapter
-                // If there is only one chapter for this number, use it
-                chaptersForNumber.size == 1 -> chaptersForNumber.first()
-                // Prefer a chapter of the same scanlator as the selected
-                else ->
-                    chaptersForNumber.find { it.scanlator == selectedChapter.scanlator }
-                        ?: chaptersForNumber.first()
-            }
+            val preferredChapter =
+                when {
+                    // Make sure the selected chapter is always present
+                    number == selectedChapter.chapter_number -> selectedChapter
+                    // If there is only one chapter for this number, use it
+                    chaptersForNumber.size == 1 -> chaptersForNumber.first()
+                    // Prefer a chapter of the same scanlator as the selected
+                    else ->
+                        chaptersForNumber.find { it.scanlator == selectedChapter.scanlator }
+                            ?: chaptersForNumber.first()
+                }
             chapters.add(preferredChapter)
         }
         return chapters.sortedBy { it.chapter_number }

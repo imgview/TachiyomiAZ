@@ -18,10 +18,11 @@ class ForceCloseActivity : AppCompatActivity() {
 
     companion object {
         fun closeApp(context: Context) {
-            val intent = Intent(context, ForceCloseActivity::class.java).apply {
-                addCategory(Intent.CATEGORY_HOME)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            }
+            val intent =
+                Intent(context, ForceCloseActivity::class.java).apply {
+                    addCategory(Intent.CATEGORY_HOME)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                }
             context.startActivity(intent)
         }
     }

@@ -16,23 +16,27 @@ import eu.kanade.tachiyomi.util.system.notificationBuilder
 import timber.log.Timber
 
 class ExtensionInstallService : Service() {
-
     private var installer: Installer? = null
 
     override fun onCreate() {
         super.onCreate()
-        val notification = notificationBuilder(Notifications.CHANNEL_DOWNLOADER_PROGRESS) {
-            setSmallIcon(R.drawable.ic_tachi)
-            setAutoCancel(false)
-            setOngoing(true)
-            setShowWhen(false)
-            setContentTitle(getString(R.string.ext_install_service_notif))
-            setProgress(100, 100, true)
-        }.build()
+        val notification =
+            notificationBuilder(Notifications.CHANNEL_DOWNLOADER_PROGRESS) {
+                setSmallIcon(R.drawable.ic_tachi)
+                setAutoCancel(false)
+                setOngoing(true)
+                setShowWhen(false)
+                setContentTitle(getString(R.string.ext_install_service_notif))
+                setProgress(100, 100, true)
+            }.build()
         startForeground(Notifications.ID_EXTENSION_INSTALLER, notification)
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int
+    ): Int {
         val uri = intent?.data
         val id = intent?.getLongExtra(EXTRA_DOWNLOAD_ID, -1)?.takeIf { it != -1L }
         val installerUsed = intent?.getSerializableExtra(EXTRA_INSTALLER) as? PreferenceValues.ExtensionInstaller
@@ -42,15 +46,16 @@ class ExtensionInstallService : Service() {
         }
 
         if (installer == null) {
-            installer = when (installerUsed) {
-                PreferenceValues.ExtensionInstaller.PACKAGEINSTALLER -> PackageInstallerInstaller(this)
-                PreferenceValues.ExtensionInstaller.SHIZUKU -> ShizukuInstaller(this)
-                else -> {
-                    Timber.e("Not implemented for installer $installerUsed")
-                    stopSelf()
-                    return START_NOT_STICKY
+            installer =
+                when (installerUsed) {
+                    PreferenceValues.ExtensionInstaller.PACKAGEINSTALLER -> PackageInstallerInstaller(this)
+                    PreferenceValues.ExtensionInstaller.SHIZUKU -> ShizukuInstaller(this)
+                    else -> {
+                        Timber.e("Not implemented for installer $installerUsed")
+                        stopSelf()
+                        return START_NOT_STICKY
+                    }
                 }
-            }
         }
         installer!!.addToQueue(id, uri)
         return START_NOT_STICKY

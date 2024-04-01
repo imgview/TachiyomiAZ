@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.widget.RecyclerViewPagerAdapter
  * @constructor creates an instance of the adapter.
  */
 class LibraryAdapter(private val controller: LibraryController) : RecyclerViewPagerAdapter() {
-
     /**
      * The categories to bind in the adapter.
      */
@@ -47,7 +46,10 @@ class LibraryAdapter(private val controller: LibraryController) : RecyclerViewPa
      * @param view the view to bind.
      * @param position the position in the adapter.
      */
-    override fun bindView(view: View, position: Int) {
+    override fun bindView(
+        view: View,
+        position: Int
+    ) {
         (view as LibraryCategoryView).onBind(categories[position])
         boundViews.add(view)
     }
@@ -58,7 +60,10 @@ class LibraryAdapter(private val controller: LibraryController) : RecyclerViewPa
      * @param view the view to recycle.
      * @param position the position in the adapter.
      */
-    override fun recycleView(view: View, position: Int) {
+    override fun recycleView(
+        view: View,
+        position: Int
+    ) {
         (view as LibraryCategoryView).onRecycle()
         boundViews.remove(view)
     }

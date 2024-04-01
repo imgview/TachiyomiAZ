@@ -13,17 +13,16 @@ import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
-import kotlin.math.abs
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import uy.kohesive.injekt.injectLazy
+import kotlin.math.abs
 
 /**
  * Color filter sheet to toggle custom filter and brightness overlay.
  */
 class ReaderColorFilterSheet(private val activity: ReaderActivity) : BottomSheetDialog(activity) {
-
     private val preferences by injectLazy<PreferencesHelper>()
 
     private var sheetBehavior: BottomSheetBehavior<*>? = null
@@ -77,50 +76,81 @@ class ReaderColorFilterSheet(private val activity: ReaderActivity) : BottomSheet
             preferences.customBrightness().set(isChecked)
         }
 
-        binding.includedReaderColorFilter.colorFilterMode.onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
-            preferences.colorFilterMode().set(position)
-        }
+        binding.includedReaderColorFilter.colorFilterMode.onItemSelectedListener =
+            IgnoreFirstSpinnerListener { position ->
+                preferences.colorFilterMode().set(position)
+            }
         binding.includedReaderColorFilter.colorFilterMode.setSelection(preferences.colorFilterMode().get(), false)
 
-        binding.includedReaderColorFilter.seekbarColorFilterAlpha.setOnSeekBarChangeListener(object : SimpleSeekBarListener() {
-            override fun onProgressChanged(seekBar: SeekBar, value: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    setColorValue(value, ALPHA_MASK, 24)
+        binding.includedReaderColorFilter.seekbarColorFilterAlpha.setOnSeekBarChangeListener(
+            object : SimpleSeekBarListener() {
+                override fun onProgressChanged(
+                    seekBar: SeekBar,
+                    value: Int,
+                    fromUser: Boolean
+                ) {
+                    if (fromUser) {
+                        setColorValue(value, ALPHA_MASK, 24)
+                    }
                 }
             }
-        })
+        )
 
-        binding.includedReaderColorFilter.seekbarColorFilterRed.setOnSeekBarChangeListener(object : SimpleSeekBarListener() {
-            override fun onProgressChanged(seekBar: SeekBar, value: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    setColorValue(value, RED_MASK, 16)
+        binding.includedReaderColorFilter.seekbarColorFilterRed.setOnSeekBarChangeListener(
+            object : SimpleSeekBarListener() {
+                override fun onProgressChanged(
+                    seekBar: SeekBar,
+                    value: Int,
+                    fromUser: Boolean
+                ) {
+                    if (fromUser) {
+                        setColorValue(value, RED_MASK, 16)
+                    }
                 }
             }
-        })
+        )
 
-        binding.includedReaderColorFilter.seekbarColorFilterGreen.setOnSeekBarChangeListener(object : SimpleSeekBarListener() {
-            override fun onProgressChanged(seekBar: SeekBar, value: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    setColorValue(value, GREEN_MASK, 8)
+        binding.includedReaderColorFilter.seekbarColorFilterGreen.setOnSeekBarChangeListener(
+            object : SimpleSeekBarListener() {
+                override fun onProgressChanged(
+                    seekBar: SeekBar,
+                    value: Int,
+                    fromUser: Boolean
+                ) {
+                    if (fromUser) {
+                        setColorValue(value, GREEN_MASK, 8)
+                    }
                 }
             }
-        })
+        )
 
-        binding.includedReaderColorFilter.seekbarColorFilterBlue.setOnSeekBarChangeListener(object : SimpleSeekBarListener() {
-            override fun onProgressChanged(seekBar: SeekBar, value: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    setColorValue(value, BLUE_MASK, 0)
+        binding.includedReaderColorFilter.seekbarColorFilterBlue.setOnSeekBarChangeListener(
+            object : SimpleSeekBarListener() {
+                override fun onProgressChanged(
+                    seekBar: SeekBar,
+                    value: Int,
+                    fromUser: Boolean
+                ) {
+                    if (fromUser) {
+                        setColorValue(value, BLUE_MASK, 0)
+                    }
                 }
             }
-        })
+        )
 
-        binding.includedReaderColorFilter.brightnessSeekbar.setOnSeekBarChangeListener(object : SimpleSeekBarListener() {
-            override fun onProgressChanged(seekBar: SeekBar, value: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    preferences.customBrightnessValue().set(value)
+        binding.includedReaderColorFilter.brightnessSeekbar.setOnSeekBarChangeListener(
+            object : SimpleSeekBarListener() {
+                override fun onProgressChanged(
+                    seekBar: SeekBar,
+                    value: Int,
+                    fromUser: Boolean
+                ) {
+                    if (fromUser) {
+                        preferences.customBrightnessValue().set(value)
+                    }
                 }
             }
-        })
+        )
     }
 
     override fun onStart() {
@@ -134,7 +164,10 @@ class ReaderColorFilterSheet(private val activity: ReaderActivity) : BottomSheet
      * @param enabled determines if seekBar gets enabled
      * @param view view of the dialog
      */
-    private fun setColorFilterSeekBar(enabled: Boolean, view: View) = with(view) {
+    private fun setColorFilterSeekBar(
+        enabled: Boolean,
+        view: View
+    ) = with(view) {
         binding.includedReaderColorFilter!!
         binding.includedReaderColorFilter.seekbarColorFilterRed.isEnabled = enabled
         binding.includedReaderColorFilter.seekbarColorFilterGreen.isEnabled = enabled
@@ -147,7 +180,10 @@ class ReaderColorFilterSheet(private val activity: ReaderActivity) : BottomSheet
      * @param enabled value which determines if seekBar gets enabled
      * @param view view of the dialog
      */
-    private fun setCustomBrightnessSeekBar(enabled: Boolean, view: View) = with(view) {
+    private fun setCustomBrightnessSeekBar(
+        enabled: Boolean,
+        view: View
+    ) = with(view) {
         binding.includedReaderColorFilter!!.brightnessSeekbar.isEnabled = enabled
     }
 
@@ -156,7 +192,10 @@ class ReaderColorFilterSheet(private val activity: ReaderActivity) : BottomSheet
      * @param color integer containing color information
      * @param view view of the dialog
      */
-    fun setValues(color: Int, view: View): Array<Int> {
+    fun setValues(
+        color: Int,
+        view: View
+    ): Array<Int> {
         val alpha = getAlphaFromColor(color)
         val red = getRedFromColor(color)
         val green = getGreenFromColor(color)
@@ -177,7 +216,10 @@ class ReaderColorFilterSheet(private val activity: ReaderActivity) : BottomSheet
      * @param enabled determines if the subscription get (un)subscribed
      * @param view view of the dialog
      */
-    private fun setCustomBrightness(enabled: Boolean, view: View) {
+    private fun setCustomBrightness(
+        enabled: Boolean,
+        view: View
+    ) {
         if (enabled) {
             preferences.customBrightnessValue().asFlow()
                 .sample(100)
@@ -195,7 +237,11 @@ class ReaderColorFilterSheet(private val activity: ReaderActivity) : BottomSheet
      * From 1 to 100 it sets that value as brightness.
      * 0 sets system brightness and hides the overlay.
      */
-    private fun setCustomBrightnessValue(value: Int, view: View, isDisabled: Boolean = false) = with(view) {
+    private fun setCustomBrightnessValue(
+        value: Int,
+        view: View,
+        isDisabled: Boolean = false
+    ) = with(view) {
         // Set black overlay visibility.
         if (value < 0) {
             binding.brightnessOverlay.visible()
@@ -215,7 +261,10 @@ class ReaderColorFilterSheet(private val activity: ReaderActivity) : BottomSheet
      * @param enabled determines if the subscription get (un)subscribed
      * @param view view of the dialog
      */
-    private fun setColorFilter(enabled: Boolean, view: View) {
+    private fun setColorFilter(
+        enabled: Boolean,
+        view: View
+    ) {
         if (enabled) {
             preferences.colorFilterValue().asFlow()
                 .sample(100)
@@ -232,7 +281,10 @@ class ReaderColorFilterSheet(private val activity: ReaderActivity) : BottomSheet
      * @param color hex of color.
      * @param view view of the dialog
      */
-    private fun setColorFilterValue(@ColorInt color: Int, view: View) = with(view) {
+    private fun setColorFilterValue(
+        @ColorInt color: Int,
+        view: View
+    ) = with(view) {
         binding.colorOverlay.visible()
         binding.colorOverlay.setFilterColor(color, preferences.colorFilterMode().get())
         setValues(color, view)
@@ -244,7 +296,11 @@ class ReaderColorFilterSheet(private val activity: ReaderActivity) : BottomSheet
      * @param mask contains hex mask of chosen color
      * @param bitShift amounts of bits that gets shifted to receive value
      */
-    fun setColorValue(color: Int, mask: Long, bitShift: Int) {
+    fun setColorValue(
+        color: Int,
+        mask: Long,
+        bitShift: Int
+    ) {
         val currentColor = preferences.colorFilterValue().get()
         val updatedColor = (color shl bitShift) or (currentColor and mask.inv().toInt())
         preferences.colorFilterValue().set(updatedColor)

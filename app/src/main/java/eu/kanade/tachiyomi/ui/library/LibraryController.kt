@@ -53,7 +53,6 @@ import eu.kanade.tachiyomi.util.view.visible
 import exh.favorites.FavoritesIntroDialog
 import exh.favorites.FavoritesSyncStatus
 import exh.ui.LoaderManager
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
@@ -65,6 +64,7 @@ import rx.android.schedulers.AndroidSchedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.concurrent.TimeUnit
 
 class LibraryController(
     bundle: Bundle? = null,
@@ -79,7 +79,6 @@ class LibraryController(
     ChangeMangaCategoriesDialog.Listener,
     DeleteLibraryMangasDialog.Listener,
     LibraryCategoryAdapter.LibraryListener {
-
     /**
      * Position of the active category.
      */
@@ -165,8 +164,10 @@ class LibraryController(
     // --> EH
     // Sync dialog
     private var favSyncDialog: MaterialDialog? = null
+
     // Old sync status
     private var oldSyncStatus: FavoritesSyncStatus? = null
+
     // Favorites
     private var favoritesSyncSubscription: Subscription? = null
     val loaderManager = LoaderManager()
@@ -185,7 +186,10 @@ class LibraryController(
         return LibraryPresenter()
     }
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = LibraryControllerBinding.inflate(inflater)
         return binding.root
     }
@@ -219,7 +223,10 @@ class LibraryController(
         // EXH <--
     }
 
-    override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
+    override fun onChangeStarted(
+        handler: ControllerChangeHandler,
+        type: ControllerChangeType
+    ) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
             val activity = activity as MainActivity?
@@ -268,14 +275,15 @@ class LibraryController(
             tabMode = TabLayout.MODE_SCROLLABLE
         }
         tabsVisibilitySubscription?.unsubscribe()
-        tabsVisibilitySubscription = tabsVisibilityRelay.subscribe { visible ->
-            val tabAnimator = (activity as? MainActivity)?.tabAnimator
-            if (visible) {
-                tabAnimator?.expand()
-            } else {
-                tabAnimator?.collapse()
+        tabsVisibilitySubscription =
+            tabsVisibilityRelay.subscribe { visible ->
+                val tabAnimator = (activity as? MainActivity)?.tabAnimator
+                if (visible) {
+                    tabAnimator?.expand()
+                } else {
+                    tabAnimator?.collapse()
+                }
             }
-        }
     }
 
     override fun cleanupTabs(tabs: TabLayout) {
@@ -283,7 +291,10 @@ class LibraryController(
         tabsVisibilitySubscription = null
     }
 
-    fun onNextLibraryUpdate(categories: List<Category>, mangaMap: Map<Int, List<LibraryItem>>) {
+    fun onNextLibraryUpdate(
+        categories: List<Category>,
+        mangaMap: Map<Int, List<LibraryItem>>
+    ) {
         val view = view ?: return
         val adapter = adapter ?: return
 
@@ -295,11 +306,12 @@ class LibraryController(
         }
 
         // Get the current active category.
-        val activeCat = if (adapter.categories.isNotEmpty()) {
-            binding.libraryPager.currentItem
-        } else {
-            activeCategory
-        }
+        val activeCat =
+            if (adapter.categories.isNotEmpty()) {
+                binding.libraryPager.currentItem
+            } else {
+                activeCategory
+            }
 
         // Set the categories
         adapter.categories = categories
@@ -384,7 +396,10 @@ class LibraryController(
         actionMode?.finish()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
         inflater.inflate(R.menu.library, menu)
 
         val reorganizeItem = menu.findItem(R.id.action_reorganize)
@@ -485,12 +500,18 @@ class LibraryController(
         actionMode?.invalidate()
     }
 
-    override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+    override fun onCreateActionMode(
+        mode: ActionMode,
+        menu: Menu
+    ): Boolean {
         mode.menuInflater.inflate(R.menu.library_selection, menu)
         return true
     }
 
-    override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+    override fun onPrepareActionMode(
+        mode: ActionMode,
+        menu: Menu
+    ): Boolean {
         val count = selectedMangas.size
         if (count == 0) {
             // Destroy action mode if there are no items selected.
@@ -504,7 +525,10 @@ class LibraryController(
         return false
     }
 
-    override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+    override fun onActionItemClicked(
+        mode: ActionMode,
+        item: MenuItem
+    ): Boolean {
         return onActionItemClicked(item)
     }
 
@@ -548,7 +572,10 @@ class LibraryController(
      * @param manga the manga whose selection has changed.
      * @param selected whether it's now selected or not.
      */
-    fun setSelection(manga: Manga, selected: Boolean) {
+    fun setSelection(
+        manga: Manga,
+        selected: Boolean
+    ) {
         if (selected) {
             if (selectedMangas.add(manga)) {
                 selectionRelay.call(LibrarySelectionEvent.Selected(manga))
@@ -601,9 +628,10 @@ class LibraryController(
         val categories = presenter.categories.filter { it.id != 0 }
 
         // Get indexes of the common categories to preselect.
-        val commonCategoriesIndexes = presenter.getCommonCategories(mangas)
-            .map { categories.indexOf(it) }
-            .toTypedArray()
+        val commonCategoriesIndexes =
+            presenter.getCommonCategories(mangas)
+                .map { categories.indexOf(it) }
+                .toTypedArray()
 
         ChangeMangaCategoriesDialog(this, mangas, categories, commonCategoriesIndexes)
             .showDialog(router)
@@ -650,12 +678,18 @@ class LibraryController(
         destroyActionModeIfNeeded()
     }
 
-    override fun updateCategoriesForMangas(mangas: List<Manga>, categories: List<Category>) {
+    override fun updateCategoriesForMangas(
+        mangas: List<Manga>,
+        categories: List<Category>
+    ) {
         presenter.moveMangasToCategories(categories, mangas)
         destroyActionModeIfNeeded()
     }
 
-    override fun deleteMangasFromLibrary(mangas: List<Manga>, deleteChapters: Boolean) {
+    override fun deleteMangasFromLibrary(
+        mangas: List<Manga>,
+        deleteChapters: Boolean
+    ) {
         presenter.removeMangaFromLibrary(mangas, deleteChapters)
         destroyActionModeIfNeeded()
     }
@@ -694,15 +728,17 @@ class LibraryController(
         releaseSyncLocks()
     }
 
-    private fun buildDialog() = activity?.let {
-        MaterialDialog(it)
-    }
+    private fun buildDialog() =
+        activity?.let {
+            MaterialDialog(it)
+        }
 
     private fun showSyncProgressDialog() {
         favSyncDialog?.dismiss()
-        favSyncDialog = buildDialog()
-            ?.title(text = "Favorites syncing")
-            ?.cancelable(false)
+        favSyncDialog =
+            buildDialog()
+                ?.title(text = "Favorites syncing")
+                ?.cancelable(false)
         // ?.progress(true, 0)
         favSyncDialog?.show()
     }
@@ -727,47 +763,51 @@ class LibraryController(
                 releaseSyncLocks()
 
                 favSyncDialog?.dismiss()
-                favSyncDialog = buildDialog()
-                    ?.title(text = "Favorites sync error")
-                    ?.message(text = status.message + " Sync will not start until the gallery is in only one category.")
-                    ?.cancelable(false)
-                    ?.positiveButton(text = "Show gallery") {
-                        openManga(status.manga)
-                        presenter.favoritesSync.status.onNext(FavoritesSyncStatus.Idle())
-                    }
-                    ?.negativeButton(android.R.string.ok) {
-                        presenter.favoritesSync.status.onNext(FavoritesSyncStatus.Idle())
-                    }
+                favSyncDialog =
+                    buildDialog()
+                        ?.title(text = "Favorites sync error")
+                        ?.message(text = status.message + " Sync will not start until the gallery is in only one category.")
+                        ?.cancelable(false)
+                        ?.positiveButton(text = "Show gallery") {
+                            openManga(status.manga)
+                            presenter.favoritesSync.status.onNext(FavoritesSyncStatus.Idle())
+                        }
+                        ?.negativeButton(android.R.string.ok) {
+                            presenter.favoritesSync.status.onNext(FavoritesSyncStatus.Idle())
+                        }
                 favSyncDialog?.show()
             }
             is FavoritesSyncStatus.Error -> {
                 releaseSyncLocks()
 
                 favSyncDialog?.dismiss()
-                favSyncDialog = buildDialog()
-                    ?.title(text = "Favorites sync error")
-                    ?.message(text = "An error occurred during the sync process: ${status.message}")
-                    ?.cancelable(false)
-                    ?.positiveButton(android.R.string.ok) {
-                        presenter.favoritesSync.status.onNext(FavoritesSyncStatus.Idle())
-                    }
+                favSyncDialog =
+                    buildDialog()
+                        ?.title(text = "Favorites sync error")
+                        ?.message(text = "An error occurred during the sync process: ${status.message}")
+                        ?.cancelable(false)
+                        ?.positiveButton(android.R.string.ok) {
+                            presenter.favoritesSync.status.onNext(FavoritesSyncStatus.Idle())
+                        }
                 favSyncDialog?.show()
             }
             is FavoritesSyncStatus.CompleteWithErrors -> {
                 releaseSyncLocks()
 
                 favSyncDialog?.dismiss()
-                favSyncDialog = buildDialog()
-                    ?.title(text = "Favorites sync complete with errors")
-                    ?.message(text = "Errors occurred during the sync process that were ignored:\n${status.message}")
-                    ?.cancelable(false)
-                    ?.positiveButton(android.R.string.ok) {
-                        presenter.favoritesSync.status.onNext(FavoritesSyncStatus.Idle())
-                    }
+                favSyncDialog =
+                    buildDialog()
+                        ?.title(text = "Favorites sync complete with errors")
+                        ?.message(text = "Errors occurred during the sync process that were ignored:\n${status.message}")
+                        ?.cancelable(false)
+                        ?.positiveButton(android.R.string.ok) {
+                            presenter.favoritesSync.status.onNext(FavoritesSyncStatus.Idle())
+                        }
                 favSyncDialog?.show()
             }
             is FavoritesSyncStatus.Processing,
-            is FavoritesSyncStatus.Initializing -> {
+            is FavoritesSyncStatus.Initializing
+            -> {
                 takeSyncLocks()
 
                 if (favSyncDialog == null || (
@@ -785,7 +825,10 @@ class LibraryController(
         oldSyncStatus = status
     }
 
-    override fun startReading(manga: Manga, adapter: LibraryCategoryAdapter) {
+    override fun startReading(
+        manga: Manga,
+        adapter: LibraryCategoryAdapter
+    ) {
         if (adapter.mode == SelectableAdapter.Mode.MULTI) {
             toggleSelection(manga)
             return
@@ -810,7 +853,11 @@ class LibraryController(
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
         if (requestCode == REQUEST_IMAGE_OPEN) {
             val dataUri = data?.data
             if (dataUri == null || resultCode != Activity.RESULT_OK) return
@@ -840,7 +887,10 @@ class LibraryController(
 }
 
 object HeightTopWindowInsetsListener : View.OnApplyWindowInsetsListener {
-    override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
+    override fun onApplyWindowInsets(
+        v: View,
+        insets: WindowInsets
+    ): WindowInsets {
         val topInset = insets.systemWindowInsetTop
         v.setPadding(0, topInset, 0, 0)
         if (v.layoutParams.height != topInset) {

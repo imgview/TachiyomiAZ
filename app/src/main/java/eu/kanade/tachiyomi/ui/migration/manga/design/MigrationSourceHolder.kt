@@ -12,17 +12,26 @@ import uy.kohesive.injekt.injectLazy
 class MigrationSourceHolder(view: View, val adapter: MigrationSourceAdapter) :
     BaseFlexibleViewHolder(view, adapter) {
     private val binding = MigrationSourceItemBinding.bind(view)
+
     init {
         setDragHandleView(binding.reorder)
     }
 
-    fun bind(source: HttpSource, sourceEnabled: Boolean) {
+    fun bind(
+        source: HttpSource,
+        sourceEnabled: Boolean
+    ) {
         val preferences by injectLazy<PreferencesHelper>()
         val isMultiLanguage = preferences.enabledLanguages().get().size > 1
         // Set capitalized title.
-        val sourceName = if (isMultiLanguage) source.toString() else source.name.replaceFirstChar {
-            if (it.isLowerCase()) it.titlecase() else it.toString()
-        }
+        val sourceName =
+            if (isMultiLanguage) {
+                source.toString()
+            } else {
+                source.name.replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase() else it.toString()
+                }
+            }
         binding.title.text = sourceName
         // Update circle letter image.
         itemView.post {

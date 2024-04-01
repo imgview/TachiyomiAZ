@@ -9,7 +9,10 @@ import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
  *
  * @param drawable id of drawable resource
  */
-fun ImageView.setVectorCompat(@DrawableRes drawable: Int, tint: Int? = null) {
+fun ImageView.setVectorCompat(
+    @DrawableRes drawable: Int,
+    tint: Int? = null
+) {
     val vector = VectorDrawableCompat.create(resources, drawable, context.theme)
     if (tint != null) {
         vector?.mutate()

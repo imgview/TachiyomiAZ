@@ -12,8 +12,8 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
  * @param adapter The adapter containing this holder.
  */
 class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleViewHolder(view, adapter) {
-
     private val binding = CategoriesItemBinding.bind(view)
+
     init {
         setDragHandleView(binding.reorder)
     }

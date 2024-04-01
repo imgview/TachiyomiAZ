@@ -13,8 +13,7 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
  * Dialog to rename an existing category of the library.
  */
 class CategoryRenameDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
-        where T : Controller, T : CategoryRenameDialog.Listener {
-
+    where T : Controller, T : CategoryRenameDialog.Listener {
     private var category: Category? = null
 
     /**
@@ -78,7 +77,10 @@ class CategoryRenameDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
     }
 
     interface Listener {
-        fun renameCategory(category: Category, name: String)
+        fun renameCategory(
+            category: Category,
+            name: String
+        )
     }
 
     private companion object {

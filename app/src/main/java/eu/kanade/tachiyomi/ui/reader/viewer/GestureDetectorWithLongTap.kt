@@ -15,7 +15,6 @@ open class GestureDetectorWithLongTap(
     context: Context,
     listener: Listener
 ) : GestureDetector(context, listener) {
-
     private val handler = Handler()
     private val slop = ViewConfiguration.get(context).scaledTouchSlop
     private val longTapTime = ViewConfiguration.getLongPressTimeout().toLong()

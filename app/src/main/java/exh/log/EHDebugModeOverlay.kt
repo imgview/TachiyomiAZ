@@ -19,32 +19,44 @@ class EHDebugModeOverlay(private val context: Context) : OverlayModule<String>(n
     private val prefs: PreferencesHelper by injectLazy()
 
     override fun start() {}
+
     override fun stop() {}
+
     override fun notifyObservers() {}
+
     override fun addObserver(observer: DataObserver<Any>) {
         observer.onDataAvailable(buildInfo())
     }
+
     override fun removeObserver(observer: DataObserver<Any>) {}
+
     override fun onDataAvailable(data: String?) {
         textView?.text = HtmlCompat.fromHtml(data!!, HtmlCompat.FROM_HTML_MODE_LEGACY)
     }
 
-    override fun createView(root: ViewGroup, textColor: Int, textSize: Float, textAlpha: Float): View {
+    override fun createView(
+        root: ViewGroup,
+        textColor: Int,
+        textSize: Float,
+        textAlpha: Float
+    ): View {
         val view = LinearLayout(root.context)
-        view.layoutParams = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
+        view.layoutParams =
+            ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
         view.setPadding(4.dpToPx, 0, 4.dpToPx, 4.dpToPx)
         val textView = TextView(view.context)
         textView.setTextColor(textColor)
         textView.textSize = textSize
         textView.alpha = textAlpha
         textView.text = HtmlCompat.fromHtml(buildInfo(), HtmlCompat.FROM_HTML_MODE_LEGACY)
-        textView.layoutParams = LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
+        textView.layoutParams =
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
         view.addView(textView)
         this.textView = textView
         return view

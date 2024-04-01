@@ -5,7 +5,6 @@ import eu.davidea.flexibleadapter.items.IFlexible
 
 class UpdatesAdapter(val controller: UpdatesController) :
     FlexibleAdapter<IFlexible<*>>(null, controller, true) {
-
     val coverClickListener: OnCoverClickListener = controller
 
     init {

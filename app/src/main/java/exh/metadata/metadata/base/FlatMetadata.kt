@@ -6,12 +6,12 @@ import exh.metadata.metadata.RaisedSearchMetadata
 import exh.metadata.sql.models.SearchMetadata
 import exh.metadata.sql.models.SearchTag
 import exh.metadata.sql.models.SearchTitle
-import kotlin.reflect.KClass
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.serializer
 import rx.Completable
 import rx.Single
+import kotlin.reflect.KClass
 
 @Serializable
 data class FlatMetadata(
@@ -31,15 +31,18 @@ data class FlatMetadata(
 
 fun DatabaseHelper.getFlatMetadataForManga(mangaId: Long): PreparedOperation<FlatMetadata?> {
     // We have to use fromCallable because StorIO messes up the thread scheduling if we use their rx functions
-    val single = Single.fromCallable {
-        val meta = getSearchMetadataForManga(mangaId).executeAsBlocking()
-        if (meta != null) {
-            val tags = getSearchTagsForManga(mangaId).executeAsBlocking()
-            val titles = getSearchTitlesForManga(mangaId).executeAsBlocking()
+    val single =
+        Single.fromCallable {
+            val meta = getSearchMetadataForManga(mangaId).executeAsBlocking()
+            if (meta != null) {
+                val tags = getSearchTagsForManga(mangaId).executeAsBlocking()
+                val titles = getSearchTitlesForManga(mangaId).executeAsBlocking()
 
-            FlatMetadata(meta, tags, titles)
-        } else null
-    }
+                FlatMetadata(meta, tags, titles)
+            } else {
+                null
+            }
+        }
 
     return preparedOperationFromSingle(single)
 }
@@ -90,12 +93,13 @@ private fun <T> preparedOperationFromSingle(single: Single<T>): PreparedOperatio
     }
 }
 
-fun DatabaseHelper.insertFlatMetadata(flatMetadata: FlatMetadata): Completable = Completable.fromCallable {
-    require(flatMetadata.metadata.mangaId != -1L)
+fun DatabaseHelper.insertFlatMetadata(flatMetadata: FlatMetadata): Completable =
+    Completable.fromCallable {
+        require(flatMetadata.metadata.mangaId != -1L)
 
-    inTransaction {
-        insertSearchMetadata(flatMetadata.metadata).executeAsBlocking()
-        setSearchTagsForManga(flatMetadata.metadata.mangaId, flatMetadata.tags)
-        setSearchTitlesForManga(flatMetadata.metadata.mangaId, flatMetadata.titles)
+        inTransaction {
+            insertSearchMetadata(flatMetadata.metadata).executeAsBlocking()
+            setSearchTagsForManga(flatMetadata.metadata.mangaId, flatMetadata.tags)
+            setSearchTitlesForManga(flatMetadata.metadata.mangaId, flatMetadata.titles)
+        }
     }
-}

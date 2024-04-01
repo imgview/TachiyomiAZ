@@ -41,7 +41,6 @@ class ExtensionManager(
     private val context: Context,
     private val preferences: PreferencesHelper = Injekt.get()
 ) {
-
     /**
      * API where all the available extensions can be found.
      */
@@ -134,18 +133,20 @@ class ExtensionManager(
     private fun initExtensions() {
         val extensions = ExtensionLoader.loadExtensions(context)
 
-        installedExtensions = extensions
-            .filterIsInstance<LoadResult.Success>()
-            .map { it.extension }
+        installedExtensions =
+            extensions
+                .filterIsInstance<LoadResult.Success>()
+                .map { it.extension }
         installedExtensions
             .flatMap { it.sources }
             // overwrite is needed until the bundled sources are removed
             .forEach { sourceManager.registerSource(it, true) }
 
-        untrustedExtensions = extensions
-            .filterIsInstance<LoadResult.Untrusted>()
-            .map { it.extension }
-            .filterNotBlacklisted()
+        untrustedExtensions =
+            extensions
+                .filterIsInstance<LoadResult.Untrusted>()
+                .map { it.extension }
+                .filterNotBlacklisted()
     }
 
     // EXH -->
@@ -155,7 +156,9 @@ class ExtensionManager(
             if (it.isBlacklisted(blacklistEnabled)) {
                 XLog.d("[EXH] Removing blacklisted extension: (name: %s, pkgName: %s)!", it.name, it.pkgName)
                 false
-            } else true
+            } else {
+                true
+            }
         }
     }
 
@@ -193,12 +196,13 @@ class ExtensionManager(
      */
     fun findAvailableExtensions() {
         launchNow {
-            val extensions: List<Extension.Available> = try {
-                api.findExtensions().filterNotBlacklisted()
-            } catch (e: Exception) {
-                context.toast(e.message)
-                emptyList()
-            }
+            val extensions: List<Extension.Available> =
+                try {
+                    api.findExtensions().filterNotBlacklisted()
+                } catch (e: Exception) {
+                    context.toast(e.message)
+                    emptyList()
+                }
 
             unalteredAvailableExtensions = extensions
             availableExtensions = extensions.filterNotBlacklisted()
@@ -262,8 +266,9 @@ class ExtensionManager(
      * @param extension The extension to be updated.
      */
     fun updateExtension(extension: Extension.Installed): Observable<InstallStep> {
-        val availableExt = availableExtensions.find { it.pkgName == extension.pkgName }
-            ?: return Observable.empty()
+        val availableExt =
+            availableExtensions.find { it.pkgName == extension.pkgName }
+                ?: return Observable.empty()
         return installExtension(availableExt)
     }
 
@@ -280,12 +285,18 @@ class ExtensionManager(
         installer.updateInstallStep(downloadId, InstallStep.Installing)
     }
 
-    fun setInstallationResult(downloadId: Long, result: Boolean) {
+    fun setInstallationResult(
+        downloadId: Long,
+        result: Boolean
+    ) {
         val step = if (result) InstallStep.Installed else InstallStep.Error
         installer.updateInstallStep(downloadId, step)
     }
 
-    fun updateInstallStep(downloadId: Long, step: InstallStep) {
+    fun updateInstallStep(
+        downloadId: Long,
+        step: InstallStep
+    ) {
         installer.updateInstallStep(downloadId, step)
     }
 
@@ -390,7 +401,6 @@ class ExtensionManager(
      * Listener which receives events of the extensions being installed, updated or removed.
      */
     private inner class InstallationListener : ExtensionInstallReceiver.Listener {
-
         override fun onExtensionInstalled(extension: Extension.Installed) {
             registerNewExtension(extension.withUpdateCheck())
             updatePendingUpdatesCount()

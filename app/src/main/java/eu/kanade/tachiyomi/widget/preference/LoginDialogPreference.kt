@@ -23,7 +23,6 @@ abstract class LoginDialogPreference(
     @StringRes private val usernameLabelRes: Int? = null,
     bundle: Bundle? = null
 ) : DialogController(bundle) {
-
     var v: View? = null
         private set
 
@@ -34,9 +33,10 @@ abstract class LoginDialogPreference(
     var requestSubscription: Subscription? = null
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-        var dialog = MaterialDialog(activity!!)
-            .customView(R.layout.pref_account_login)
-            .negativeButton(android.R.string.cancel)
+        var dialog =
+            MaterialDialog(activity!!)
+                .customView(R.layout.pref_account_login)
+                .negativeButton(android.R.string.cancel)
 
         binding = PrefAccountLoginBinding.bind(dialog.getCustomView())
 
@@ -50,19 +50,23 @@ abstract class LoginDialogPreference(
     }
 
     fun onViewCreated(view: View) {
-        v = view.apply {
-            if (usernameLabelRes != null) {
-                binding.usernameLabel.hint = context.getString(usernameLabelRes)
+        v =
+            view.apply {
+                if (usernameLabelRes != null) {
+                    binding.usernameLabel.hint = context.getString(usernameLabelRes)
+                }
+
+                binding.login.setMode(ActionProcessButton.Mode.ENDLESS)
+                binding.login.setOnClickListener { checkLogin() }
+
+                setCredentialsOnView(this)
             }
-
-            binding.login.setMode(ActionProcessButton.Mode.ENDLESS)
-            binding.login.setOnClickListener { checkLogin() }
-
-            setCredentialsOnView(this)
-        }
     }
 
-    override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
+    override fun onChangeStarted(
+        handler: ControllerChangeHandler,
+        type: ControllerChangeType
+    ) {
         super.onChangeStarted(handler, type)
         if (!type.isEnter) {
             onDialogClosed()

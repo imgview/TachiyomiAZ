@@ -32,9 +32,6 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.updateCoverLastModified
 import exh.util.defaultReaderType
-import java.io.File
-import java.util.Date
-import java.util.concurrent.TimeUnit
 import rx.Completable
 import rx.Observable
 import rx.Subscription
@@ -43,6 +40,9 @@ import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.File
+import java.util.Date
+import java.util.concurrent.TimeUnit
 
 /**
  * Presenter used by the activity to perform background operations.
@@ -55,7 +55,6 @@ class ReaderPresenter(
     private val preferences: PreferencesHelper = Injekt.get(),
     private val delayedTrackingStore: DelayedTrackingStore = Injekt.get()
 ) : BasePresenter<ReaderActivity>() {
-
     /**
      * The manga loaded in the reader. It can be null when instantiated for a short time.
      */
@@ -80,7 +79,8 @@ class ReaderPresenter(
     /**
      * Relay for currently active viewer chapters.
      */
-    /* [EXH] private */ val viewerChaptersRelay = BehaviorRelay.create<ViewerChapters>()
+    // [EXH] private
+    val viewerChaptersRelay = BehaviorRelay.create<ViewerChapters>()
 
     /**
      * Relay used when loading prev/next chapter needed to lock the UI (with a dialog).
@@ -95,32 +95,34 @@ class ReaderPresenter(
         val manga = manga!!
         val dbChapters = db.getChapters(manga).executeAsBlocking()
 
-        val selectedChapter = dbChapters.find { it.id == chapterId }
-            ?: error("Requested chapter of id $chapterId not found in chapter list")
+        val selectedChapter =
+            dbChapters.find { it.id == chapterId }
+                ?: error("Requested chapter of id $chapterId not found in chapter list")
 
         val chaptersForReader =
             if (preferences.skipRead() || preferences.skipFiltered()) {
-                val list = dbChapters
-                    .filter {
-                        if (preferences.skipRead() && it.read) {
-                            return@filter false
-                        } else if (preferences.skipFiltered()) {
-                            if (
-                                (manga.readFilter == Manga.SHOW_READ && !it.read) ||
-                                (manga.readFilter == Manga.SHOW_UNREAD && it.read) ||
-                                (
-                                    manga.downloadedFilter == Manga.SHOW_DOWNLOADED &&
-                                        !downloadManager.isChapterDownloaded(it, manga)
-                                    ) ||
-                                (manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED && !it.bookmark)
-                            ) {
+                val list =
+                    dbChapters
+                        .filter {
+                            if (preferences.skipRead() && it.read) {
                                 return@filter false
+                            } else if (preferences.skipFiltered()) {
+                                if (
+                                    (manga.readFilter == Manga.SHOW_READ && !it.read) ||
+                                    (manga.readFilter == Manga.SHOW_UNREAD && it.read) ||
+                                    (
+                                        manga.downloadedFilter == Manga.SHOW_DOWNLOADED &&
+                                            !downloadManager.isChapterDownloaded(it, manga)
+                                        ) ||
+                                    (manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED && !it.bookmark)
+                                ) {
+                                    return@filter false
+                                }
                             }
-                        }
 
-                        true
-                    }
-                    .toMutableList()
+                            true
+                        }
+                        .toMutableList()
 
                 val find = list.find { it.id == chapterId }
                 if (find == null) {
@@ -205,7 +207,10 @@ class ReaderPresenter(
      * Initializes this presenter with the given [mangaId] and [initialChapterId]. This method will
      * fetch the manga from the database and initialize the initial chapter.
      */
-    fun init(mangaId: Long, initialChapterId: Long) {
+    fun init(
+        mangaId: Long,
+        initialChapterId: Long
+    ) {
         if (!needsInit()) return
 
         db.getManga(mangaId).asRxObservable()
@@ -224,7 +229,10 @@ class ReaderPresenter(
      * Initializes this presenter with the given [manga] and [initialChapterId]. This method will
      * set the chapter loader, view subscriptions and trigger an initial load.
      */
-    private fun init(manga: Manga, initialChapterId: Long) {
+    private fun init(
+        manga: Manga,
+        initialChapterId: Long
+    ) {
         if (!needsInit()) return
 
         this.manga = manga
@@ -240,17 +248,18 @@ class ReaderPresenter(
 
         // Read chapterList from an io thread because it's retrieved lazily and would block main.
         activeChapterSubscription?.unsubscribe()
-        activeChapterSubscription = Observable
-            .fromCallable { chapterList.first { chapterId == it.chapter.id } }
-            .flatMap { getLoadObservable(loader!!, it) }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeFirst(
-                { _, _ ->
-                    // Ignore onNext event
-                },
-                ReaderActivity::setInitialChapterError
-            )
+        activeChapterSubscription =
+            Observable
+                .fromCallable { chapterList.first { chapterId == it.chapter.id } }
+                .flatMap { getLoadObservable(loader!!, it) }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeFirst(
+                    { _, _ ->
+                        // Ignore onNext event
+                    },
+                    ReaderActivity::setInitialChapterError
+                )
     }
 
     /**
@@ -298,11 +307,12 @@ class ReaderPresenter(
         Timber.d("Loading ${chapter.chapter.url}")
 
         activeChapterSubscription?.unsubscribe()
-        activeChapterSubscription = getLoadObservable(loader, chapter)
-            .toCompletable()
-            .onErrorComplete()
-            .subscribe()
-            .also(::add)
+        activeChapterSubscription =
+            getLoadObservable(loader, chapter)
+                .toCompletable()
+                .onErrorComplete()
+                .subscribe()
+                .also(::add)
     }
 
     /**
@@ -316,17 +326,18 @@ class ReaderPresenter(
         Timber.d("Loading adjacent ${chapter.chapter.url}")
 
         activeChapterSubscription?.unsubscribe()
-        activeChapterSubscription = getLoadObservable(loader, chapter)
-            .doOnSubscribe { isLoadingAdjacentChapterRelay.call(true) }
-            .doOnUnsubscribe { isLoadingAdjacentChapterRelay.call(false) }
-            .subscribeFirst(
-                { view, _ ->
-                    view.moveToPageIndex(0)
-                },
-                { _, _ ->
-                    // Ignore onError event, viewers handle that state
-                }
-            )
+        activeChapterSubscription =
+            getLoadObservable(loader, chapter)
+                .doOnSubscribe { isLoadingAdjacentChapterRelay.call(true) }
+                .doOnUnsubscribe { isLoadingAdjacentChapterRelay.call(false) }
+                .subscribeFirst(
+                    { view, _ ->
+                        view.moveToPageIndex(0)
+                    },
+                    { _, _ ->
+                        // Ignore onError event, viewers handle that state
+                    }
+                )
     }
 
     /**
@@ -490,7 +501,11 @@ class ReaderPresenter(
     /**
      * Saves the image of this [page] in the given [directory] and returns the file location.
      */
-    private fun saveImage(page: ReaderPage, directory: File, manga: Manga): File {
+    private fun saveImage(
+        page: ReaderPage,
+        directory: File,
+        manga: Manga
+    ): File {
         val stream = page.stream!!
         val type = ImageUtil.findImageType(stream) ?: throw Exception("Not an image")
 
@@ -500,9 +515,10 @@ class ReaderPresenter(
 
         // Build destination file.
         val filenameSuffix = " - ${page.number}.${type.extension}"
-        val filename = DiskUtil.buildValidFilename(
-            "${manga.title} - ${chapter.name}".takeBytes(MAX_FILE_NAME_BYTES - filenameSuffix.byteSize())
-        ) + filenameSuffix
+        val filename =
+            DiskUtil.buildValidFilename(
+                "${manga.title} - ${chapter.name}".takeBytes(MAX_FILE_NAME_BYTES - filenameSuffix.byteSize())
+            ) + filenameSuffix
 
         val destFile = File(directory, filename)
         stream().use { input ->
@@ -526,11 +542,12 @@ class ReaderPresenter(
         notifier.onClear()
 
         // Pictures directory.
-        val destDir = File(
-            Environment.getExternalStorageDirectory().absolutePath +
-                File.separator + Environment.DIRECTORY_PICTURES +
-                File.separator + context.getString(R.string.app_name)
-        )
+        val destDir =
+            File(
+                Environment.getExternalStorageDirectory().absolutePath +
+                    File.separator + Environment.DIRECTORY_PICTURES +
+                    File.separator + context.getString(R.string.app_name)
+            )
 
         // Copy file in background.
         Observable.fromCallable { saveImage(page, destDir, manga) }
@@ -609,7 +626,9 @@ class ReaderPresenter(
      * Results of the set as cover feature.
      */
     enum class SetAsCoverResult {
-        Success, AddToLibraryFirst, Error
+        Success,
+        AddToLibraryFirst,
+        Error
     }
 
     /**
@@ -617,6 +636,7 @@ class ReaderPresenter(
      */
     sealed class SaveImageResult {
         class Success(val file: File) : SaveImageResult()
+
         class Error(val error: Throwable) : SaveImageResult()
     }
 

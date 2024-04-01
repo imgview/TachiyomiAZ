@@ -23,40 +23,42 @@ class SearchTitleTypeMapping : SQLiteTypeMapping<SearchTitle>(
 )
 
 class SearchTitlePutResolver : DefaultPutResolver<SearchTitle>() {
+    override fun mapToInsertQuery(obj: SearchTitle) =
+        InsertQuery.builder()
+            .table(TABLE)
+            .build()
 
-    override fun mapToInsertQuery(obj: SearchTitle) = InsertQuery.builder()
-        .table(TABLE)
-        .build()
+    override fun mapToUpdateQuery(obj: SearchTitle) =
+        UpdateQuery.builder()
+            .table(TABLE)
+            .where("$COL_ID = ?")
+            .whereArgs(obj.id)
+            .build()
 
-    override fun mapToUpdateQuery(obj: SearchTitle) = UpdateQuery.builder()
-        .table(TABLE)
-        .where("$COL_ID = ?")
-        .whereArgs(obj.id)
-        .build()
-
-    override fun mapToContentValues(obj: SearchTitle) = ContentValues(4).apply {
-        put(COL_ID, obj.id)
-        put(COL_MANGA_ID, obj.mangaId)
-        put(COL_TITLE, obj.title)
-        put(COL_TYPE, obj.type)
-    }
+    override fun mapToContentValues(obj: SearchTitle) =
+        ContentValues(4).apply {
+            put(COL_ID, obj.id)
+            put(COL_MANGA_ID, obj.mangaId)
+            put(COL_TITLE, obj.title)
+            put(COL_TYPE, obj.type)
+        }
 }
 
 class SearchTitleGetResolver : DefaultGetResolver<SearchTitle>() {
-
-    override fun mapFromCursor(cursor: Cursor): SearchTitle = SearchTitle(
-        id = cursor.getLong(cursor.getColumnIndex(COL_ID)),
-        mangaId = cursor.getLong(cursor.getColumnIndex(COL_MANGA_ID)),
-        title = cursor.getString(cursor.getColumnIndex(COL_TITLE)),
-        type = cursor.getInt(cursor.getColumnIndex(COL_TYPE))
-    )
+    override fun mapFromCursor(cursor: Cursor): SearchTitle =
+        SearchTitle(
+            id = cursor.getLong(cursor.getColumnIndex(COL_ID)),
+            mangaId = cursor.getLong(cursor.getColumnIndex(COL_MANGA_ID)),
+            title = cursor.getString(cursor.getColumnIndex(COL_TITLE)),
+            type = cursor.getInt(cursor.getColumnIndex(COL_TYPE))
+        )
 }
 
 class SearchTitleDeleteResolver : DefaultDeleteResolver<SearchTitle>() {
-
-    override fun mapToDeleteQuery(obj: SearchTitle) = DeleteQuery.builder()
-        .table(TABLE)
-        .where("$COL_ID = ?")
-        .whereArgs(obj.id)
-        .build()
+    override fun mapToDeleteQuery(obj: SearchTitle) =
+        DeleteQuery.builder()
+            .table(TABLE)
+            .where("$COL_ID = ?")
+            .whereArgs(obj.id)
+            .build()
 }

@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.source.CatalogueSource
  */
 class GlobalSearchItem(val source: CatalogueSource, val results: List<GlobalSearchCardItem>?, val highlighted: Boolean = false) :
     AbstractFlexibleItem<GlobalSearchHolder>() {
-
     /**
      * Set view.
      *
@@ -32,7 +31,10 @@ class GlobalSearchItem(val source: CatalogueSource, val results: List<GlobalSear
      *
      * @return holder of view.
      */
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): GlobalSearchHolder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): GlobalSearchHolder {
         return GlobalSearchHolder(view, adapter as GlobalSearchAdapter)
     }
 

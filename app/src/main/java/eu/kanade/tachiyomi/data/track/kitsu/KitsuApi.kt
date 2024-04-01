@@ -29,57 +29,69 @@ import retrofit2.http.Query
 import rx.Observable
 
 class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) {
-
     private val authClient = client.newBuilder().addInterceptor(interceptor).build()
 
-    private val rest = Retrofit.Builder()
-        .baseUrl(baseUrl)
-        .client(authClient)
-        .addConverterFactory(GsonConverterFactory.create(GsonBuilder().serializeNulls().create()))
-        .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-        .build()
-        .create(Rest::class.java)
+    private val rest =
+        Retrofit.Builder()
+            .baseUrl(baseUrl)
+            .client(authClient)
+            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().serializeNulls().create()))
+            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+            .build()
+            .create(Rest::class.java)
 
-    private val searchRest = Retrofit.Builder()
-        .baseUrl(algoliaKeyUrl)
-        .client(authClient)
-        .addConverterFactory(GsonConverterFactory.create())
-        .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-        .build()
-        .create(SearchKeyRest::class.java)
+    private val searchRest =
+        Retrofit.Builder()
+            .baseUrl(algoliaKeyUrl)
+            .client(authClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+            .build()
+            .create(SearchKeyRest::class.java)
 
-    private val algoliaRest = Retrofit.Builder()
-        .baseUrl(algoliaUrl)
-        .client(client)
-        .addConverterFactory(GsonConverterFactory.create())
-        .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-        .build()
-        .create(AgoliaSearchRest::class.java)
+    private val algoliaRest =
+        Retrofit.Builder()
+            .baseUrl(algoliaUrl)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+            .build()
+            .create(AgoliaSearchRest::class.java)
 
-    fun addLibManga(track: Track, userId: String): Observable<Track> {
+    fun addLibManga(
+        track: Track,
+        userId: String
+    ): Observable<Track> {
         return Observable.defer {
             // @formatter:off
-            val data = jsonObject(
-                "type" to "libraryEntries",
-                "attributes" to jsonObject(
-                    "status" to track.toKitsuStatus(),
-                    "progress" to track.last_chapter_read
-                ),
-                "relationships" to jsonObject(
-                    "user" to jsonObject(
-                        "data" to jsonObject(
-                            "id" to userId,
-                            "type" to "users"
+            val data =
+                jsonObject(
+                    "type" to "libraryEntries",
+                    "attributes" to
+                        jsonObject(
+                            "status" to track.toKitsuStatus(),
+                            "progress" to track.last_chapter_read
+                        ),
+                    "relationships" to
+                        jsonObject(
+                            "user" to
+                                jsonObject(
+                                    "data" to
+                                        jsonObject(
+                                            "id" to userId,
+                                            "type" to "users"
+                                        )
+                                ),
+                            "media" to
+                                jsonObject(
+                                    "data" to
+                                        jsonObject(
+                                            "id" to track.media_id,
+                                            "type" to "manga"
+                                        )
+                                )
                         )
-                    ),
-                    "media" to jsonObject(
-                        "data" to jsonObject(
-                            "id" to track.media_id,
-                            "type" to "manga"
-                        )
-                    )
                 )
-            )
 
             rest.addLibManga(jsonObject("data" to data))
                 .map { json ->
@@ -92,15 +104,17 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
     fun updateLibManga(track: Track): Observable<Track> {
         return Observable.defer {
             // @formatter:off
-            val data = jsonObject(
-                "type" to "libraryEntries",
-                "id" to track.media_id,
-                "attributes" to jsonObject(
-                    "status" to track.toKitsuStatus(),
-                    "progress" to track.last_chapter_read,
-                    "ratingTwenty" to track.toKitsuScore()
+            val data =
+                jsonObject(
+                    "type" to "libraryEntries",
+                    "id" to track.media_id,
+                    "attributes" to
+                        jsonObject(
+                            "status" to track.toKitsuStatus(),
+                            "progress" to track.last_chapter_read,
+                            "ratingTwenty" to track.toKitsuScore()
+                        )
                 )
-            )
             // @formatter:on
 
             rest.updateLibManga(track.media_id, jsonObject("data" to data))
@@ -117,7 +131,10 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
             }
     }
 
-    private fun algoliaSearch(key: String, query: String): Observable<List<TrackSearch>> {
+    private fun algoliaSearch(
+        key: String,
+        query: String
+    ): Observable<List<TrackSearch>> {
         val jsonObject = jsonObject("params" to "query=$query$algoliaFilter")
         return algoliaRest
             .getSearchQuery(algoliaAppId, key, jsonObject)
@@ -129,7 +146,10 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
             }
     }
 
-    fun findLibManga(track: Track, userId: String): Observable<Track?> {
+    fun findLibManga(
+        track: Track,
+        userId: String
+    ): Observable<Track?> {
         return rest.findLibManga(track.media_id, userId)
             .map { json ->
                 val data = json["data"].array
@@ -155,7 +175,10 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
             }
     }
 
-    fun login(username: String, password: String): Observable<OAuth> {
+    fun login(
+        username: String,
+        password: String
+    ): Observable<OAuth> {
         return Retrofit.Builder()
             .baseUrl(loginUrl)
             .client(client)
@@ -171,7 +194,6 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
     }
 
     private interface Rest {
-
         @Headers("Content-Type: application/vnd.api+json")
         @POST("library-entries")
         fun addLibManga(
@@ -211,11 +233,14 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
 
     private interface AgoliaSearchRest {
         @POST("query/")
-        fun getSearchQuery(@Header("X-Algolia-Application-Id") appid: String, @Header("X-Algolia-API-Key") key: String, @Body json: JsonObject): Observable<JsonObject>
+        fun getSearchQuery(
+            @Header("X-Algolia-Application-Id") appid: String,
+            @Header("X-Algolia-API-Key") key: String,
+            @Body json: JsonObject
+        ): Observable<JsonObject>
     }
 
     private interface LoginRest {
-
         @FormUrlEncoded
         @POST("oauth/token")
         fun requestAccessToken(
@@ -242,14 +267,16 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
             return baseMangaUrl + remoteId
         }
 
-        fun refreshTokenRequest(token: String) = POST(
-            "${loginUrl}oauth/token",
-            body = FormBody.Builder()
-                .add("grant_type", "refresh_token")
-                .add("client_id", clientId)
-                .add("client_secret", clientSecret)
-                .add("refresh_token", token)
-                .build()
-        )
+        fun refreshTokenRequest(token: String) =
+            POST(
+                "${loginUrl}oauth/token",
+                body =
+                FormBody.Builder()
+                    .add("grant_type", "refresh_token")
+                    .add("client_id", clientId)
+                    .add("client_secret", clientSecret)
+                    .add("refresh_token", token)
+                    .build()
+            )
     }
 }

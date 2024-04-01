@@ -9,7 +9,6 @@ import okio.Buffer
 import org.json.JSONObject
 
 class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor {
-
     override fun intercept(chain: Interceptor.Chain): Response {
         myanimelist.ensureLoggedIn()
 
@@ -20,11 +19,12 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor
     private fun updateRequest(request: Request): Request {
         return request.body?.let {
             val contentType = it.contentType().toString()
-            val updatedBody = when {
-                contentType.contains("x-www-form-urlencoded") -> updateFormBody(it)
-                contentType.contains("json") -> updateJsonBody(it)
-                else -> it
-            }
+            val updatedBody =
+                when {
+                    contentType.contains("x-www-form-urlencoded") -> updateFormBody(it)
+                    contentType.contains("json") -> updateJsonBody(it)
+                    else -> it
+                }
             request.newBuilder().post(updatedBody).build()
         } ?: request
     }
@@ -39,13 +39,16 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor
     private fun updateFormBody(requestBody: RequestBody): RequestBody {
         val formString = bodyToString(requestBody)
 
-        return "$formString${if (formString.isNotEmpty()) "&" else ""}${MyAnimeListApi.CSRF}=${myanimelist.getCSRF()}".toRequestBody(requestBody.contentType())
+        return "$formString${if (formString.isNotEmpty()) "&" else ""}${MyAnimeListApi.CSRF}=${myanimelist.getCSRF()}".toRequestBody(
+            requestBody.contentType()
+        )
     }
 
     private fun updateJsonBody(requestBody: RequestBody): RequestBody {
         val jsonString = bodyToString(requestBody)
-        val newBody = JSONObject(jsonString)
-            .put(MyAnimeListApi.CSRF, myanimelist.getCSRF())
+        val newBody =
+            JSONObject(jsonString)
+                .put(MyAnimeListApi.CSRF, myanimelist.getCSRF())
 
         return newBody.toString().toRequestBody(requestBody.contentType())
     }

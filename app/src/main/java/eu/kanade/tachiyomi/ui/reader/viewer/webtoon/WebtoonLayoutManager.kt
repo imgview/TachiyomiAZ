@@ -13,8 +13,11 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
  * This layout manager uses the same package name as the support library in order to use a package
  * protected method.
  */
-class WebtoonLayoutManager(activity: ReaderActivity, orientation: Int = RecyclerView.VERTICAL, reverse: Boolean = false) : LinearLayoutManager(activity, orientation, reverse) {
-
+class WebtoonLayoutManager(
+    activity: ReaderActivity,
+    orientation: Int = RecyclerView.VERTICAL,
+    reverse: Boolean = false
+) : LinearLayoutManager(activity, orientation, reverse) {
     /**
      * Extra layout space is set to half the screen height.
      */
@@ -42,13 +45,14 @@ class WebtoonLayoutManager(activity: ReaderActivity, orientation: Int = Recycler
         val fromIndex = childCount - 1
         val toIndex = -1
 
-        val child = if (mOrientation == HORIZONTAL) {
-            mHorizontalBoundCheck
-                .findOneViewWithinBoundFlags(fromIndex, toIndex, preferredBoundsFlag, 0)
-        } else {
-            mVerticalBoundCheck
-                .findOneViewWithinBoundFlags(fromIndex, toIndex, preferredBoundsFlag, 0)
-        }
+        val child =
+            if (mOrientation == HORIZONTAL) {
+                mHorizontalBoundCheck
+                    .findOneViewWithinBoundFlags(fromIndex, toIndex, preferredBoundsFlag, 0)
+            } else {
+                mVerticalBoundCheck
+                    .findOneViewWithinBoundFlags(fromIndex, toIndex, preferredBoundsFlag, 0)
+            }
 
         return if (child == null) NO_POSITION else getPosition(child)
     }

@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 
 class ChangeMangaCategoriesDialog<T>(bundle: Bundle? = null) :
     DialogController(bundle) where T : Controller, T : ChangeMangaCategoriesDialog.Listener {
-
     private var mangas = emptyList<Manga>()
 
     private var categories = emptyList<Category>()
@@ -48,6 +47,9 @@ class ChangeMangaCategoriesDialog<T>(bundle: Bundle? = null) :
     }
 
     interface Listener {
-        fun updateCategoriesForMangas(mangas: List<Manga>, categories: List<Category>)
+        fun updateCategoriesForMangas(
+            mangas: List<Manga>,
+            categories: List<Category>
+        )
     }
 }

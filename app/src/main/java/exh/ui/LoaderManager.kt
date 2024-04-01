@@ -1,11 +1,11 @@
 package exh.ui
 
-import java.util.UUID
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.UUID
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 typealias LoadingHandle = String
 
@@ -19,11 +19,12 @@ class LoaderManager(parentContext: CoroutineContext = EmptyCoroutineContext) : C
     var loadingChangeListener: (suspend (newIsLoading: Boolean) -> Unit)? = null
 
     fun openProgressBar(): LoadingHandle {
-        val (handle, shouldUpdateLoadingStatus) = synchronized(this) {
-            val handle = UUID.randomUUID().toString()
-            openLoadingHandles += handle
-            handle to (openLoadingHandles.size == 1)
-        }
+        val (handle, shouldUpdateLoadingStatus) =
+            synchronized(this) {
+                val handle = UUID.randomUUID().toString()
+                openLoadingHandles += handle
+                handle to (openLoadingHandles.size == 1)
+            }
 
         if (shouldUpdateLoadingStatus) {
             launch {
@@ -38,9 +39,10 @@ class LoaderManager(parentContext: CoroutineContext = EmptyCoroutineContext) : C
     fun closeProgressBar(handle: LoadingHandle?) {
         if (handle == null) return
 
-        val shouldUpdateLoadingStatus = synchronized(this) {
-            openLoadingHandles.remove(handle) && openLoadingHandles.isEmpty()
-        }
+        val shouldUpdateLoadingStatus =
+            synchronized(this) {
+                openLoadingHandles.remove(handle) && openLoadingHandles.isEmpty()
+            }
 
         if (shouldUpdateLoadingStatus) {
             launch {

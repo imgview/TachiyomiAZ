@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
  */
 class ExtensionAdapter(val controller: ExtensionController) :
     FlexibleAdapter<IFlexible<*>>(null, controller, true) {
-
     val cardBackground = controller.activity!!.getResourceColor(R.attr.colorSurface)
 
     init {
@@ -26,6 +25,7 @@ class ExtensionAdapter(val controller: ExtensionController) :
 
     interface OnButtonClickListener {
         fun onButtonClick(position: Int)
+
         fun onCancelButtonClick(position: Int)
     }
 }

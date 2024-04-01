@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.util.system.getResourceColor
 
 class SortItem(val name: String, val group: SortGroup) : AbstractSectionableItem<SortItem.Holder, SortGroup>(group) {
-
     override fun getLayoutRes(): Int {
         return R.layout.navigation_view_checkedtext
     }
@@ -22,26 +21,35 @@ class SortItem(val name: String, val group: SortGroup) : AbstractSectionableItem
         return 102
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<androidx.recyclerview.widget.RecyclerView.ViewHolder>>): Holder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<androidx.recyclerview.widget.RecyclerView.ViewHolder>>
+    ): Holder {
         return Holder(view, adapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<androidx.recyclerview.widget.RecyclerView.ViewHolder>>, holder: Holder, position: Int, payloads: List<Any?>?) {
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<androidx.recyclerview.widget.RecyclerView.ViewHolder>>,
+        holder: Holder,
+        position: Int,
+        payloads: List<Any?>?
+    ) {
         val view = holder.text
         view.text = name
         val filter = group.filter
 
         val i = filter.values.indexOf(name)
 
-        fun getIcon() = when (filter.state) {
-            Filter.Sort.Selection(i, false) ->
-                VectorDrawableCompat.create(view.resources, R.drawable.ic_arrow_down_white_32dp, null)
-                    ?.apply { setTint(view.context.getResourceColor(R.attr.colorAccent)) }
-            Filter.Sort.Selection(i, true) ->
-                VectorDrawableCompat.create(view.resources, R.drawable.ic_arrow_up_white_32dp, null)
-                    ?.apply { setTint(view.context.getResourceColor(R.attr.colorAccent)) }
-            else -> ContextCompat.getDrawable(view.context, R.drawable.empty_drawable_32dp)
-        }
+        fun getIcon() =
+            when (filter.state) {
+                Filter.Sort.Selection(i, false) ->
+                    VectorDrawableCompat.create(view.resources, R.drawable.ic_arrow_down_white_32dp, null)
+                        ?.apply { setTint(view.context.getResourceColor(R.attr.colorAccent)) }
+                Filter.Sort.Selection(i, true) ->
+                    VectorDrawableCompat.create(view.resources, R.drawable.ic_arrow_up_white_32dp, null)
+                        ?.apply { setTint(view.context.getResourceColor(R.attr.colorAccent)) }
+                else -> ContextCompat.getDrawable(view.context, R.drawable.empty_drawable_32dp)
+            }
 
         view.setCompoundDrawablesWithIntrinsicBounds(getIcon(), null, null, null)
         holder.itemView.setOnClickListener {

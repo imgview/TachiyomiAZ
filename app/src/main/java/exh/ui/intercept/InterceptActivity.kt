@@ -15,10 +15,10 @@ import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 import exh.GalleryAddEvent
 import exh.GalleryAdder
-import kotlin.concurrent.thread
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.subjects.BehaviorSubject
+import kotlin.concurrent.thread
 
 class InterceptActivity : BaseActivity<EhActivityInterceptBinding>() {
     private var statusSubscription: Subscription? = null
@@ -55,37 +55,38 @@ class InterceptActivity : BaseActivity<EhActivityInterceptBinding>() {
     override fun onStart() {
         super.onStart()
         statusSubscription?.unsubscribe()
-        statusSubscription = status
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                when (it) {
-                    is InterceptResult.Success -> {
-                        binding.interceptProgress.gone()
-                        binding.interceptStatus.text = "Launching app..."
-                        onBackPressed()
-                        startActivity(
-                            Intent(this, MainActivity::class.java)
-                                .setAction(MainActivity.SHORTCUT_MANGA)
-                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                                .putExtra(MangaController.MANGA_EXTRA, it.mangaId)
-                        )
+        statusSubscription =
+            status
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    when (it) {
+                        is InterceptResult.Success -> {
+                            binding.interceptProgress.gone()
+                            binding.interceptStatus.text = "Launching app..."
+                            onBackPressed()
+                            startActivity(
+                                Intent(this, MainActivity::class.java)
+                                    .setAction(MainActivity.SHORTCUT_MANGA)
+                                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                    .putExtra(MangaController.MANGA_EXTRA, it.mangaId)
+                            )
+                        }
+                        is InterceptResult.Failure -> {
+                            binding.interceptProgress.gone()
+                            binding.interceptStatus.text = "Error: ${it.reason}"
+                            MaterialDialog(this)
+                                .title(text = "Error")
+                                .message(text = "Could not open this gallery:\n\n${it.reason}")
+                                .cancelable(true)
+                                .cancelOnTouchOutside(true)
+                                .positiveButton(android.R.string.ok)
+                                .onCancel { onBackPressed() }
+                                .onDismiss { onBackPressed() }
+                                .show()
+                        }
+                        else -> {}
                     }
-                    is InterceptResult.Failure -> {
-                        binding.interceptProgress.gone()
-                        binding.interceptStatus.text = "Error: ${it.reason}"
-                        MaterialDialog(this)
-                            .title(text = "Error")
-                            .message(text = "Could not open this gallery:\n\n${it.reason}")
-                            .cancelable(true)
-                            .cancelOnTouchOutside(true)
-                            .positiveButton(android.R.string.ok)
-                            .onCancel { onBackPressed() }
-                            .onDismiss { onBackPressed() }
-                            .show()
-                    }
-                    else -> {}
                 }
-            }
     }
 
     override fun onStop() {
@@ -109,9 +110,10 @@ class InterceptActivity : BaseActivity<EhActivityInterceptBinding>() {
 
                 status.onNext(
                     when (result) {
-                        is GalleryAddEvent.Success -> result.manga.id?.let {
-                            InterceptResult.Success(it)
-                        } ?: InterceptResult.Failure("Manga ID is null!")
+                        is GalleryAddEvent.Success ->
+                            result.manga.id?.let {
+                                InterceptResult.Success(it)
+                            } ?: InterceptResult.Failure("Manga ID is null!")
                         is GalleryAddEvent.Fail -> InterceptResult.Failure(result.logMessage)
                     }
                 )
@@ -122,7 +124,10 @@ class InterceptActivity : BaseActivity<EhActivityInterceptBinding>() {
 
 sealed class InterceptResult {
     class Idle : InterceptResult()
+
     class Loading : InterceptResult()
+
     data class Success(val mangaId: Long) : InterceptResult()
+
     data class Failure(val reason: String) : InterceptResult()
 }

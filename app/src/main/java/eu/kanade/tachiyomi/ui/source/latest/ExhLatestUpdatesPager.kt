@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.util.lang.awaitSingle
  * ExhLatestUpdatesPager inherited from the Exh Pager.
  */
 class ExhLatestUpdatesPager(val source: CatalogueSource) : Pager() {
-
     override suspend fun requestNextPage() {
         val mangasPage = source.fetchLatestUpdates(currentPage).awaitSingle()
         onPageReceived(mangasPage)

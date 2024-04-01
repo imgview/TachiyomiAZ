@@ -31,7 +31,6 @@ import uy.kohesive.injekt.api.get
 
 class LibraryItem(val manga: LibraryManga, private val libraryDisplayMode: Preference<DisplayMode>) :
     AbstractFlexibleItem<LibraryHolder<*>>(), IFilterable<Pair<String, Boolean>> {
-
     private val sourceManager: SourceManager = Injekt.get()
     private val trackManager: TrackManager = Injekt.get()
     private val db: DatabaseHelper = Injekt.get()
@@ -55,7 +54,10 @@ class LibraryItem(val manga: LibraryManga, private val libraryDisplayMode: Prefe
         }
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): LibraryHolder<*> {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): LibraryHolder<*> {
         return when (libraryDisplayMode.get()) {
             DisplayMode.COMPACT_GRID -> {
                 val parent = adapter.recyclerView as AutofitRecyclerView
@@ -63,9 +65,12 @@ class LibraryItem(val manga: LibraryManga, private val libraryDisplayMode: Prefe
                 val binding = SourceCompactGridItemBinding.bind(view)
                 view.apply {
                     binding.card.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, coverHeight)
-                    binding.gradient.layoutParams = FrameLayout.LayoutParams(
-                        MATCH_PARENT, coverHeight / 2, Gravity.BOTTOM
-                    )
+                    binding.gradient.layoutParams =
+                        FrameLayout.LayoutParams(
+                            MATCH_PARENT,
+                            coverHeight / 2,
+                            Gravity.BOTTOM
+                        )
                 }
                 LibraryGridHolder(view, adapter)
             }
@@ -74,9 +79,11 @@ class LibraryItem(val manga: LibraryManga, private val libraryDisplayMode: Prefe
                 val coverHeight = parent.itemWidth / 3 * 4
                 val binding = SourceComfortableGridItemBinding.bind(view)
                 view.apply {
-                    binding.card.layoutParams = ConstraintLayout.LayoutParams(
-                        MATCH_PARENT, coverHeight
-                    )
+                    binding.card.layoutParams =
+                        ConstraintLayout.LayoutParams(
+                            MATCH_PARENT,
+                            coverHeight
+                        )
                 }
                 LibraryComfortableGridHolder(view, adapter)
             }
@@ -117,7 +124,10 @@ class LibraryItem(val manga: LibraryManga, private val libraryDisplayMode: Prefe
             constraint.second && ehContainsGenre(constraint.first)
     }
 
-    private fun filterTracks(constraint: String, tracks: List<Track>): Boolean {
+    private fun filterTracks(
+        constraint: String,
+        tracks: List<Track>
+    ): Boolean {
         return tracks.any {
             val trackService = trackManager.getService(it.sync_id)
             if (trackService != null) {
@@ -131,20 +141,24 @@ class LibraryItem(val manga: LibraryManga, private val libraryDisplayMode: Prefe
 
     private fun ehContainsGenre(constraint: String): Boolean {
         val genres = manga.getGenres()
-        val raisedTags = if (source?.isNamespaceSource() == true) {
-            manga.getRaisedTags(genres)
-        } else null
+        val raisedTags =
+            if (source?.isNamespaceSource() == true) {
+                manga.getRaisedTags(genres)
+            } else {
+                null
+            }
         return if (constraint.contains(" ") || constraint.contains("\"")) {
             var cleanConstraint = ""
             var ignoreSpace = false
             for (i in constraint.trim().lowercase()) {
                 when (i) {
                     ' ' -> {
-                        cleanConstraint = if (!ignoreSpace) {
-                            "$cleanConstraint,"
-                        } else {
-                            "$cleanConstraint "
-                        }
+                        cleanConstraint =
+                            if (!ignoreSpace) {
+                                "$cleanConstraint,"
+                            } else {
+                                "$cleanConstraint "
+                            }
                     }
                     '"' -> {
                         ignoreSpace = !ignoreSpace
@@ -155,9 +169,14 @@ class LibraryItem(val manga: LibraryManga, private val libraryDisplayMode: Prefe
                 }
             }
             cleanConstraint.split(",").all {
-                if (raisedTags == null) containsGenre(it.trim(), genres) else containsRaisedGenre(
-                    parseTag(it.trim()), raisedTags
-                )
+                if (raisedTags == null) {
+                    containsGenre(it.trim(), genres)
+                } else {
+                    containsRaisedGenre(
+                        parseTag(it.trim()),
+                        raisedTags
+                    )
+                }
             }
         } else if (raisedTags == null) {
             containsGenre(constraint, genres)
@@ -166,10 +185,14 @@ class LibraryItem(val manga: LibraryManga, private val libraryDisplayMode: Prefe
         }
     }
 
-    private fun containsRaisedGenre(tag: RaisedTag, genres: List<RaisedTag>): Boolean {
-        val genre = genres.find {
-            (it.namespace?.lowercase() == tag.namespace?.lowercase() && it.name.lowercase() == tag.name.lowercase())
-        }
+    private fun containsRaisedGenre(
+        tag: RaisedTag,
+        genres: List<RaisedTag>
+    ): Boolean {
+        val genre =
+            genres.find {
+                (it.namespace?.lowercase() == tag.namespace?.lowercase() && it.name.lowercase() == tag.name.lowercase())
+            }
         return if (tag.type == TAG_TYPE_EXCLUDE) {
             genre == null
         } else {
@@ -178,7 +201,10 @@ class LibraryItem(val manga: LibraryManga, private val libraryDisplayMode: Prefe
     }
     // SY <--
 
-    private fun containsGenre(tag: String, genres: List<String>?): Boolean {
+    private fun containsGenre(
+        tag: String,
+        genres: List<String>?
+    ): Boolean {
         return if (tag.startsWith("-")) {
             genres?.find {
                 it.trim().lowercase() == tag.substringAfter("-").lowercase()

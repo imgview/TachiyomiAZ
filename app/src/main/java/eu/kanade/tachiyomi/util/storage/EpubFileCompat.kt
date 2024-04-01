@@ -2,6 +2,8 @@ package eu.kanade.tachiyomi.util.storage
 
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import java.io.Closeable
 import java.io.File
 import java.io.InputStream
@@ -10,8 +12,6 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
 
 /**
  * Wrapper over ZipFile to load files in epub format.
@@ -134,9 +134,10 @@ class EpubFileCompat(private val zip: ZipFile) : Closeable {
      * Returns all the pages from the epub.
      */
     private fun getPagesFromDocument(document: Document): List<String> {
-        val pages = document.select("manifest > item")
-            .filter { "application/xhtml+xml" == it.attr("media-type") }
-            .associateBy { it.attr("id") }
+        val pages =
+            document.select("manifest > item")
+                .filter { "application/xhtml+xml" == it.attr("media-type") }
+                .associateBy { it.attr("id") }
 
         val spine = document.select("spine > itemref").map { it.attr("idref") }
         return spine.mapNotNull { pages[it] }.map { it.attr("href") }
@@ -145,7 +146,10 @@ class EpubFileCompat(private val zip: ZipFile) : Closeable {
     /**
      * Returns all the images contained in every page from the epub.
      */
-    private fun getImagesFromPages(pages: List<String>, packageHref: String): List<String> {
+    private fun getImagesFromPages(
+        pages: List<String>,
+        packageHref: String
+    ): List<String> {
         val result = ArrayList<String>()
         val basePath = getParentDirectory(packageHref)
         pages.forEach { page ->
@@ -181,7 +185,10 @@ class EpubFileCompat(private val zip: ZipFile) : Closeable {
     /**
      * Resolves a zip path from base and relative components and a path separator.
      */
-    private fun resolveZipPath(basePath: String, relativePath: String): String {
+    private fun resolveZipPath(
+        basePath: String,
+        relativePath: String
+    ): String {
         if (relativePath.startsWith(pathSeparator)) {
             // Path is absolute, so return as-is.
             return relativePath

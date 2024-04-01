@@ -9,8 +9,8 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 
 class ExtensionGroupHolder(view: View, adapter: FlexibleAdapter<*>) :
     BaseFlexibleViewHolder(view, adapter) {
-
     private val binding = ExtensionCardHeaderBinding.bind(view)
+
     @SuppressLint("SetTextI18n")
     fun bind(item: ExtensionGroupItem) {
         var text = item.name

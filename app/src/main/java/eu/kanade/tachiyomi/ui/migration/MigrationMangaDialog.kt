@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 
 class MigrationMangaDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
     where T : Controller {
-
     var copy = false
     var mangaSet = 0
     var mangaSkipped = 0
@@ -23,14 +22,19 @@ class MigrationMangaDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val confirmRes = if (copy) R.plurals.copy_manga else R.plurals.migrate_manga
-        val confirmString = applicationContext?.resources?.getQuantityString(
-            confirmRes, mangaSet,
-            mangaSet,
-            (
-                if (mangaSkipped > 0) " " + applicationContext?.getString(R.string.skipping_, mangaSkipped)
-                else ""
-                )
-        ) ?: ""
+        val confirmString =
+            applicationContext?.resources?.getQuantityString(
+                confirmRes,
+                mangaSet,
+                mangaSet,
+                (
+                    if (mangaSkipped > 0) {
+                        " " + applicationContext?.getString(R.string.skipping_, mangaSkipped)
+                    } else {
+                        ""
+                    }
+                    )
+            ) ?: ""
         return MaterialDialog(activity!!)
             .message(text = confirmString)
             .positiveButton(if (copy) R.string.copy else R.string.migrate) {

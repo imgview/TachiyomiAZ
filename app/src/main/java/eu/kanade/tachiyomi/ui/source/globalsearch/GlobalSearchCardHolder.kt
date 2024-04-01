@@ -8,10 +8,11 @@ import eu.kanade.tachiyomi.data.glide.toMangaThumbnail
 import eu.kanade.tachiyomi.databinding.GlobalSearchControllerCardItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.widget.StateImageViewTarget
+
 class GlobalSearchCardHolder(view: View, adapter: GlobalSearchCardAdapter) :
     BaseFlexibleViewHolder(view, adapter) {
-
     private val binding = GlobalSearchControllerCardItemBinding.bind(view)
+
     init {
         // Call onMangaClickListener when item is pressed.
         itemView.setOnClickListener {

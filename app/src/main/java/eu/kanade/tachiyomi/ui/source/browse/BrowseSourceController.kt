@@ -75,7 +75,6 @@ open class BrowseSourceController(bundle: Bundle) :
     FlexibleAdapter.OnItemLongClickListener,
     FlexibleAdapter.EndlessScrollListener,
     ChangeMangaCategoriesDialog.Listener {
-
     constructor(
         source: CatalogueSource,
         searchQuery: String? = null,
@@ -151,7 +150,10 @@ open class BrowseSourceController(bundle: Bundle) :
         )
     }
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = SourceControllerBinding.inflate(inflater)
         return binding.root
     }
@@ -177,7 +179,9 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     override fun createSecondaryDrawer(drawer: DrawerLayout): ViewGroup? {
-        if (mode == Mode.RECOMMENDS) { return null }
+        if (mode == Mode.RECOMMENDS) {
+            return null
+        }
         // Inflate and prepare drawer
         val navView = drawer.inflate(R.layout.source_drawer) as SourceFilterSheet // TODO whatever this is
         this.navView = navView
@@ -197,11 +201,13 @@ open class BrowseSourceController(bundle: Bundle) :
                     if (searchName.isNotBlank() &&
                         oldSavedSearches.size < SourceFilterSheet.MAX_SAVED_SEARCHES
                     ) {
-                        val newSearches = oldSavedSearches + EXHSavedSearch(
-                            searchName.toString().trim(),
-                            presenter.query,
-                            presenter.sourceFilters
-                        )
+                        val newSearches =
+                            oldSavedSearches +
+                                EXHSavedSearch(
+                                    searchName.toString().trim(),
+                                    presenter.query,
+                                    presenter.sourceFilters
+                                )
                         presenter.saveSearches(newSearches)
                         navView.setSavedSearches(newSearches)
                     }
@@ -259,9 +265,10 @@ open class BrowseSourceController(bundle: Bundle) :
                 .message(text = "Are you sure you wish to delete your saved search query: '${search.name}'?")
                 .positiveButton(R.string.action_cancel)
                 .negativeButton(text = "Confirm") {
-                    val newSearches = savedSearches.filterIndexed { index, _ ->
-                        index != indexToDelete
-                    }
+                    val newSearches =
+                        savedSearches.filterIndexed { index, _ ->
+                            index != indexToDelete
+                        }
                     presenter.saveSearches(newSearches)
                     navView.setSavedSearches(newSearches)
                 }
@@ -304,31 +311,34 @@ open class BrowseSourceController(bundle: Bundle) :
             binding.catalogueView.removeView(oldRecycler)
         }
 
-        val recycler = if (preferences.catalogueDisplayMode().get() == DisplayMode.LIST) {
-            RecyclerView(view.context).apply {
-                id = R.id.recycler
-                layoutManager = LinearLayoutManager(context)
-                layoutParams = RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-                addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
-            }
-        } else {
-            (binding.catalogueView.inflate(R.layout.source_recycler_autofit) as AutofitRecyclerView).apply {
-                numColumnsJob = getColumnsPreferenceForCurrentOrientation().asImmediateFlow { spanCount = it }
-                    .drop(1)
-                    // Set again the adapter to recalculate the covers height
-                    .onEach { adapter = this@BrowseSourceController.adapter }
-                    .launchIn(scope)
+        val recycler =
+            if (preferences.catalogueDisplayMode().get() == DisplayMode.LIST) {
+                RecyclerView(view.context).apply {
+                    id = R.id.recycler
+                    layoutManager = LinearLayoutManager(context)
+                    layoutParams = RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                    addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+                }
+            } else {
+                (binding.catalogueView.inflate(R.layout.source_recycler_autofit) as AutofitRecyclerView).apply {
+                    numColumnsJob =
+                        getColumnsPreferenceForCurrentOrientation().asImmediateFlow { spanCount = it }
+                            .drop(1)
+                            // Set again the adapter to recalculate the covers height
+                            .onEach { adapter = this@BrowseSourceController.adapter }
+                            .launchIn(scope)
 
-                (layoutManager as GridLayoutManager).spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                    override fun getSpanSize(position: Int): Int {
-                        return when (adapter?.getItemViewType(position)) {
-                            R.layout.source_compact_grid_item, R.layout.source_comfortable_grid_item, null -> 1
-                            else -> spanCount
+                    (layoutManager as GridLayoutManager).spanSizeLookup =
+                        object : GridLayoutManager.SpanSizeLookup() {
+                            override fun getSpanSize(position: Int): Int {
+                                return when (adapter?.getItemViewType(position)) {
+                                    R.layout.source_compact_grid_item, R.layout.source_comfortable_grid_item, null -> 1
+                                    else -> spanCount
+                                }
+                            }
                         }
-                    }
                 }
             }
-        }
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
 
@@ -340,7 +350,10 @@ open class BrowseSourceController(bundle: Bundle) :
         this.recycler = recycler
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
         inflater.inflate(R.menu.source_browse, menu)
 
         if (mode == Mode.RECOMMENDS) {
@@ -387,11 +400,12 @@ open class BrowseSourceController(bundle: Bundle) :
         }
 
         // Show next display mode
-        val displayItem = when (preferences.catalogueDisplayMode().get()) {
-            DisplayMode.COMPACT_GRID -> R.id.action_compact_grid
-            DisplayMode.COMFORTABLE_GRID -> R.id.action_comfortable_grid
-            DisplayMode.LIST -> R.id.action_list
-        }
+        val displayItem =
+            when (preferences.catalogueDisplayMode().get()) {
+                DisplayMode.COMPACT_GRID -> R.id.action_compact_grid
+                DisplayMode.COMFORTABLE_GRID -> R.id.action_comfortable_grid
+                DisplayMode.LIST -> R.id.action_list
+            }
         menu.findItem(displayItem).isChecked = true
     }
 
@@ -453,7 +467,10 @@ open class BrowseSourceController(bundle: Bundle) :
      * @param page the current page.
      * @param mangas the list of manga of the page.
      */
-    fun onAddPage(page: Int, mangas: List<SourceItem>) {
+    fun onAddPage(
+        page: Int,
+        mangas: List<SourceItem>
+    ) {
         val adapter = adapter ?: return
         hideProgressBar()
         if (page == 1) {
@@ -488,15 +505,16 @@ open class BrowseSourceController(bundle: Bundle) :
         snack?.dismiss()
 
         val message = getErrorMessage(error)
-        val retryAction = View.OnClickListener {
-            // If not the first page, show bottom progress bar.
-            if (adapter.mainItemCount > 0 && progressItem != null) {
-                adapter.addScrollableFooterWithDelay(progressItem!!, 0, true)
-            } else {
-                showProgressBar()
+        val retryAction =
+            View.OnClickListener {
+                // If not the first page, show bottom progress bar.
+                if (adapter.mainItemCount > 0 && progressItem != null) {
+                    adapter.addScrollableFooterWithDelay(progressItem!!, 0, true)
+                } else {
+                    showProgressBar()
+                }
+                presenter.requestNext()
             }
-            presenter.requestNext()
-        }
 
         if (adapter.isEmpty) {
             Log.d("Adapter", "empty")
@@ -514,9 +532,10 @@ open class BrowseSourceController(bundle: Bundle) :
 
             binding.emptyView.show(message, actions)
         } else {
-            snack = binding.catalogueView.snack(message, Snackbar.LENGTH_INDEFINITE) {
-                setAction(R.string.action_retry, retryAction)
-            }
+            snack =
+                binding.catalogueView.snack(message, Snackbar.LENGTH_INDEFINITE) {
+                    setAction(R.string.action_retry, retryAction)
+                }
         }
     }
 
@@ -527,7 +546,9 @@ open class BrowseSourceController(bundle: Bundle) :
 
         return when {
             error.message == null -> ""
-            error.message!!.startsWith("HTTP error") -> "${error.message}: ${binding.catalogueView.context.getString(R.string.http_error_hint)}"
+            error.message!!.startsWith(
+                "HTTP error"
+            ) -> "${error.message}: ${binding.catalogueView.context.getString(R.string.http_error_hint)}"
             else -> error.message!!
         }
     }
@@ -544,7 +565,10 @@ open class BrowseSourceController(bundle: Bundle) :
     /**
      * Called by the adapter when scrolled near the bottom.
      */
-    override fun onLoadMore(lastPosition: Int, currentPage: Int) {
+    override fun onLoadMore(
+        lastPosition: Int,
+        currentPage: Int
+    ) {
         if (presenter.hasNextPage()) {
             presenter.requestNext()
         } else {
@@ -580,9 +604,10 @@ open class BrowseSourceController(bundle: Bundle) :
 
         // Initialize mangas if not on a metered connection
         if (!view.context.connectivityManager.isActiveNetworkMetered) {
-            val mangas = (0 until adapter.itemCount).mapNotNull {
-                (adapter.getItem(it) as? SourceItem)?.manga
-            }
+            val mangas =
+                (0 until adapter.itemCount).mapNotNull {
+                    (adapter.getItem(it) as? SourceItem)?.manga
+                }
             presenter.initializeMangas(mangas)
         }
     }
@@ -643,17 +668,21 @@ open class BrowseSourceController(bundle: Bundle) :
      * @param position the position of the element clicked.
      * @return true if the item should be selected, false otherwise.
      */
-    override fun onItemClick(view: View, position: Int): Boolean {
+    override fun onItemClick(
+        view: View,
+        position: Int
+    ): Boolean {
         val item = adapter?.getItem(position) as? SourceItem ?: return false
 
         when (mode) {
-            Mode.CATALOGUE -> router.pushController(
-                MangaController(
-                    item.manga,
-                    true,
-                    args.getParcelable(SMART_SEARCH_CONFIG_KEY)
-                ).withFadeTransaction()
-            )
+            Mode.CATALOGUE ->
+                router.pushController(
+                    MangaController(
+                        item.manga,
+                        true,
+                        args.getParcelable(SMART_SEARCH_CONFIG_KEY)
+                    ).withFadeTransaction()
+                )
             Mode.RECOMMENDS -> openSmartSearch(item.manga.title)
         }
         return false
@@ -672,6 +701,7 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     // AZ <--
+
     /**
      * Called when a manga is long clicked.
      *
@@ -682,7 +712,9 @@ open class BrowseSourceController(bundle: Bundle) :
      * @param position the position of the element clicked.
      */
     override fun onItemLongClick(position: Int) {
-        if (mode == Mode.RECOMMENDS) { return }
+        if (mode == Mode.RECOMMENDS) {
+            return
+        }
         val activity = activity ?: return
         val manga = (adapter?.getItem(position) as? SourceItem?)?.manga ?: return
 
@@ -728,9 +760,10 @@ open class BrowseSourceController(bundle: Bundle) :
                 // Choose a category
                 else -> {
                     val ids = presenter.getMangaCategoryIds(manga)
-                    val preselected = ids.mapNotNull { id ->
-                        categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
-                    }.toTypedArray()
+                    val preselected =
+                        ids.mapNotNull { id ->
+                            categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
+                        }.toTypedArray()
 
                     ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected)
                         .showDialog(router)
@@ -745,7 +778,10 @@ open class BrowseSourceController(bundle: Bundle) :
      * @param mangas The list of manga to move to categories.
      * @param categories The list of categories where manga will be placed.
      */
-    override fun updateCategoriesForMangas(mangas: List<Manga>, categories: List<Category>) {
+    override fun updateCategoriesForMangas(
+        mangas: List<Manga>,
+        categories: List<Category>
+    ) {
         val manga = mangas.firstOrNull() ?: return
 
         presenter.changeMangaFavorite(manga)

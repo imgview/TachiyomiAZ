@@ -25,7 +25,6 @@ class TrackController :
     SetTrackChaptersDialog.Listener,
     SetTrackScoreDialog.Listener,
     SetTrackReadingDatesDialog.Listener {
-
     private var adapter: TrackAdapter? = null
 
     init {
@@ -38,7 +37,10 @@ class TrackController :
         return TrackPresenter((parentController as MangaController).manga!!)
     }
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = TrackControllerBinding.inflate(inflater)
         return binding.root
     }
@@ -146,22 +148,35 @@ class TrackController :
         SetTrackReadingDatesDialog(this, SetTrackReadingDatesDialog.ReadingDate.Finish, item).showDialog(router)
     }
 
-    override fun setStatus(item: TrackItem, selection: Int) {
+    override fun setStatus(
+        item: TrackItem,
+        selection: Int
+    ) {
         presenter.setStatus(item, selection)
         binding.swipeRefresh.isRefreshing = true
     }
 
-    override fun setScore(item: TrackItem, score: Int) {
+    override fun setScore(
+        item: TrackItem,
+        score: Int
+    ) {
         presenter.setScore(item, score)
         binding.swipeRefresh.isRefreshing = true
     }
 
-    override fun setChaptersRead(item: TrackItem, chaptersRead: Int) {
+    override fun setChaptersRead(
+        item: TrackItem,
+        chaptersRead: Int
+    ) {
         presenter.setLastChapterRead(item, chaptersRead)
         binding.swipeRefresh.isRefreshing = true
     }
 
-    override fun setReadingDate(item: TrackItem, type: SetTrackReadingDatesDialog.ReadingDate, date: Long) {
+    override fun setReadingDate(
+        item: TrackItem,
+        type: SetTrackReadingDatesDialog.ReadingDate,
+        date: Long
+    ) {
         when (type) {
             SetTrackReadingDatesDialog.ReadingDate.Start -> presenter.setStartDate(item, date)
             SetTrackReadingDatesDialog.ReadingDate.Finish -> presenter.setFinishDate(item, date)

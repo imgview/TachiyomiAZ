@@ -20,12 +20,14 @@ import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.widget.SimpleNavigationView
 import exh.savedsearches.EXHSavedSearch
 
-class SourceFilterSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+class SourceFilterSheet
+@JvmOverloads
+constructor(context: Context, attrs: AttributeSet? = null) :
     SimpleNavigationView(context, attrs) {
-
-    val adapter: FlexibleAdapter<IFlexible<*>> = FlexibleAdapter<IFlexible<*>>(null)
-        .setDisplayHeadersAtStartUp(true)
-        .setStickyHeaders(true)
+    val adapter: FlexibleAdapter<IFlexible<*>> =
+        FlexibleAdapter<IFlexible<*>>(null)
+            .setDisplayHeadersAtStartUp(true)
+            .setStickyHeaders(true)
 
     var onSearchClicked = {}
 
@@ -47,6 +49,7 @@ class SourceFilterSheet @JvmOverloads constructor(context: Context, attrs: Attri
     private val searchBtn: Button
     private val resetBtn: Button
     private val savedSearches: LinearLayout
+
     init {
         recycler.adapter = adapter
         recycler.setHasFixedSize(true)
@@ -87,7 +90,10 @@ class SourceFilterSheet @JvmOverloads constructor(context: Context, attrs: Attri
             restoreBtn.setBackgroundResource(outValue.resourceId)
             restoreBtn.setPadding(8.dpToPx, 8.dpToPx, 8.dpToPx, 8.dpToPx)
             restoreBtn.setOnClickListener { onSavedSearchClicked(index) }
-            restoreBtn.setOnLongClickListener { onSavedSearchDeleteClicked(index, search.name); true }
+            restoreBtn.setOnLongClickListener {
+                onSavedSearchDeleteClicked(index, search.name)
+                true
+            }
             savedSearches.addView(restoreBtn)
         }
     }

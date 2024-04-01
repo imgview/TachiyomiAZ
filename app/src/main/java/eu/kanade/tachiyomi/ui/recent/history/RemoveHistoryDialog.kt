@@ -12,8 +12,7 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.widget.DialogCheckboxView
 
 class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
-        where T : Controller, T : RemoveHistoryDialog.Listener {
-
+    where T : Controller, T : RemoveHistoryDialog.Listener {
     private var manga: Manga? = null
 
     private var history: History? = null
@@ -28,10 +27,11 @@ class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
         val activity = activity!!
 
         // Create custom view
-        val dialogCheckboxView = DialogCheckboxView(activity).apply {
-            setDescription(R.string.dialog_with_checkbox_remove_description)
-            setOptionDescription(R.string.dialog_with_checkbox_reset)
-        }
+        val dialogCheckboxView =
+            DialogCheckboxView(activity).apply {
+                setDescription(R.string.dialog_with_checkbox_remove_description)
+                setOptionDescription(R.string.dialog_with_checkbox_reset)
+            }
 
         return MaterialDialog(activity)
             .title(R.string.action_remove)
@@ -49,6 +49,10 @@ class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
     }
 
     interface Listener {
-        fun removeHistory(manga: Manga, history: History, all: Boolean)
+        fun removeHistory(
+            manga: Manga,
+            history: History,
+            all: Boolean
+        )
     }
 }

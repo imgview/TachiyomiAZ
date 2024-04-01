@@ -15,10 +15,10 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.isLocal
-import java.io.InputStream
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.io.InputStream
 
 /**
  * A class for loading a cover associated with a [Manga] that can be present in our own cache.
@@ -32,7 +32,6 @@ import uy.kohesive.injekt.injectLazy
  * @param context the application context.
  */
 class MangaThumbnailModelLoader : ModelLoader<MangaThumbnail, InputStream> {
-
     /**
      * Cover cache where persistent covers are stored.
      */
@@ -57,7 +56,6 @@ class MangaThumbnailModelLoader : ModelLoader<MangaThumbnail, InputStream> {
      * Factory class for creating [MangaThumbnailModelLoader] instances.
      */
     class Factory : ModelLoaderFactory<MangaThumbnail, InputStream> {
-
         override fun build(multiFactory: MultiModelLoaderFactory): ModelLoader<MangaThumbnail, InputStream> {
             return MangaThumbnailModelLoader()
         }
@@ -119,7 +117,10 @@ class MangaThumbnailModelLoader : ModelLoader<MangaThumbnail, InputStream> {
      *
      * @param manga the model.
      */
-    private fun getHeaders(manga: Manga, source: HttpSource?): Headers {
+    private fun getHeaders(
+        manga: Manga,
+        source: HttpSource?
+    ): Headers {
         if (source == null) return LazyHeaders.DEFAULT
 
         return cachedHeaders.getOrPut(manga.source) {
@@ -133,7 +134,10 @@ class MangaThumbnailModelLoader : ModelLoader<MangaThumbnail, InputStream> {
         }
     }
 
-    private inline fun <K, V> LruCache<K, V>.getOrPut(key: K, defaultValue: () -> V): V {
+    private inline fun <K, V> LruCache<K, V>.getOrPut(
+        key: K,
+        defaultValue: () -> V
+    ): V {
         val value = get(key)
         return if (value == null) {
             val answer = defaultValue()

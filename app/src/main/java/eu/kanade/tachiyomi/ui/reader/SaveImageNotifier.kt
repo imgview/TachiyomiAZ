@@ -17,7 +17,6 @@ import java.io.File
  * Class used to show BigPictureStyle notifications
  */
 class SaveImageNotifier(private val context: Context) {
-
     /**
      * Notification builder.
      */
@@ -36,13 +35,14 @@ class SaveImageNotifier(private val context: Context) {
      * @param file image file containing downloaded page image.
      */
     fun onComplete(file: File) {
-        val bitmap = GlideApp.with(context)
-            .asBitmap()
-            .load(file)
-            .diskCacheStrategy(DiskCacheStrategy.NONE)
-            .skipMemoryCache(true)
-            .submit(720, 1280)
-            .get()
+        val bitmap =
+            GlideApp.with(context)
+                .asBitmap()
+                .load(file)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .submit(720, 1280)
+                .get()
 
         if (bitmap != null) {
             showCompleteNotification(file, bitmap)
@@ -51,7 +51,10 @@ class SaveImageNotifier(private val context: Context) {
         }
     }
 
-    private fun showCompleteNotification(file: File, image: Bitmap) {
+    private fun showCompleteNotification(
+        file: File,
+        image: Bitmap
+    ) {
         with(notificationBuilder) {
             setContentTitle(context.getString(R.string.picture_saved))
             setSmallIcon(R.drawable.ic_photo_24dp)

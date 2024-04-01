@@ -18,7 +18,10 @@ object LockActivityDelegate {
 
     private val uiScope = CoroutineScope(Dispatchers.Main)
 
-    fun doLock(router: Router, animate: Boolean = false) {
+    fun doLock(
+        router: Router,
+        animate: Boolean = false
+    ) {
         router.pushController(
             RouterTransaction.with(LockController())
                 .popChangeHandler(LockChangeHandler(animate))
@@ -37,7 +40,10 @@ object LockActivityDelegate {
             .launchIn(uiScope)
     }
 
-    fun onResume(activity: FragmentActivity, router: Router) {
+    fun onResume(
+        activity: FragmentActivity,
+        router: Router
+    ) {
         if (lockEnabled() && !isAppLocked(router) && willLock && !preferences.eh_lockManually().get()) {
             doLock(router)
             willLock = false

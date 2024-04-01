@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.data.database.models
 import eu.kanade.tachiyomi.source.model.UpdateStrategy
 
 open class MangaImpl : Manga {
-
     override var id: Long? = null
 
     override var source: Long = -1

@@ -5,7 +5,6 @@ import okhttp3.Interceptor
 import okhttp3.Response
 
 class ShikimoriInterceptor(val shikimori: Shikimori, val gson: Gson) : Interceptor {
-
     /**
      * OAuth object used for authenticated requests.
      */
@@ -28,10 +27,11 @@ class ShikimoriInterceptor(val shikimori: Shikimori, val gson: Gson) : Intercept
             }
         }
         // Add the authorization header to the original request.
-        val authRequest = originalRequest.newBuilder()
-            .addHeader("Authorization", "Bearer ${oauth!!.access_token}")
-            .header("User-Agent", "Tachiyomi")
-            .build()
+        val authRequest =
+            originalRequest.newBuilder()
+                .addHeader("Authorization", "Bearer ${oauth!!.access_token}")
+                .header("User-Agent", "Tachiyomi")
+                .build()
 
         return chain.proceed(authRequest)
     }

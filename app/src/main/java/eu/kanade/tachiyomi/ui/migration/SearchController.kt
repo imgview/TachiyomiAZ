@@ -29,7 +29,6 @@ class SearchController(
     private var manga: Manga? = null,
     private var sources: List<CatalogueSource>? = null
 ) : GlobalSearchController(manga?.title) {
-
     private var newManga: Manga? = null
     private var progress = 1
     var totalProgress = 0
@@ -110,7 +109,9 @@ class SearchController(
             searchController.progress = progress + 1
             searchController.totalProgress = totalProgress
             router.replaceTopController(searchController.withFadeTransaction())
-        } else router.popController(this)
+        } else {
+            router.popController(this)
+        }
     }
 
     override fun onMangaClick(manga: Manga) {
@@ -134,7 +135,6 @@ class SearchController(
     }
 
     class MigrationDialog : DialogController() {
-
         private val preferences: PreferencesHelper by injectLazy()
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
@@ -145,7 +145,8 @@ class SearchController(
             return MaterialDialog(activity!!)
                 .message(R.string.data_to_include_in_migration)
                 .listItemsMultiChoice(
-                    items = MigrationFlags.titles.map
+                    items =
+                    MigrationFlags.titles.map
                     { resources?.getString(it) as CharSequence },
                     initialSelection = preselected.toIntArray()
                 ) { _, positions, _ ->
@@ -167,7 +168,10 @@ class SearchController(
      * @param menu menu containing options.
      * @param inflater used to load the menu xml.
      */
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
         // Inflate menu.
         inflater.inflate(R.menu.source_browse, menu)
 
@@ -175,17 +179,19 @@ class SearchController(
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
 
-        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
-            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
-                searchView.onActionViewExpanded() // Required to show the query in the view
-                searchView.setQuery(presenter.query, false)
-                return true
-            }
+        searchItem.setOnActionExpandListener(
+            object : MenuItem.OnActionExpandListener {
+                override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                    searchView.onActionViewExpanded() // Required to show the query in the view
+                    searchView.setQuery(presenter.query, false)
+                    return true
+                }
 
-            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
-                return true
+                override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                    return true
+                }
             }
-        })
+        )
 
         searchView.queryTextEvents()
             .filter { it is QueryTextEvent.QuerySubmitted }

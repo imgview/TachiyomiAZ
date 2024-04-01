@@ -22,12 +22,11 @@ import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.notification
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
+import uy.kohesive.injekt.injectLazy
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
-import uy.kohesive.injekt.injectLazy
 
 class LibraryUpdateNotifier(private val context: Context) {
-
     private val preferences: PreferencesHelper by injectLazy()
 
     /**
@@ -65,12 +64,17 @@ class LibraryUpdateNotifier(private val context: Context) {
      * @param current the current progress.
      * @param total the total progress.
      */
-    fun showProgressNotification(manga: Manga, current: Int, total: Int) {
-        val title = if (preferences.hideNotificationContent()) {
-            context.getString(R.string.notification_check_updates)
-        } else {
-            manga.title
-        }
+    fun showProgressNotification(
+        manga: Manga,
+        current: Int,
+        total: Int
+    ) {
+        val title =
+            if (preferences.hideNotificationContent()) {
+                context.getString(R.string.notification_check_updates)
+            } else {
+                manga.title
+            }
 
         context.notificationManager.notify(
             Notifications.ID_LIBRARY_PROGRESS,
@@ -87,7 +91,10 @@ class LibraryUpdateNotifier(private val context: Context) {
      * @param errors List of entry titles that failed to update.
      * @param uri Uri for error log file containing all titles that failed.
      */
-    fun showUpdateErrorNotification(errors: List<String>, uri: Uri) {
+    fun showUpdateErrorNotification(
+        errors: List<String>,
+        uri: Uri
+    ) {
         if (errors.isEmpty()) {
             return
         }
@@ -133,7 +140,9 @@ class LibraryUpdateNotifier(private val context: Context) {
                     if (updates.size == 1 && !preferences.hideNotificationContent()) {
                         setContentText(updates.first().first.title.chop(NOTIF_TITLE_MAX_LEN))
                     } else {
-                        setContentText(context.resources.getQuantityString(R.plurals.notification_new_chapters_summary, updates.size, updates.size))
+                        setContentText(
+                            context.resources.getQuantityString(R.plurals.notification_new_chapters_summary, updates.size, updates.size)
+                        )
 
                         if (!preferences.hideNotificationContent()) {
                             setStyle(
@@ -169,7 +178,10 @@ class LibraryUpdateNotifier(private val context: Context) {
         }
     }
 
-    private fun createNewChaptersNotification(manga: Manga, chapters: Array<Chapter>): Notification {
+    private fun createNewChaptersNotification(
+        manga: Manga,
+        chapters: Array<Chapter>
+    ): Notification {
         return context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
             setContentTitle(manga.title)
 
@@ -194,18 +206,23 @@ class LibraryUpdateNotifier(private val context: Context) {
 
             // Mark chapters as read action
             addAction(
-                R.drawable.ic_glasses_black_24dp, context.getString(R.string.action_mark_as_read),
+                R.drawable.ic_glasses_black_24dp,
+                context.getString(R.string.action_mark_as_read),
                 NotificationReceiver.markAsReadPendingBroadcast(
                     context,
-                    manga, chapters, Notifications.ID_NEW_CHAPTERS
+                    manga,
+                    chapters,
+                    Notifications.ID_NEW_CHAPTERS
                 )
             )
             // View chapters action
             addAction(
-                R.drawable.ic_book_24dp, context.getString(R.string.action_view_chapters),
+                R.drawable.ic_book_24dp,
+                context.getString(R.string.action_view_chapters),
                 NotificationReceiver.openChapterPendingActivity(
                     context,
-                    manga, Notifications.ID_NEW_CHAPTERS
+                    manga,
+                    Notifications.ID_NEW_CHAPTERS
                 )
             )
         }
@@ -238,17 +255,19 @@ class LibraryUpdateNotifier(private val context: Context) {
     }
 
     private fun getNewChaptersDescription(chapters: Array<Chapter>): String {
-        val formatter = DecimalFormat(
-            "#.###",
-            DecimalFormatSymbols()
-                .apply { decimalSeparator = '.' }
-        )
+        val formatter =
+            DecimalFormat(
+                "#.###",
+                DecimalFormatSymbols()
+                    .apply { decimalSeparator = '.' }
+            )
 
-        val displayableChapterNumbers = chapters
-            .filter { it.isRecognizedNumber }
-            .sortedBy { it.chapter_number }
-            .map { formatter.format(it.chapter_number) }
-            .toSet()
+        val displayableChapterNumbers =
+            chapters
+                .filter { it.isRecognizedNumber }
+                .sortedBy { it.chapter_number }
+                .map { formatter.format(it.chapter_number) }
+                .toSet()
 
         return when (displayableChapterNumbers.size) {
             // No sensible chapter numbers to show (i.e. no chapters have parsed chapter number)
@@ -264,7 +283,11 @@ class LibraryUpdateNotifier(private val context: Context) {
                     context.resources.getString(R.string.notification_chapters_single, displayableChapterNumbers.first())
                 } else {
                     // "Chapter 2.5 and 10 more"
-                    context.resources.getString(R.string.notification_chapters_single_and_more, displayableChapterNumbers.first(), remaining)
+                    context.resources.getString(
+                        R.string.notification_chapters_single_and_more,
+                        displayableChapterNumbers.first(),
+                        remaining
+                    )
                 }
             }
             // Everything else (i.e. multiple parsed chapter numbers)
@@ -274,7 +297,12 @@ class LibraryUpdateNotifier(private val context: Context) {
                     // "Chapters 1, 2.5, 3, 4, 5 and 10 more"
                     val remaining = displayableChapterNumbers.size - NOTIF_MAX_CHAPTERS
                     val joinedChapterNumbers = displayableChapterNumbers.take(NOTIF_MAX_CHAPTERS).joinToString(", ")
-                    context.resources.getQuantityString(R.plurals.notification_chapters_multiple_and_more, remaining, joinedChapterNumbers, remaining)
+                    context.resources.getQuantityString(
+                        R.plurals.notification_chapters_multiple_and_more,
+                        remaining,
+                        joinedChapterNumbers,
+                        remaining
+                    )
                 } else {
                     // "Chapters 1, 2.5, 3"
                     context.resources.getString(R.string.notification_chapters_multiple, displayableChapterNumbers.joinToString(", "))
@@ -287,10 +315,11 @@ class LibraryUpdateNotifier(private val context: Context) {
      * Returns an intent to open the main activity.
      */
     private fun getNotificationIntent(): PendingIntent {
-        val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            action = MainActivity.SHORTCUT_RECENTLY_UPDATED
-        }
+        val intent =
+            Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                action = MainActivity.SHORTCUT_RECENTLY_UPDATED
+            }
         return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 

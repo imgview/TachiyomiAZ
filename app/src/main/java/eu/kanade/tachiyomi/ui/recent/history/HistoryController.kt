@@ -42,7 +42,6 @@ class HistoryController :
     HistoryAdapter.OnResumeClickListener,
     HistoryAdapter.OnItemClickListener,
     RemoveHistoryDialog.Listener {
-
     init {
         setHasOptionsMenu(true)
     }
@@ -67,7 +66,10 @@ class HistoryController :
         return HistoryPresenter()
     }
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = HistoryControllerBinding.inflate(inflater)
         return binding.root
     }
@@ -97,7 +99,10 @@ class HistoryController :
      *
      * @param mangaHistory list of manga history
      */
-    fun onNextManga(mangaHistory: List<HistoryItem>, cleanBatch: Boolean = false) {
+    fun onNextManga(
+        mangaHistory: List<HistoryItem>,
+        cleanBatch: Boolean = false
+    ) {
         if (adapter?.itemCount ?: 0 == 0 || cleanBatch) {
             resetProgressItem()
         }
@@ -130,7 +135,10 @@ class HistoryController :
         adapter?.setEndlessScrollListener(this, progressItem!!)
     }
 
-    override fun onLoadMore(lastPosition: Int, currentPage: Int) {
+    override fun onLoadMore(
+        lastPosition: Int,
+        currentPage: Int
+    ) {
         val view = view ?: return
         if (BackupRestoreService.isRunning(view.context.applicationContext)) {
             onAddPageError(Throwable())
@@ -165,7 +173,11 @@ class HistoryController :
         router.pushController(MangaController(manga).withFadeTransaction())
     }
 
-    override fun removeHistory(manga: Manga, history: History, all: Boolean) {
+    override fun removeHistory(
+        manga: Manga,
+        history: History,
+        all: Boolean
+    ) {
         if (all) {
             // Reset last read of chapter to 0L
             presenter.removeAllFromHistory(manga.id!!)
@@ -184,7 +196,10 @@ class HistoryController :
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
         inflater.inflate(R.menu.recently_read, menu)
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
@@ -203,15 +218,17 @@ class HistoryController :
             .launchIn(scope)
 
         // Fixes problem with the overflow icon showing up in lieu of search
-        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
-            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
-                return true
-            }
+        searchItem.setOnActionExpandListener(
+            object : MenuItem.OnActionExpandListener {
+                override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                    return true
+                }
 
-            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
-                activity?.invalidateOptionsMenu()
-                return true
+                override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                    activity?.invalidateOptionsMenu()
+                    return true
+                }
             }
-        })
+        )
     }
 }

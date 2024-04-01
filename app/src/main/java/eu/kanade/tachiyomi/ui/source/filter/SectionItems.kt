@@ -4,7 +4,6 @@ import eu.davidea.flexibleadapter.items.ISectionable
 import eu.kanade.tachiyomi.source.model.Filter
 
 class TriStateSectionItem(filter: Filter.TriState) : TriStateItem(filter), ISectionable<TriStateItem.Holder, GroupItem> {
-
     private var head: GroupItem? = null
 
     override fun getHeader(): GroupItem? = head
@@ -28,7 +27,6 @@ class TriStateSectionItem(filter: Filter.TriState) : TriStateItem(filter), ISect
 }
 
 class TextSectionItem(filter: Filter.Text) : TextItem(filter), ISectionable<TextItem.Holder, GroupItem> {
-
     private var head: GroupItem? = null
 
     override fun getHeader(): GroupItem? = head
@@ -52,7 +50,6 @@ class TextSectionItem(filter: Filter.Text) : TextItem(filter), ISectionable<Text
 }
 
 class CheckboxSectionItem(filter: Filter.CheckBox) : CheckboxItem(filter), ISectionable<CheckboxItem.Holder, GroupItem> {
-
     private var head: GroupItem? = null
 
     override fun getHeader(): GroupItem? = head
@@ -76,7 +73,6 @@ class CheckboxSectionItem(filter: Filter.CheckBox) : CheckboxItem(filter), ISect
 }
 
 class SelectSectionItem(filter: Filter.Select<*>) : SelectItem(filter), ISectionable<SelectItem.Holder, GroupItem> {
-
     private var head: GroupItem? = null
 
     override fun getHeader(): GroupItem? = head

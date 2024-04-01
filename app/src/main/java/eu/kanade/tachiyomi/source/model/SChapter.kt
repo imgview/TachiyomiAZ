@@ -1,10 +1,9 @@
 package eu.kanade.tachiyomi.source.model
 
-import java.io.Serializable
 import tachiyomi.source.model.ChapterInfo
+import java.io.Serializable
 
 interface SChapter : Serializable {
-
     var url: String
 
     var name: String

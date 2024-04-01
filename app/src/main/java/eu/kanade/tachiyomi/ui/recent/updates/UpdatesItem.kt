@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.ui.recent.DateSectionItem
 
 class UpdatesItem(val chapter: Chapter, val manga: Manga, header: DateSectionItem) :
     AbstractSectionableItem<UpdatesHolder, DateSectionItem>(header) {
-
     private var _status: Int = 0
 
     var status: Int
@@ -32,7 +31,10 @@ class UpdatesItem(val chapter: Chapter, val manga: Manga, header: DateSectionIte
         return R.layout.updates_item
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): UpdatesHolder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): UpdatesHolder {
         return UpdatesHolder(view, adapter as UpdatesAdapter)
     }
 

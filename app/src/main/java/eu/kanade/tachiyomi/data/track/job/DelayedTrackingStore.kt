@@ -7,7 +7,6 @@ import rx.Observable
 import timber.log.Timber
 
 class DelayedTrackingStore(context: Context) {
-
     /**
      * Preference file where queued tracking updates are stored.
      */

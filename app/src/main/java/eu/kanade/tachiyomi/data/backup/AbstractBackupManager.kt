@@ -19,21 +19,23 @@ import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
 abstract class AbstractBackupManager(protected val context: Context) {
-
     internal val databaseHelper: DatabaseHelper by injectLazy()
     internal val sourceManager: SourceManager by injectLazy()
     internal val trackManager: TrackManager by injectLazy()
     protected val preferences: PreferencesHelper by injectLazy()
 
-    abstract fun createBackup(uri: Uri, flags: Int, isJob: Boolean): String?
+    abstract fun createBackup(
+        uri: Uri,
+        flags: Int,
+        isJob: Boolean
+    ): String?
 
     /**
      * Returns manga
      *
      * @return [Manga], null if not found
      */
-    internal fun getMangaFromDatabase(manga: Manga): Manga? =
-        databaseHelper.getManga(manga.url, manga.source).executeAsBlocking()
+    internal fun getMangaFromDatabase(manga: Manga): Manga? = databaseHelper.getManga(manga.url, manga.source).executeAsBlocking()
 
     /**
      * [Observable] that fetches chapter information
@@ -43,7 +45,12 @@ abstract class AbstractBackupManager(protected val context: Context) {
      * @param chapters list of chapters in the backup
      * @return [Observable] that contains manga
      */
-    internal open fun restoreChapterFetchObservable(source: Source, manga: Manga, chapters: List<Chapter>, throttleManager: EHentaiThrottleManager): Observable<Pair<List<Chapter>, List<Chapter>>> {
+    internal open fun restoreChapterFetchObservable(
+        source: Source,
+        manga: Manga,
+        chapters: List<Chapter>,
+        throttleManager: EHentaiThrottleManager
+    ): Observable<Pair<List<Chapter>, List<Chapter>>> {
         return (
             if (source is EHentai) {
                 source.fetchChapterList(manga, throttleManager::throttle)
@@ -69,16 +76,14 @@ abstract class AbstractBackupManager(protected val context: Context) {
      *
      * @return [Manga] from library
      */
-    protected fun getFavoriteManga(): List<Manga> =
-        databaseHelper.getFavoriteMangas().executeAsBlocking()
+    protected fun getFavoriteManga(): List<Manga> = databaseHelper.getFavoriteMangas().executeAsBlocking()
 
     /**
      * Inserts manga and returns id
      *
      * @return id of [Manga], null if not found
      */
-    internal fun insertManga(manga: Manga): Long? =
-        databaseHelper.insertManga(manga).executeAsBlocking().insertedId()
+    internal fun insertManga(manga: Manga): Long? = databaseHelper.insertManga(manga).executeAsBlocking().insertedId()
 
     /**
      * Inserts list of chapters

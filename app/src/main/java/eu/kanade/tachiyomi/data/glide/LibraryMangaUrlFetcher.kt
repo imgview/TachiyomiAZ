@@ -22,8 +22,10 @@ class LibraryMangaUrlFetcher(
     private val manga: Manga,
     private val coverCache: CoverCache
 ) : LibraryMangaCustomCoverFetcher(manga, coverCache) {
-
-    override fun loadData(priority: Priority, callback: DataFetcher.DataCallback<in InputStream>) {
+    override fun loadData(
+        priority: Priority,
+        callback: DataFetcher.DataCallback<in InputStream>
+    ) {
         getCustomCoverFile()?.let {
             loadFromFile(it, callback)
             return
@@ -44,12 +46,13 @@ class LibraryMangaUrlFetcher(
                             val tmpFile = File(cover.path + ".tmp")
                             try {
                                 // Retrieve destination stream, create parent folders if needed.
-                                val output = try {
-                                    tmpFile.outputStream()
-                                } catch (e: FileNotFoundException) {
-                                    tmpFile.parentFile!!.mkdirs()
-                                    tmpFile.outputStream()
-                                }
+                                val output =
+                                    try {
+                                        tmpFile.outputStream()
+                                    } catch (e: FileNotFoundException) {
+                                        tmpFile.parentFile!!.mkdirs()
+                                        tmpFile.outputStream()
+                                    }
 
                                 // Copy the file and rename to the original.
                                 data.use { output.use { data.copyTo(output) } }

@@ -14,7 +14,6 @@ import timber.log.Timber
  * Pager adapter used by this [viewer] to where [ViewerChapters] updates are posted.
  */
 class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
-
     /**
      * List of currently set items.
      */
@@ -25,12 +24,16 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         private set
 
     var currentChapter: ReaderChapter? = null
+
     /**
      * Updates this adapter with the given [chapters]. It handles setting a few pages of the
      * next/previous chapter to allow seamless transitions and inverting the pages if the viewer
      * has R2L direction.
      */
-    fun setChapters(chapters: ViewerChapters, forceTransition: Boolean) {
+    fun setChapters(
+        chapters: ViewerChapters,
+        forceTransition: Boolean
+    ) {
         val newItems = mutableListOf<Any>()
 
         // Forces chapter transition if there is missing chapters
@@ -61,14 +64,15 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         currentChapter = chapters.currChapter
 
         // Add next chapter transition and pages.
-        nextTransition = ChapterTransition.Next(chapters.currChapter, chapters.nextChapter)
-            .also {
-                if (nextHasMissingChapters || forceTransition ||
-                    chapters.nextChapter?.state !is ReaderChapter.State.Loaded
-                ) {
-                    newItems.add(it)
+        nextTransition =
+            ChapterTransition.Next(chapters.currChapter, chapters.nextChapter)
+                .also {
+                    if (nextHasMissingChapters || forceTransition ||
+                        chapters.nextChapter?.state !is ReaderChapter.State.Loaded
+                    ) {
+                        newItems.add(it)
+                    }
                 }
-            }
 
         if (chapters.nextChapter != null) {
             // Add at most two pages, because this chapter will be selected before the user can
@@ -97,7 +101,10 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
     /**
      * Creates a new view for the item at the given [position].
      */
-    override fun createView(container: ViewGroup, position: Int): View {
+    override fun createView(
+        container: ViewGroup,
+        position: Int
+    ): View {
         return when (val item = items[position]) {
             is ReaderPage -> PagerPageHolder(viewer, item)
             is ChapterTransition -> PagerTransitionHolder(viewer, item)

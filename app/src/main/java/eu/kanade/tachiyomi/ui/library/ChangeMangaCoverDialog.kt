@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 
 class ChangeMangaCoverDialog<T>(bundle: Bundle? = null) :
     DialogController(bundle) where T : Controller, T : ChangeMangaCoverDialog.Listener {
-
     private lateinit var manga: Manga
 
     constructor(target: T, manga: Manga) : this() {

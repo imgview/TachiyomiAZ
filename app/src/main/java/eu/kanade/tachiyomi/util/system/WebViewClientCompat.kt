@@ -10,12 +10,17 @@ import android.webkit.WebViewClient
 
 @Suppress("OverridingDeprecatedMember")
 abstract class WebViewClientCompat : WebViewClient() {
-
-    open fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
+    open fun shouldOverrideUrlCompat(
+        view: WebView,
+        url: String
+    ): Boolean {
         return false
     }
 
-    open fun shouldInterceptRequestCompat(view: WebView, url: String): WebResourceResponse? {
+    open fun shouldInterceptRequestCompat(
+        view: WebView,
+        url: String
+    ): WebResourceResponse? {
         return null
     }
 
@@ -36,7 +41,10 @@ abstract class WebViewClientCompat : WebViewClient() {
         return shouldOverrideUrlCompat(view, request.url.toString())
     }
 
-    final override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
+    final override fun shouldOverrideUrlLoading(
+        view: WebView,
+        url: String
+    ): Boolean {
         return shouldOverrideUrlCompat(view, url)
     }
 
@@ -61,8 +69,11 @@ abstract class WebViewClientCompat : WebViewClient() {
         error: WebResourceError
     ) {
         onReceivedErrorCompat(
-            view, error.errorCode, error.description?.toString(),
-            request.url.toString(), request.isForMainFrame
+            view,
+            error.errorCode,
+            error.description?.toString(),
+            request.url.toString(),
+            request.isForMainFrame
         )
     }
 
@@ -82,7 +93,9 @@ abstract class WebViewClientCompat : WebViewClient() {
         error: WebResourceResponse
     ) {
         onReceivedErrorCompat(
-            view, error.statusCode, error.reasonPhrase,
+            view,
+            error.statusCode,
+            error.reasonPhrase,
             request.url
                 .toString(),
             request.isForMainFrame

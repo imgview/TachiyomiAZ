@@ -32,13 +32,12 @@ import eu.kanade.tachiyomi.ui.manga.info.MangaInfoController
 import eu.kanade.tachiyomi.ui.manga.track.TrackController
 import eu.kanade.tachiyomi.ui.source.SourceController
 import eu.kanade.tachiyomi.util.system.toast
-import java.util.Date
 import rx.Subscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Date
 
 class MangaController : RxController<MangaControllerBinding>, TabbedController {
-
     constructor(
         manga: Manga?,
         fromSource: Boolean = false,
@@ -109,7 +108,10 @@ class MangaController : RxController<MangaControllerBinding>, TabbedController {
         return manga?.title
     }
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = MangaControllerBinding.inflate(inflater)
         return binding.root
     }
@@ -135,7 +137,10 @@ class MangaController : RxController<MangaControllerBinding>, TabbedController {
         adapter = null
     }
 
-    override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
+    override fun onChangeStarted(
+        handler: ControllerChangeHandler,
+        type: ControllerChangeType
+    ) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
             val activity = activity as MainActivity?
@@ -144,7 +149,10 @@ class MangaController : RxController<MangaControllerBinding>, TabbedController {
         }
     }
 
-    override fun onChangeEnded(handler: ControllerChangeHandler, type: ControllerChangeType) {
+    override fun onChangeEnded(
+        handler: ControllerChangeHandler,
+        type: ControllerChangeType
+    ) {
         super.onChangeEnded(handler, type)
         if (manga == null || source == null) {
             activity?.toast(R.string.manga_not_in_db)
@@ -172,38 +180,47 @@ class MangaController : RxController<MangaControllerBinding>, TabbedController {
         val activity = activity as MainActivity?
 
         val tab = activity?.binding?.tabs?.getTabAt(TRACK_CONTROLLER) ?: return
-        val drawable = if (visible) {
-            VectorDrawableCompat.create(resources!!, R.drawable.ic_done_white_18dp, null)
-        } else {
-            null
-        }
+        val drawable =
+            if (visible) {
+                VectorDrawableCompat.create(resources!!, R.drawable.ic_done_white_18dp, null)
+            } else {
+                null
+            }
 
         tab.icon = drawable
     }
 
     private inner class MangaDetailAdapter : RouterPagerAdapter(this@MangaController) {
-
         private val tabCount = if (Injekt.get<TrackManager>().hasLoggedServices()) 3 else 2
 
-        private val tabTitles = listOf(
-            R.string.manga_detail_tab,
-            if (source is AnimeSource) { R.string.episodes_tab_title } else { R.string.manga_chapters_tab },
-            R.string.manga_tracking_tab
-        )
-            .map { resources!!.getString(it) }
+        private val tabTitles =
+            listOf(
+                R.string.manga_detail_tab,
+                if (source is AnimeSource) {
+                    R.string.episodes_tab_title
+                } else {
+                    R.string.manga_chapters_tab
+                },
+                R.string.manga_tracking_tab
+            )
+                .map { resources!!.getString(it) }
 
         override fun getCount(): Int {
             return tabCount
         }
 
-        override fun configureRouter(router: Router, position: Int) {
+        override fun configureRouter(
+            router: Router,
+            position: Int
+        ) {
             if (!router.hasRootController()) {
-                val controller = when (position) {
-                    INFO_CONTROLLER -> MangaInfoController(fromSource)
-                    CHAPTERS_CONTROLLER -> ChaptersController()
-                    TRACK_CONTROLLER -> TrackController()
-                    else -> error("Wrong position $position")
-                }
+                val controller =
+                    when (position) {
+                        INFO_CONTROLLER -> MangaInfoController(fromSource)
+                        CHAPTERS_CONTROLLER -> ChaptersController()
+                        TRACK_CONTROLLER -> TrackController()
+                        else -> error("Wrong position $position")
+                    }
                 router.setRoot(RouterTransaction.with(controller))
             }
         }
@@ -214,7 +231,6 @@ class MangaController : RxController<MangaControllerBinding>, TabbedController {
     }
 
     companion object {
-
         const val UPDATE_EXTRA = "update"
         const val SMART_SEARCH_CONFIG_EXTRA = "smartSearchConfig"
 

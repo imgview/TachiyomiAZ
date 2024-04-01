@@ -41,8 +41,6 @@ import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import exh.util.isInNightMode
-import java.io.InputStream
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import rx.Observable
@@ -50,6 +48,8 @@ import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.injectLazy
+import java.io.InputStream
+import java.util.concurrent.TimeUnit
 
 /**
  * View of the ViewPager that contains a page of a chapter.
@@ -59,7 +59,6 @@ class PagerPageHolder(
     val viewer: PagerViewer,
     val page: ReaderPage
 ) : FrameLayout(viewer.activity), ViewPagerAdapter.PositionableView {
-
     /**
      * Item that identifies this view. Needed by the adapter to not recreate views.
      */
@@ -133,9 +132,10 @@ class PagerPageHolder(
         statusSubscription?.unsubscribe()
 
         val loader = page.chapter.pageLoader ?: return
-        statusSubscription = loader.getPage(page)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { processStatus(it) }
+        statusSubscription =
+            loader.getPage(page)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { processStatus(it) }
     }
 
     /**
@@ -144,12 +144,13 @@ class PagerPageHolder(
     private fun observeProgress() {
         progressSubscription?.unsubscribe()
 
-        progressSubscription = Observable.interval(100, TimeUnit.MILLISECONDS)
-            .map { page.progress }
-            .distinctUntilChanged()
-            .onBackpressureLatest()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { value -> progressBar.setProgress(value) }
+        progressSubscription =
+            Observable.interval(100, TimeUnit.MILLISECONDS)
+                .map { page.progress }
+                .distinctUntilChanged()
+                .onBackpressureLatest()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { value -> progressBar.setProgress(value) }
     }
 
     /**
@@ -240,53 +241,55 @@ class PagerPageHolder(
         val streamFn = page.stream ?: return
 
         var openStream: InputStream? = null
-        readImageHeaderSubscription = Observable
-            .fromCallable {
-                val stream = streamFn().buffered(16)
-                openStream = stream
+        readImageHeaderSubscription =
+            Observable
+                .fromCallable {
+                    val stream = streamFn().buffered(16)
+                    openStream = stream
 
-                ImageUtil.findImageType(stream) == ImageUtil.ImageType.GIF
-            }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext { isAnimated ->
-                if (!isAnimated) {
-                    // SY -->
-                    if (viewer.config.readerTheme >= 3) {
-                        val imageView = initSubsamplingImageView()
-                        if (page.bg != null && page.bgType == getBGType(
-                            viewer.config.readerTheme,
-                            context
-                        )
-                        ) {
-                            imageView.setImage(ImageSource.inputStream(openStream!!))
-                            imageView.background = page.bg
-                        }
-                        // if the user switches to automatic when pages are already cached, the bg needs to be loaded
-                        else {
-                            val bytesArray = openStream!!.readBytes()
-                            val bytesStream = bytesArray.inputStream()
-                            imageView.setImage(ImageSource.inputStream(bytesStream))
-                            bytesStream.close()
-
-                            launchUI {
-                                imageView.background = setBG(bytesArray)
-                                page.bg = imageView.background
-                                page.bgType = getBGType(viewer.config.readerTheme, context)
-                            }
-                        }
-                    } else {
-                        initSubsamplingImageView().setImage(ImageSource.inputStream(openStream!!))
-                    }
-                    // SY <--
-                } else {
-                    initImageView().setImage(openStream!!)
+                    ImageUtil.findImageType(stream) == ImageUtil.ImageType.GIF
                 }
-            }
-            // Keep the Rx stream alive to close the input stream only when unsubscribed
-            .flatMap { Observable.never<Unit>() }
-            .doOnUnsubscribe { openStream?.close() }
-            .subscribe({}, {})
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext { isAnimated ->
+                    if (!isAnimated) {
+                        // SY -->
+                        if (viewer.config.readerTheme >= 3) {
+                            val imageView = initSubsamplingImageView()
+                            if (page.bg != null && page.bgType ==
+                                getBGType(
+                                        viewer.config.readerTheme,
+                                        context
+                                    )
+                            ) {
+                                imageView.setImage(ImageSource.inputStream(openStream!!))
+                                imageView.background = page.bg
+                            }
+                            // if the user switches to automatic when pages are already cached, the bg needs to be loaded
+                            else {
+                                val bytesArray = openStream!!.readBytes()
+                                val bytesStream = bytesArray.inputStream()
+                                imageView.setImage(ImageSource.inputStream(bytesStream))
+                                bytesStream.close()
+
+                                launchUI {
+                                    imageView.background = setBG(bytesArray)
+                                    page.bg = imageView.background
+                                    page.bgType = getBGType(viewer.config.readerTheme, context)
+                                }
+                            }
+                        } else {
+                            initSubsamplingImageView().setImage(ImageSource.inputStream(openStream!!))
+                        }
+                        // SY <--
+                    } else {
+                        initImageView().setImage(openStream!!)
+                    }
+                }
+                // Keep the Rx stream alive to close the input stream only when unsubscribed
+                .flatMap { Observable.never<Unit>() }
+                .doOnUnsubscribe { openStream?.close() }
+                .subscribe({}, {})
     }
 
     // SY -->
@@ -295,9 +298,12 @@ class PagerPageHolder(
             val preferences by injectLazy<PreferencesHelper>()
             ImageUtil.autoSetBackground(
                 BitmapFactory.decodeByteArray(
-                    bytesArray, 0, bytesArray.size
+                    bytesArray,
+                    0,
+                    bytesArray.size
                 ),
-                preferences.readerTheme().get() == 3, context
+                preferences.readerTheme().get() == 3,
+                context
             )
         }
     }
@@ -333,9 +339,10 @@ class PagerPageHolder(
     private fun createProgressBar(): ReaderProgressBar {
         return ReaderProgressBar(context, null).apply {
             val size = 48.dpToPx
-            layoutParams = LayoutParams(size, size).apply {
-                gravity = Gravity.CENTER
-            }
+            layoutParams =
+                LayoutParams(size, size).apply {
+                    gravity = Gravity.CENTER
+                }
         }
     }
 
@@ -347,31 +354,34 @@ class PagerPageHolder(
 
         val config = viewer.config
 
-        subsamplingImageView = SubsamplingScaleImageView(context).apply {
-            layoutParams = LayoutParams(MATCH_PARENT, MATCH_PARENT)
-            setMaxTileSize(viewer.activity.maxBitmapSize)
-            setDoubleTapZoomStyle(SubsamplingScaleImageView.ZOOM_FOCUS_CENTER)
-            setDoubleTapZoomDuration(config.doubleTapAnimDuration)
-            setPanLimit(SubsamplingScaleImageView.PAN_LIMIT_INSIDE)
-            setMinimumScaleType(config.imageScaleType)
-            setMinimumDpi(90)
-            setMinimumTileDpi(180)
-            setCropBorders(config.imageCropBorders)
-            setOnImageEventListener(object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
-                override fun onReady() {
-                    when (config.imageZoomType) {
-                        ZoomType.Left -> setScaleAndCenter(scale, PointF(0f, 0f))
-                        ZoomType.Right -> setScaleAndCenter(scale, PointF(sWidth.toFloat(), 0f))
-                        ZoomType.Center -> setScaleAndCenter(scale, center.also { it?.y = 0f })
-                    }
-                    onImageDecoded()
-                }
+        subsamplingImageView =
+            SubsamplingScaleImageView(context).apply {
+                layoutParams = LayoutParams(MATCH_PARENT, MATCH_PARENT)
+                setMaxTileSize(viewer.activity.maxBitmapSize)
+                setDoubleTapZoomStyle(SubsamplingScaleImageView.ZOOM_FOCUS_CENTER)
+                setDoubleTapZoomDuration(config.doubleTapAnimDuration)
+                setPanLimit(SubsamplingScaleImageView.PAN_LIMIT_INSIDE)
+                setMinimumScaleType(config.imageScaleType)
+                setMinimumDpi(90)
+                setMinimumTileDpi(180)
+                setCropBorders(config.imageCropBorders)
+                setOnImageEventListener(
+                    object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
+                        override fun onReady() {
+                            when (config.imageZoomType) {
+                                ZoomType.Left -> setScaleAndCenter(scale, PointF(0f, 0f))
+                                ZoomType.Right -> setScaleAndCenter(scale, PointF(sWidth.toFloat(), 0f))
+                                ZoomType.Center -> setScaleAndCenter(scale, center.also { it?.y = 0f })
+                            }
+                            onImageDecoded()
+                        }
 
-                override fun onImageLoadError(e: Exception) {
-                    onImageDecodeError()
-                }
-            })
-        }
+                        override fun onImageLoadError(e: Exception) {
+                            onImageDecodeError()
+                        }
+                    }
+                )
+            }
         addView(subsamplingImageView)
         return subsamplingImageView!!
     }
@@ -382,23 +392,26 @@ class PagerPageHolder(
     private fun initImageView(): ImageView {
         if (imageView != null) return imageView!!
 
-        imageView = PhotoView(context, null).apply {
-            layoutParams = LayoutParams(MATCH_PARENT, MATCH_PARENT)
-            adjustViewBounds = true
-            setZoomTransitionDuration(viewer.config.doubleTapAnimDuration)
-            setScaleLevels(1f, 2f, 3f)
-            // Force 2 scale levels on double tap
-            setOnDoubleTapListener(object : GestureDetector.SimpleOnGestureListener() {
-                override fun onDoubleTap(e: MotionEvent): Boolean {
-                    if (scale > 1f) {
-                        setScale(1f, e.x, e.y, true)
-                    } else {
-                        setScale(2f, e.x, e.y, true)
+        imageView =
+            PhotoView(context, null).apply {
+                layoutParams = LayoutParams(MATCH_PARENT, MATCH_PARENT)
+                adjustViewBounds = true
+                setZoomTransitionDuration(viewer.config.doubleTapAnimDuration)
+                setScaleLevels(1f, 2f, 3f)
+                // Force 2 scale levels on double tap
+                setOnDoubleTapListener(
+                    object : GestureDetector.SimpleOnGestureListener() {
+                        override fun onDoubleTap(e: MotionEvent): Boolean {
+                            if (scale > 1f) {
+                                setScale(1f, e.x, e.y, true)
+                            } else {
+                                setScale(2f, e.x, e.y, true)
+                            }
+                            return true
+                        }
                     }
-                    return true
-                }
-            })
-        }
+                )
+            }
         addView(imageView)
         return imageView!!
     }
@@ -409,15 +422,17 @@ class PagerPageHolder(
     private fun initRetryButton(): PagerButton {
         if (retryButton != null) return retryButton!!
 
-        retryButton = PagerButton(context, viewer).apply {
-            layoutParams = LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
-                gravity = Gravity.CENTER
+        retryButton =
+            PagerButton(context, viewer).apply {
+                layoutParams =
+                    LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                        gravity = Gravity.CENTER
+                    }
+                setText(R.string.action_retry)
+                setOnClickListener {
+                    page.chapter.pageLoader?.retryPage(page)
+                }
             }
-            setText(R.string.action_retry)
-            setOnClickListener {
-                page.chapter.pageLoader?.retryPage(page)
-            }
-        }
         addView(retryButton)
         return retryButton!!
     }
@@ -430,16 +445,18 @@ class PagerPageHolder(
 
         val margins = 8.dpToPx
 
-        val decodeLayout = LinearLayout(context).apply {
-            gravity = Gravity.CENTER
-            orientation = LinearLayout.VERTICAL
-        }
+        val decodeLayout =
+            LinearLayout(context).apply {
+                gravity = Gravity.CENTER
+                orientation = LinearLayout.VERTICAL
+            }
         decodeErrorLayout = decodeLayout
 
         TextView(context).apply {
-            layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
-                setMargins(margins, margins, margins, margins)
-            }
+            layoutParams =
+                LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                    setMargins(margins, margins, margins, margins)
+                }
             gravity = Gravity.CENTER
             setText(R.string.decode_image_error)
 
@@ -447,9 +464,10 @@ class PagerPageHolder(
         }
 
         PagerButton(context, viewer).apply {
-            layoutParams = LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
-                setMargins(margins, margins, margins, margins)
-            }
+            layoutParams =
+                LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                    setMargins(margins, margins, margins, margins)
+                }
             setText(R.string.action_retry)
             setOnClickListener {
                 page.chapter.pageLoader?.retryPage(page)
@@ -461,9 +479,10 @@ class PagerPageHolder(
         val imageUrl = page.imageUrl
         if (imageUrl.orEmpty().startsWith("http", true)) {
             PagerButton(context, viewer).apply {
-                layoutParams = LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
-                    setMargins(margins, margins, margins, margins)
-                }
+                layoutParams =
+                    LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                        setMargins(margins, margins, margins, margins)
+                    }
                 setText(R.string.action_open_in_web_view)
                 setOnClickListener {
                     val intent = WebViewActivity.newIntent(context, imageUrl!!)
@@ -488,38 +507,45 @@ class PagerPageHolder(
             .skipMemoryCache(true)
             .diskCacheStrategy(DiskCacheStrategy.NONE)
             .transition(DrawableTransitionOptions.with(NoTransition.getFactory()))
-            .listener(object : RequestListener<GifDrawable> {
-                override fun onLoadFailed(
-                    e: GlideException?,
-                    model: Any?,
-                    target: Target<GifDrawable>,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    onImageDecodeError()
-                    return false
-                }
+            .listener(
+                object : RequestListener<GifDrawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<GifDrawable>,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        onImageDecodeError()
+                        return false
+                    }
 
-                override fun onResourceReady(
-                    resource: GifDrawable,
-                    model: Any,
-                    target: Target<GifDrawable>,
-                    dataSource: DataSource,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    resource.setLoopCount(GifDrawable.LOOP_INTRINSIC)
-                    onImageDecoded()
-                    return false
+                    override fun onResourceReady(
+                        resource: GifDrawable,
+                        model: Any,
+                        target: Target<GifDrawable>,
+                        dataSource: DataSource,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        resource.setLoopCount(GifDrawable.LOOP_INTRINSIC)
+                        onImageDecoded()
+                        return false
+                    }
                 }
-            })
+            )
             .into(this)
     }
 
     // SY -->
     companion object {
-        fun getBGType(readerTheme: Int, context: Context): Int {
+        fun getBGType(
+            readerTheme: Int,
+            context: Context
+        ): Int {
             return if (readerTheme == 3) {
                 if (context.isInNightMode()) 2 else 1
-            } else 0
+            } else {
+                0
+            }
         }
     }
     // SY <--

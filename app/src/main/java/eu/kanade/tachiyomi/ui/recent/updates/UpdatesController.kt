@@ -47,7 +47,6 @@ class UpdatesController :
     FlexibleAdapter.OnUpdateListener,
     ConfirmDeleteChaptersDialog.Listener,
     UpdatesAdapter.OnCoverClickListener {
-
     /**
      * Action mode for multiple selection.
      */
@@ -71,7 +70,10 @@ class UpdatesController :
         return UpdatesPresenter()
     }
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = UpdatesControllerBinding.inflate(inflater)
         return binding.root
     }
@@ -117,7 +119,10 @@ class UpdatesController :
         super.onDestroyView(view)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(
+        menu: Menu,
+        inflater: MenuInflater
+    ) {
         inflater.inflate(R.menu.updates, menu)
     }
 
@@ -150,7 +155,10 @@ class UpdatesController :
      * Called when item in list is clicked
      * @param position position of clicked item
      */
-    override fun onItemClick(view: View, position: Int): Boolean {
+    override fun onItemClick(
+        view: View,
+        position: Int
+    ): Boolean {
         val adapter = adapter ?: return false
 
         // Get item from position
@@ -314,13 +322,19 @@ class UpdatesController :
      * @param mode the ActionMode object
      * @param menu menu object of ActionMode
      */
-    override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+    override fun onCreateActionMode(
+        mode: ActionMode,
+        menu: Menu
+    ): Boolean {
         mode.menuInflater.inflate(R.menu.updates_chapter_selection, menu)
         adapter?.mode = SelectableAdapter.Mode.MULTI
         return true
     }
 
-    override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+    override fun onPrepareActionMode(
+        mode: ActionMode,
+        menu: Menu
+    ): Boolean {
         val count = adapter?.selectedItemCount ?: 0
         if (count == 0) {
             // Destroy action mode if there are no items selected.
@@ -342,7 +356,10 @@ class UpdatesController :
      * @param mode the ActionMode object
      * @param item item from ActionMode.
      */
-    override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+    override fun onActionItemClicked(
+        mode: ActionMode,
+        item: MenuItem
+    ): Boolean {
         return onActionItemClicked(item)
     }
 

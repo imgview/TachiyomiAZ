@@ -24,7 +24,6 @@ import uy.kohesive.injekt.injectLazy
  */
 @SuppressLint("PackageManagerGetSignatures")
 internal object ExtensionLoader {
-
     private val preferences: PreferencesHelper by injectLazy()
     private val allowNsfwSource by lazy {
         preferences.allowNsfwSource().get()
@@ -60,9 +59,10 @@ internal object ExtensionLoader {
 
         // Load each extension concurrently and wait for completion
         return runBlocking {
-            val deferred = extPkgs.map {
-                async { loadExtension(context, it.packageName, it) }
-            }
+            val deferred =
+                extPkgs.map {
+                    async { loadExtension(context, it.packageName, it) }
+                }
             deferred.map { it.await() }
         }
     }
@@ -71,13 +71,17 @@ internal object ExtensionLoader {
      * Attempts to load an extension from the given package name. It checks if the extension
      * contains the required feature flag before trying to load it.
      */
-    fun loadExtensionFromPkgName(context: Context, pkgName: String): LoadResult {
-        val pkgInfo = try {
-            context.packageManager.getPackageInfo(pkgName, PACKAGE_FLAGS)
-        } catch (error: PackageManager.NameNotFoundException) {
-            // Unlikely, but the package may have been uninstalled at this point
-            return LoadResult.Error(error)
-        }
+    fun loadExtensionFromPkgName(
+        context: Context,
+        pkgName: String
+    ): LoadResult {
+        val pkgInfo =
+            try {
+                context.packageManager.getPackageInfo(pkgName, PACKAGE_FLAGS)
+            } catch (error: PackageManager.NameNotFoundException) {
+                // Unlikely, but the package may have been uninstalled at this point
+                return LoadResult.Error(error)
+            }
         if (!isPackageAnExtension(pkgInfo)) {
             return LoadResult.Error("Tried to load a package that wasn't a extension")
         }
@@ -91,15 +95,20 @@ internal object ExtensionLoader {
      * @param pkgName The package name of the extension to load.
      * @param pkgInfo The package info of the extension.
      */
-    private fun loadExtension(context: Context, pkgName: String, pkgInfo: PackageInfo): LoadResult {
+    private fun loadExtension(
+        context: Context,
+        pkgName: String,
+        pkgInfo: PackageInfo
+    ): LoadResult {
         val pkgManager = context.packageManager
 
-        val appInfo = try {
-            pkgManager.getApplicationInfo(pkgName, PackageManager.GET_META_DATA)
-        } catch (error: PackageManager.NameNotFoundException) {
-            // Unlikely, but the package may have been uninstalled at this point
-            return LoadResult.Error(error)
-        }
+        val appInfo =
+            try {
+                pkgManager.getApplicationInfo(pkgName, PackageManager.GET_META_DATA)
+            } catch (error: PackageManager.NameNotFoundException) {
+                // Unlikely, but the package may have been uninstalled at this point
+                return LoadResult.Error(error)
+            }
 
         val extName = pkgManager.getApplicationLabel(appInfo).toString().substringAfter("Tachiyomi: ")
         val versionName = pkgInfo.versionName
@@ -114,10 +123,11 @@ internal object ExtensionLoader {
         // Validate lib version
         val libVersion = versionName.substringBeforeLast('.').toDouble()
         if (libVersion < LIB_VERSION_MIN || libVersion > LIB_VERSION_MAX) {
-            val exception = Exception(
-                "Lib version is $libVersion, while only versions " +
-                    "$LIB_VERSION_MIN to $LIB_VERSION_MAX are allowed"
-            )
+            val exception =
+                Exception(
+                    "Lib version is $libVersion, while only versions " +
+                        "$LIB_VERSION_MIN to $LIB_VERSION_MAX are allowed"
+                )
             Timber.w(exception)
             return LoadResult.Error(exception)
         }
@@ -139,49 +149,53 @@ internal object ExtensionLoader {
 
         val classLoader = ChildFirstPathClassLoader(appInfo.sourceDir, null, context.classLoader)
 
-        val sources = appInfo.metaData.getString(METADATA_SOURCE_CLASS)!!
-            .split(";")
-            .map {
-                val sourceClass = it.trim()
-                if (sourceClass.startsWith(".")) {
-                    pkgInfo.packageName + sourceClass
-                } else {
-                    sourceClass
-                }
-            }
-            .flatMap {
-                try {
-                    when (val obj = Class.forName(it, false, classLoader).newInstance()) {
-                        is Source -> listOf(obj)
-                        is SourceFactory -> {
-                            if (isSourceNsfw(obj)) {
-                                emptyList()
-                            } else {
-                                obj.createSources()
-                            }
-                        }
-                        else -> throw Exception("Unknown source class type! ${obj.javaClass}")
+        val sources =
+            appInfo.metaData.getString(METADATA_SOURCE_CLASS)!!
+                .split(";")
+                .map {
+                    val sourceClass = it.trim()
+                    if (sourceClass.startsWith(".")) {
+                        pkgInfo.packageName + sourceClass
+                    } else {
+                        sourceClass
                     }
-                } catch (e: Throwable) {
-                    Timber.e(e, "Extension load error: $extName.")
-                    return LoadResult.Error(e)
                 }
+                .flatMap {
+                    try {
+                        when (val obj = Class.forName(it, false, classLoader).newInstance()) {
+                            is Source -> listOf(obj)
+                            is SourceFactory -> {
+                                if (isSourceNsfw(obj)) {
+                                    emptyList()
+                                } else {
+                                    obj.createSources()
+                                }
+                            }
+                            else -> throw Exception("Unknown source class type! ${obj.javaClass}")
+                        }
+                    } catch (e: Throwable) {
+                        Timber.e(e, "Extension load error: $extName.")
+                        return LoadResult.Error(e)
+                    }
+                }
+                .filter { !isSourceNsfw(it) }
+
+        val langs =
+            sources.filterIsInstance<CatalogueSource>()
+                .map { it.lang }
+                .toSet()
+        val lang =
+            when (langs.size) {
+                0 -> ""
+                1 -> langs.first()
+                else -> "all"
             }
-            .filter { !isSourceNsfw(it) }
 
-        val langs = sources.filterIsInstance<CatalogueSource>()
-            .map { it.lang }
-            .toSet()
-        val lang = when (langs.size) {
-            0 -> ""
-            1 -> langs.first()
-            else -> "all"
-        }
-
-        val extension = Extension.Installed(
-            extName, pkgName, versionName, versionCode, libVersion, lang, isNsfw, sources,
-            isUnofficial = false
-        )
+        val extension =
+            Extension.Installed(
+                extName, pkgName, versionName, versionCode, libVersion, lang, isNsfw, sources,
+                isUnofficial = false
+            )
         return LoadResult.Success(extension)
     }
 

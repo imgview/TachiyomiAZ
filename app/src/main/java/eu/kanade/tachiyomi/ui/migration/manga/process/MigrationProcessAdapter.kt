@@ -16,7 +16,6 @@ import uy.kohesive.injekt.injectLazy
 class MigrationProcessAdapter(
     val controller: MigrationListController
 ) : FlexibleAdapter<MigrationProcessItem>(null, controller, true) {
-
     private val db: DatabaseHelper by injectLazy()
     var items: List<MigrationProcessItem> = emptyList()
     val preferences: PreferencesHelper by injectLazy()
@@ -29,10 +28,17 @@ class MigrationProcessAdapter(
     }
 
     interface MigrationProcessInterface {
-        fun onMenuItemClick(position: Int, item: MenuItem)
+        fun onMenuItemClick(
+            position: Int,
+            item: MenuItem
+        )
+
         fun enableButtons()
+
         fun removeManga(item: MigrationProcessItem)
+
         fun noMigration()
+
         fun updateCount()
     }
 
@@ -42,12 +48,14 @@ class MigrationProcessAdapter(
         if (allMangasDone()) menuItemListener.enableButtons()
     }
 
-    fun allMangasDone() = (
-        items.all {
-            it.manga.migrationStatus != MigrationStatus
-                .RUNNUNG
-        } && items.any { it.manga.migrationStatus == MigrationStatus.MANGA_FOUND }
-        )
+    fun allMangasDone() =
+        (
+            items.all {
+                it.manga.migrationStatus !=
+                    MigrationStatus
+                        .RUNNUNG
+            } && items.any { it.manga.migrationStatus == MigrationStatus.MANGA_FOUND }
+            )
 
     fun mangasSkipped() = (items.count { it.manga.migrationStatus == MigrationStatus.MANGA_NOT_FOUND })
 
@@ -71,7 +79,10 @@ class MigrationProcessAdapter(
         }
     }
 
-    fun migrateManga(position: Int, copy: Boolean) {
+    fun migrateManga(
+        position: Int,
+        copy: Boolean
+    ) {
         launchUI {
             val manga = getItem(position)?.manga ?: return@launchUI
             db.inTransaction {
@@ -79,7 +90,9 @@ class MigrationProcessAdapter(
                     db.getManga(manga.searchResult.get() ?: return@launchUI).executeAsBlocking()
                         ?: return@launchUI
                 migrateMangaInternal(
-                    manga.manga() ?: return@launchUI, toMangaObj, !copy
+                    manga.manga() ?: return@launchUI,
+                    toMangaObj,
+                    !copy
                 )
             }
             removeManga(position)

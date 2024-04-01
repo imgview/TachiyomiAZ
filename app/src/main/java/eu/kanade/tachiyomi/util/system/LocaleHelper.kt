@@ -8,15 +8,14 @@ import android.view.ContextThemeWrapper
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.source.SourcePresenter
-import java.util.Locale
 import uy.kohesive.injekt.injectLazy
+import java.util.Locale
 
 /**
  * Utility class to change the application's language in runtime.
  */
 @Suppress("DEPRECATION")
 object LocaleHelper {
-
     private val preferences: PreferencesHelper by injectLazy()
 
     private var systemLocale: Locale? = null
@@ -47,7 +46,10 @@ object LocaleHelper {
     /**
      * Returns Display name of a string language code
      */
-    fun getSourceDisplayName(lang: String?, context: Context): String {
+    fun getSourceDisplayName(
+        lang: String?,
+        context: Context
+    ): String {
         return when (lang) {
             "" -> context.getString(R.string.other_source)
             SourcePresenter.LAST_USED_KEY -> context.getString(R.string.last_used_source)
@@ -108,7 +110,11 @@ object LocaleHelper {
     /**
      * Updates the app's language to the application.
      */
-    fun updateConfiguration(app: Application, config: Configuration, configChange: Boolean = false) {
+    fun updateConfiguration(
+        app: Application,
+        config: Configuration,
+        configChange: Boolean = false
+    ) {
         if (systemLocale == null) {
             systemLocale = getConfigLocale(config)
         }
@@ -141,7 +147,10 @@ object LocaleHelper {
     /**
      * Returns a new configuration with the given locale applied.
      */
-    private fun updateConfigLocale(config: Configuration, locale: Locale): Configuration {
+    private fun updateConfigLocale(
+        config: Configuration,
+        locale: Locale
+    ): Configuration {
         val newConfig = Configuration(config)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             newConfig.locale = locale

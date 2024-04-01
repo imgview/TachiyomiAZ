@@ -20,58 +20,61 @@ import kotlin.reflect.full.declaredFunctions
 
 class SettingsDebugController : SettingsController() {
     @SuppressLint("SetTextI18n")
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        title = "DEBUG MENU"
+    override fun setupPreferenceScreen(screen: PreferenceScreen) =
+        with(screen) {
+            title = "DEBUG MENU"
 
-        preferenceCategory {
-            title = "Functions"
+            preferenceCategory {
+                title = "Functions"
 
-            DebugFunctions::class.declaredFunctions.filter {
-                it.visibility == KVisibility.PUBLIC
-            }.forEach {
-                preference {
-                    title = it.name.replace(Regex("(.)(\\p{Upper})"), "$1 $2").lowercase()
-                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-                    isPersistent = false
+                DebugFunctions::class.declaredFunctions.filter {
+                    it.visibility == KVisibility.PUBLIC
+                }.forEach {
+                    preference {
+                        title =
+                            it.name.replace(Regex("(.)(\\p{Upper})"), "$1 $2").lowercase()
+                                .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                        isPersistent = false
 
-                    onClick {
-                        val view = TextView(context)
-                        view.setHorizontallyScrolling(true)
-                        view.setTextIsSelectable(true)
+                        onClick {
+                            val view = TextView(context)
+                            view.setHorizontallyScrolling(true)
+                            view.setTextIsSelectable(true)
 
-                        val hView = HorizontalScrollView(context)
-                        hView.addView(view)
+                            val hView = HorizontalScrollView(context)
+                            hView.addView(view)
 
-                        try {
-                            val result = it.call(DebugFunctions)
-                            view.text = "Function returned result:\n\n$result"
-                            MaterialDialog(context)
-                                .customView(view = hView, scrollable = true)
-                        } catch (t: Throwable) {
-                            view.text = "Function threw exception:\n\n${Log.getStackTraceString(t)}"
-                            MaterialDialog(context)
-                                .customView(view = hView, scrollable = true)
-                        }.show()
+                            try {
+                                val result = it.call(DebugFunctions)
+                                view.text = "Function returned result:\n\n$result"
+                                MaterialDialog(context)
+                                    .customView(view = hView, scrollable = true)
+                            } catch (t: Throwable) {
+                                view.text = "Function threw exception:\n\n${Log.getStackTraceString(t)}"
+                                MaterialDialog(context)
+                                    .customView(view = hView, scrollable = true)
+                            }.show()
+                        }
+                    }
+                }
+            }
+
+            preferenceCategory {
+                title = "Toggles"
+
+                DebugToggles.values().forEach {
+                    switchPreference {
+                        title =
+                            it.name.replace('_', ' ').lowercase()
+                                .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                        key = it.prefKey
+                        defaultValue = it.default
+                        summaryOn = if (it.default) "" else MODIFIED_TEXT
+                        summaryOff = if (it.default) MODIFIED_TEXT else ""
                     }
                 }
             }
         }
-
-        preferenceCategory {
-            title = "Toggles"
-
-            DebugToggles.values().forEach {
-                switchPreference {
-                    title = it.name.replace('_', ' ').lowercase()
-                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-                    key = it.prefKey
-                    defaultValue = it.default
-                    summaryOn = if (it.default) "" else MODIFIED_TEXT
-                    summaryOff = if (it.default) MODIFIED_TEXT else ""
-                }
-            }
-        }
-    }
 
     override fun onActivityStopped(activity: Activity) {
         super.onActivityStopped(activity)

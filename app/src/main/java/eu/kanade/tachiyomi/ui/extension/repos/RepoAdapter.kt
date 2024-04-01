@@ -9,7 +9,6 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
  */
 class RepoAdapter(controller: RepoController) :
     FlexibleAdapter<RepoItem>(null, controller, true) {
-
     /**
      * Clears the active selections from the list and the model.
      */

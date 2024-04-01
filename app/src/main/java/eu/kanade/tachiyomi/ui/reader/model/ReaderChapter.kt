@@ -6,13 +6,12 @@ import eu.kanade.tachiyomi.ui.reader.loader.PageLoader
 import timber.log.Timber
 
 data class ReaderChapter(val chapter: Chapter) {
-
     var state: State =
         State.Wait
         set(value) {
-                field = value
-                stateRelay.call(value)
-            }
+            field = value
+            stateRelay.call(value)
+        }
 
     private val stateRelay by lazy { BehaviorRelay.create(state) }
 
@@ -46,8 +45,11 @@ data class ReaderChapter(val chapter: Chapter) {
 
     sealed class State {
         object Wait : State()
+
         object Loading : State()
+
         class Error(val error: Throwable) : State()
+
         class Loaded(val pages: List<ReaderPage>) : State()
     }
 }

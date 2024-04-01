@@ -14,18 +14,17 @@ import eu.kanade.tachiyomi.util.system.WebViewClientCompat
 import eu.kanade.tachiyomi.util.system.isOutdated
 import eu.kanade.tachiyomi.util.system.setDefaultSettings
 import eu.kanade.tachiyomi.util.system.toast
-import java.io.IOException
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import okhttp3.Cookie
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
+import java.io.IOException
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 class CloudflareInterceptor(private val context: Context) : Interceptor {
-
     private val handler = Handler(Looper.getMainLooper())
 
     private val networkHelper: NetworkHelper by injectLazy()
@@ -54,8 +53,9 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
         try {
             response.close()
             networkHelper.cookieManager.remove(originalRequest.url, COOKIE_NAMES, 0)
-            val oldCookie = networkHelper.cookieManager.get(originalRequest.url)
-                .firstOrNull { it.name == "cf_clearance" }
+            val oldCookie =
+                networkHelper.cookieManager.get(originalRequest.url)
+                    .firstOrNull { it.name == "cf_clearance" }
             resolveWithWebView(originalRequest, oldCookie)
 
             return chain.proceed(originalRequest)
@@ -67,7 +67,10 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private fun resolveWithWebView(request: Request, oldCookie: Cookie?) {
+    private fun resolveWithWebView(
+        request: Request,
+        oldCookie: Cookie?
+    ) {
         // We need to lock this thread until the WebView finds the challenge solution url, because
         // OkHttp doesn't support asynchronous interceptors.
         val latch = CountDownLatch(1)
@@ -90,46 +93,50 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
             webview.settings.userAgentString = request.header("User-Agent")
                 ?: networkHelper.defaultUserAgent
 
-            webview.webViewClient = object : WebViewClientCompat() {
-                override fun onPageFinished(view: WebView, url: String) {
-                    fun isCloudFlareBypassed(): Boolean {
-                        return networkHelper.cookieManager.get(origRequestUrl.toHttpUrl())
-                            .firstOrNull { it.name == "cf_clearance" }
-                            .let { it != null && it != oldCookie }
-                    }
-
-                    if (isCloudFlareBypassed()) {
-                        cloudflareBypassed = true
-                        latch.countDown()
-                    }
-
-                    // HTTP error codes are only received since M
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                        url == origRequestUrl && !challengeFound
+            webview.webViewClient =
+                object : WebViewClientCompat() {
+                    override fun onPageFinished(
+                        view: WebView,
+                        url: String
                     ) {
-                        // The first request didn't return the challenge, abort.
-                        latch.countDown()
-                    }
-                }
+                        fun isCloudFlareBypassed(): Boolean {
+                            return networkHelper.cookieManager.get(origRequestUrl.toHttpUrl())
+                                .firstOrNull { it.name == "cf_clearance" }
+                                .let { it != null && it != oldCookie }
+                        }
 
-                override fun onReceivedErrorCompat(
-                    view: WebView,
-                    errorCode: Int,
-                    description: String?,
-                    failingUrl: String,
-                    isMainFrame: Boolean
-                ) {
-                    if (isMainFrame) {
-                        if (errorCode == 503) {
-                            // Found the cloudflare challenge page.
-                            challengeFound = true
-                        } else {
-                            // Unlock thread, the challenge wasn't found.
+                        if (isCloudFlareBypassed()) {
+                            cloudflareBypassed = true
+                            latch.countDown()
+                        }
+
+                        // HTTP error codes are only received since M
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                            url == origRequestUrl && !challengeFound
+                        ) {
+                            // The first request didn't return the challenge, abort.
                             latch.countDown()
                         }
                     }
+
+                    override fun onReceivedErrorCompat(
+                        view: WebView,
+                        errorCode: Int,
+                        description: String?,
+                        failingUrl: String,
+                        isMainFrame: Boolean
+                    ) {
+                        if (isMainFrame) {
+                            if (errorCode == 503) {
+                                // Found the cloudflare challenge page.
+                                challengeFound = true
+                            } else {
+                                // Unlock thread, the challenge wasn't found.
+                                latch.countDown()
+                            }
+                        }
+                    }
                 }
-            }
 
             webView?.loadUrl(origRequestUrl, headers)
         }

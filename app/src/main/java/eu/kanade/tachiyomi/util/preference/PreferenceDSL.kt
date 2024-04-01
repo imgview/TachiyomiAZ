@@ -32,7 +32,9 @@ inline fun PreferenceGroup.preference(block: (@DSL Preference).() -> Unit): Pref
     return initThenAdd(Preference(context), block)
 }
 
-inline fun PreferenceGroup.infoPreference(@StringRes infoRes: Int): Preference {
+inline fun PreferenceGroup.infoPreference(
+    @StringRes infoRes: Int
+): Preference {
     return initThenAdd(
         Preference(context),
         {
@@ -97,16 +99,31 @@ fun initDialog(dialogPreference: DialogPreference) {
     }
 }
 
-inline fun <P : Preference> PreferenceGroup.initThenAdd(p: P, block: P.() -> Unit): P {
-    return p.apply { block(); addPreference(this); }
+inline fun <P : Preference> PreferenceGroup.initThenAdd(
+    p: P,
+    block: P.() -> Unit
+): P {
+    return p.apply {
+        block()
+        addPreference(this)
+    }
 }
 
-inline fun <P : Preference> PreferenceGroup.addThenInit(p: P, block: P.() -> Unit): P {
-    return p.apply { addPreference(this); block() }
+inline fun <P : Preference> PreferenceGroup.addThenInit(
+    p: P,
+    block: P.() -> Unit
+): P {
+    return p.apply {
+        addPreference(this)
+        block()
+    }
 }
 
 inline fun Preference.onClick(crossinline block: () -> Unit) {
-    setOnPreferenceClickListener { block(); true }
+    setOnPreferenceClickListener {
+        block()
+        true
+    }
 }
 
 inline fun Preference.onChange(crossinline block: (Any?) -> Boolean) {

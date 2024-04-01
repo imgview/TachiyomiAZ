@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.migration
 import eu.kanade.tachiyomi.R
 
 object MigrationFlags {
-
     const val CHAPTERS = 0b001
     const val CATEGORIES = 0b010
     const val TRACK = 0b100

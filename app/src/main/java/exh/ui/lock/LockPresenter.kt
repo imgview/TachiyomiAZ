@@ -10,8 +10,9 @@ class LockPresenter : BasePresenter<LockController>() {
     val prefs: PreferencesHelper by injectLazy()
 
     val useFingerprint
-        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-            Reprint.isHardwarePresent() &&
-            Reprint.hasFingerprintRegistered() &&
-            prefs.eh_lockUseFingerprint().get()
+        get() =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                Reprint.isHardwarePresent() &&
+                Reprint.hasFingerprintRegistered() &&
+                prefs.eh_lockUseFingerprint().get()
 }

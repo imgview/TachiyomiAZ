@@ -5,7 +5,6 @@ import eu.davidea.flexibleadapter.items.IFlexible
 
 class MangaAdapter(controller: MigrationController) :
     FlexibleAdapter<IFlexible<*>>(null, controller) {
-
     private var items: List<IFlexible<*>>? = null
 
     override fun updateDataSet(items: MutableList<IFlexible<*>>?) {

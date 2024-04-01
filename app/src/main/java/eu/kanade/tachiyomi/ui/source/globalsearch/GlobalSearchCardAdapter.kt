@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
  */
 class GlobalSearchCardAdapter(controller: GlobalSearchController) :
     FlexibleAdapter<GlobalSearchCardItem>(null, controller, true) {
-
     /**
      * Listen for browse item clicks.
      */
@@ -22,6 +21,7 @@ class GlobalSearchCardAdapter(controller: GlobalSearchController) :
      */
     interface OnMangaClickListener {
         fun onMangaClick(manga: Manga)
+
         fun onMangaLongClick(manga: Manga)
     }
 }

@@ -34,7 +34,6 @@ class CategoryController :
     CategoryCreateDialog.Listener,
     CategoryRenameDialog.Listener,
     UndoHelper.OnActionListener {
-
     /**
      * Object used to show ActionMode toolbar.
      */
@@ -68,7 +67,10 @@ class CategoryController :
      * @param inflater The layout inflater to create the view from XML.
      * @param container The parent view for this one.
      */
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+    override fun inflateView(
+        inflater: LayoutInflater,
+        container: ViewGroup
+    ): View {
         binding = CategoriesControllerBinding.inflate(inflater)
         return binding.root
     }
@@ -137,7 +139,10 @@ class CategoryController :
      * @return true if the action mode should be created, false if entering this mode should be
      *              aborted.
      */
-    override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+    override fun onCreateActionMode(
+        mode: ActionMode,
+        menu: Menu
+    ): Boolean {
         // Inflate menu.
         mode.menuInflater.inflate(R.menu.category_selection, menu)
         // Enable adapter multi selection.
@@ -152,7 +157,10 @@ class CategoryController :
      * @param menu Menu used to populate action buttons.
      * @return true if the menu or action mode was updated, false otherwise.
      */
-    override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+    override fun onPrepareActionMode(
+        mode: ActionMode,
+        menu: Menu
+    ): Boolean {
         val adapter = adapter ?: return false
         val count = adapter.selectedItemCount
         mode.title = count.toString()
@@ -171,15 +179,21 @@ class CategoryController :
      * @return true if this callback handled the event, false if the standard MenuItem invocation
      *              should continue.
      */
-    override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+    override fun onActionItemClicked(
+        mode: ActionMode,
+        item: MenuItem
+    ): Boolean {
         val adapter = adapter ?: return false
 
         when (item.itemId) {
             R.id.action_delete -> {
                 undoHelper = UndoHelper(adapter, this)
                 undoHelper?.start(
-                    adapter.selectedPositions, view!!,
-                    R.string.snack_categories_deleted, R.string.action_undo, 3000
+                    adapter.selectedPositions,
+                    view!!,
+                    R.string.snack_categories_deleted,
+                    R.string.action_undo,
+                    3000
                 )
 
                 mode.finish()
@@ -217,7 +231,10 @@ class CategoryController :
      * @param position The position of the clicked item.
      * @return true if this click should enable selection mode.
      */
-    override fun onItemClick(view: View, position: Int): Boolean {
+    override fun onItemClick(
+        view: View,
+        position: Int
+    ): Boolean {
         // Check if action mode is initialized and selected item exist.
         return if (actionMode != null && position != RecyclerView.NO_POSITION) {
             toggleSelection(position)
@@ -280,7 +297,10 @@ class CategoryController :
      *
      * @param action The action performed.
      */
-    override fun onActionCanceled(action: Int, positions: MutableList<Int>?) {
+    override fun onActionCanceled(
+        action: Int,
+        positions: MutableList<Int>?
+    ) {
         adapter?.restoreDeletedItems()
         undoHelper = null
     }
@@ -291,7 +311,10 @@ class CategoryController :
      * @param action The action performed.
      * @param event The event that triggered the action
      */
-    override fun onActionConfirmed(action: Int, event: Int) {
+    override fun onActionConfirmed(
+        action: Int,
+        event: Int
+    ) {
         val adapter = adapter ?: return
         presenter.deleteCategories(adapter.deletedItems.map { it.category })
         undoHelper = null
@@ -312,7 +335,10 @@ class CategoryController :
      * @param category The category to rename.
      * @param name The new name of the category.
      */
-    override fun renameCategory(category: Category, name: String) {
+    override fun renameCategory(
+        category: Category,
+        name: String
+    ) {
         presenter.renameCategory(category, name)
     }
 

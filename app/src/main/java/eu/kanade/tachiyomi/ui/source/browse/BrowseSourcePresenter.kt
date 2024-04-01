@@ -37,8 +37,6 @@ import eu.kanade.tachiyomi.util.system.withUIContext
 import exh.isEhBasedSource
 import exh.savedsearches.EXHSavedSearch
 import exh.savedsearches.JsonSavedSearch
-import java.lang.RuntimeException
-import java.util.Date
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
@@ -58,6 +56,8 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import xyz.nulldev.ts.api.http.serializer.FilterSerializer
+import java.lang.RuntimeException
+import java.util.Date
 
 /**
  * Presenter of [BrowseSourceController].
@@ -72,7 +72,6 @@ open class BrowseSourcePresenter(
     private val coverCache: CoverCache = Injekt.get(),
     private val recommends: Boolean = false
 ) : BasePresenter<BrowseSourceController>() {
-
     /**
      * Selected source.
      */
@@ -146,14 +145,22 @@ open class BrowseSourcePresenter(
      * @param query the query.
      * @param filters the current state of the filters (for search mode).
      */
-    fun restartPager(query: String = this.query, filters: FilterList = this.appliedFilters) {
+    fun restartPager(
+        query: String = this.query,
+        filters: FilterList = this.appliedFilters
+    ) {
         this.query = query
         this.appliedFilters = filters
 
         // Create a new pager.
-        pager = if (recommends && searchManga != null) RecommendsPager(
-            searchManga
-        ) else createPager(query, filters)
+        pager =
+            if (recommends && searchManga != null) {
+                RecommendsPager(
+                    searchManga
+                )
+            } else {
+                createPager(query, filters)
+            }
 
         val sourceId = source.id
 
@@ -161,20 +168,21 @@ open class BrowseSourcePresenter(
 
         // Prepare the pager.
         pagerSubscription?.let { remove(it) }
-        pagerSubscription = pager.results()
-            .observeOn(Schedulers.io())
-            .map { pair -> pair.first to pair.second.map { networkToLocalManga(it, sourceId) } }
-            .doOnNext { initializeMangas(it.second) }
-            .map { pair -> pair.first to pair.second.map { SourceItem(it, catalogueDisplayMode) } }
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeReplay(
-                { view, (page, mangas) ->
-                    view.onAddPage(page, mangas)
-                },
-                { _, error ->
-                    Timber.e(error)
-                }
-            )
+        pagerSubscription =
+            pager.results()
+                .observeOn(Schedulers.io())
+                .map { pair -> pair.first to pair.second.map { networkToLocalManga(it, sourceId) } }
+                .doOnNext { initializeMangas(it.second) }
+                .map { pair -> pair.first to pair.second.map { SourceItem(it, catalogueDisplayMode) } }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeReplay(
+                    { view, (page, mangas) ->
+                        view.onAddPage(page, mangas)
+                    },
+                    { _, error ->
+                        Timber.e(error)
+                    }
+                )
 
         // Request first page.
         requestNext()
@@ -187,15 +195,16 @@ open class BrowseSourcePresenter(
         if (!hasNextPage()) return
 
         nextPageJob?.cancel()
-        nextPageJob = launchIO {
-            try {
-                pager.requestNextPage()
-            } catch (e: Throwable) {
-                withUIContext {
-                    view().subscribe { view -> view?.onAddPageError(e) }
+        nextPageJob =
+            launchIO {
+                try {
+                    pager.requestNextPage()
+                } catch (e: Throwable) {
+                    withUIContext {
+                        view().subscribe { view -> view?.onAddPageError(e) }
+                    }
                 }
             }
-        }
     }
 
     /**
@@ -212,7 +221,10 @@ open class BrowseSourcePresenter(
      * @param sManga the manga from the source.
      * @return a manga from the database.
      */
-    private fun networkToLocalManga(sManga: SManga, sourceId: Long): Manga {
+    private fun networkToLocalManga(
+        sManga: SManga,
+        sourceId: Long
+    ): Manga {
         var localManga = db.getManga(sManga.url, sourceId).executeAsBlocking()
         if (localManga == null) {
             val newManga = Manga.create(sManga.url, sManga.title, sourceId)
@@ -270,10 +282,11 @@ open class BrowseSourcePresenter(
      */
     fun changeMangaFavorite(manga: Manga) {
         manga.favorite = !manga.favorite
-        manga.date_added = when (manga.favorite) {
-            true -> Date().time
-            false -> 0
-        }
+        manga.date_added =
+            when (manga.favorite) {
+                true -> Date().time
+                false -> 0
+            }
 
         if (!manga.favorite) {
             manga.removeCovers(coverCache)
@@ -291,8 +304,15 @@ open class BrowseSourcePresenter(
         restartPager(filters = filters)
     }
 
-    open fun createPager(query: String, filters: FilterList): Pager {
-        return if (source.isEhBasedSource()) { ExhPager(source, query, filters) } else { SourcePager(source, query, filters) }
+    open fun createPager(
+        query: String,
+        filters: FilterList
+    ): Pager {
+        return if (source.isEhBasedSource()) {
+            ExhPager(source, query, filters)
+        } else {
+            SourcePager(source, query, filters)
+        }
     }
 
     private fun FilterList.toItems(): List<IFlexible<*>> {
@@ -309,24 +329,26 @@ open class BrowseSourcePresenter(
                 is Filter.Select<*> -> SelectItem(filter)
                 is Filter.Group<*> -> {
                     val group = GroupItem(filter)
-                    val subItems = filter.state.mapNotNull {
-                        when (it) {
-                            is Filter.CheckBox -> CheckboxSectionItem(it)
-                            is Filter.TriState -> TriStateSectionItem(it)
-                            is Filter.Text -> TextSectionItem(it)
-                            is Filter.Select<*> -> SelectSectionItem(it)
-                            else -> null
+                    val subItems =
+                        filter.state.mapNotNull {
+                            when (it) {
+                                is Filter.CheckBox -> CheckboxSectionItem(it)
+                                is Filter.TriState -> TriStateSectionItem(it)
+                                is Filter.Text -> TextSectionItem(it)
+                                is Filter.Select<*> -> SelectSectionItem(it)
+                                else -> null
+                            }
                         }
-                    }
                     subItems.forEach { it.header = group }
                     group.subItems = subItems
                     group
                 }
                 is Filter.Sort -> {
                     val group = SortGroup(filter)
-                    val subItems = filter.values.map {
-                        SortItem(it, group)
-                    }
+                    val subItems =
+                        filter.values.map {
+                            SortItem(it, group)
+                        }
                     group.subItems = subItems
                     group
                 }
@@ -360,7 +382,10 @@ open class BrowseSourcePresenter(
      * @param categories the selected categories.
      * @param manga the manga to move.
      */
-    private fun moveMangaToCategories(manga: Manga, categories: List<Category>) {
+    private fun moveMangaToCategories(
+        manga: Manga,
+        categories: List<Category>
+    ) {
         val mc = categories.filter { it.id != 0 }.map { MangaCategory.create(manga, it) }
         db.setMangaCategories(mc, listOf(manga))
     }
@@ -371,7 +396,10 @@ open class BrowseSourcePresenter(
      * @param category the selected category.
      * @param manga the manga to move.
      */
-    fun moveMangaToCategory(manga: Manga, category: Category?) {
+    fun moveMangaToCategory(
+        manga: Manga,
+        category: Category?
+    ) {
         moveMangaToCategories(manga, listOfNotNull(category))
     }
 
@@ -381,7 +409,10 @@ open class BrowseSourcePresenter(
      * @param manga needed to change
      * @param selectedCategories selected categories
      */
-    fun updateMangaCategories(manga: Manga, selectedCategories: List<Category>) {
+    fun updateMangaCategories(
+        manga: Manga,
+        selectedCategories: List<Category>
+    ) {
         if (!manga.favorite) {
             changeMangaFavorite(manga)
         }
@@ -391,17 +422,21 @@ open class BrowseSourcePresenter(
 
     // EXH -->
     private val filterSerializer = FilterSerializer()
+
     fun saveSearches(searches: List<EXHSavedSearch>) {
-        val otherSerialized = prefs.eh_savedSearches().get().filter {
-            !it.startsWith("${source.id}:")
-        }
-        val newSerialized = searches.map {
-            "${source.id}:" + buildJsonObject {
-                put("name", it.name)
-                put("query", it.query)
-                put("filters", filterSerializer.serialize(it.filterList))
-            }.toString()
-        }
+        val otherSerialized =
+            prefs.eh_savedSearches().get().filter {
+                !it.startsWith("${source.id}:")
+            }
+        val newSerialized =
+            searches.map {
+                "${source.id}:" +
+                    buildJsonObject {
+                        put("name", it.name)
+                        put("query", it.query)
+                        put("filters", filterSerializer.serialize(it.filterList))
+                    }.toString()
+            }
         prefs.eh_savedSearches().set((otherSerialized + newSerialized).toSet())
     }
 

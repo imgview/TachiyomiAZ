@@ -6,7 +6,6 @@ import android.view.animation.DecelerateInterpolator
 import com.google.android.material.tabs.TabLayout
 
 class TabsAnimator(val tabs: TabLayout) {
-
     /**
      * The default height of the tab layout. It's unknown until the view is layout.
      */

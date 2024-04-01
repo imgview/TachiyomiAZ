@@ -12,13 +12,6 @@ import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.util.lang.toCalendar
 import eu.kanade.tachiyomi.util.selectInt
 import eu.kanade.tachiyomi.util.selectText
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.GregorianCalendar
-import java.util.Locale
-import java.util.zip.GZIPInputStream
 import okhttp3.FormBody
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -31,9 +24,15 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.parser.Parser
 import rx.Observable
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.GregorianCalendar
+import java.util.Locale
+import java.util.zip.GZIPInputStream
 
 class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListInterceptor) {
-
     private val authClient = client.newBuilder().addInterceptor(interceptor).build()
 
     fun search(query: String): Observable<List<TrackSearch>> {
@@ -88,15 +87,16 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         return Observable.defer {
             // Get track data
             val response = authClient.newCall(GET(url = editPageUrl(track.media_id))).execute()
-            val editData = response.use {
-                val page = it.consumeBody().let { it1 -> Jsoup.parse(it1) }
+            val editData =
+                response.use {
+                    val page = it.consumeBody().let { it1 -> Jsoup.parse(it1) }
 
-                // Extract track data from MAL page
-                extractDataFromEditPage(page).apply {
-                    // Apply changes to the just fetched data
-                    copyPersonalFrom(track)
+                    // Extract track data from MAL page
+                    extractDataFromEditPage(page).apply {
+                        // Apply changes to the just fetched data
+                        copyPersonalFrom(track)
+                    }
                 }
-            }
 
             // Update remote
             authClient.newCall(POST(url = editPageUrl(track.media_id), body = mangaEditPostBody(editData)))
@@ -116,22 +116,23 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                     if (it.priorResponse?.isRedirect != true) {
                         val trackForm = it.consumeBody().let { it1 -> Jsoup.parse(it1) }
 
-                        libTrack = Track.create(TrackManager.MYANIMELIST).apply {
-                            last_chapter_read =
-                                trackForm.select("#add_manga_num_read_chapters").`val`().toInt()
-                            total_chapters = trackForm.select("#totalChap").text().toInt()
-                            status =
-                                trackForm.select("#add_manga_status > option[selected]").`val`()
-                                    .toInt()
-                            score =
-                                trackForm.select("#add_manga_score > option[selected]").`val`()
-                                .toFloatOrNull()
-                                ?: 0f
-                            started_reading_date =
-                                trackForm.searchDatePicker("#add_manga_start_date")
-                            finished_reading_date =
-                                trackForm.searchDatePicker("#add_manga_finish_date")
-                        }
+                        libTrack =
+                            Track.create(TrackManager.MYANIMELIST).apply {
+                                last_chapter_read =
+                                    trackForm.select("#add_manga_num_read_chapters").`val`().toInt()
+                                total_chapters = trackForm.select("#totalChap").text().toInt()
+                                status =
+                                    trackForm.select("#add_manga_status > option[selected]").`val`()
+                                        .toInt()
+                                score =
+                                    trackForm.select("#add_manga_score > option[selected]").`val`()
+                                        .toFloatOrNull()
+                                        ?: 0f
+                                started_reading_date =
+                                    trackForm.searchDatePicker("#add_manga_start_date")
+                                finished_reading_date =
+                                    trackForm.searchDatePicker("#add_manga_finish_date")
+                            }
                     }
                 }
                 libTrack
@@ -171,12 +172,13 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         return authClient.newCall(POST(url = exportListUrl(), body = exportPostBody()))
             .asObservable()
             .map { response ->
-                baseUrl + response.consumeBody().let {
-                    Jsoup.parse(it)
-                        .select("div.goodresult")
-                        .select("a")
-                        .attr("href")
-                }
+                baseUrl +
+                    response.consumeBody().let {
+                        Jsoup.parse(it)
+                            .select("div.goodresult")
+                            .select("a")
+                            .attr("href")
+                    }
             }
     }
 
@@ -252,9 +254,10 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         private const val PREFIX_MY = "my:"
         private const val TD = "td"
 
-        fun loginUrl() = baseUrl.toUri().buildUpon()
-            .appendPath("login.php")
-            .toString()
+        fun loginUrl() =
+            baseUrl.toUri().buildUpon()
+                .appendPath("login.php")
+                .toString()
 
         private fun mangaUrl(remoteId: Int) = baseMangaUrl + remoteId
 
@@ -272,19 +275,22 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 .toString()
         }
 
-        private fun exportListUrl() = Uri.parse(baseUrl).buildUpon()
-            .appendPath("panel.php")
-            .appendQueryParameter("go", "export")
-            .toString()
+        private fun exportListUrl() =
+            Uri.parse(baseUrl).buildUpon()
+                .appendPath("panel.php")
+                .appendQueryParameter("go", "export")
+                .toString()
 
-        private fun editPageUrl(mediaId: Int) = Uri.parse(baseModifyListUrl).buildUpon()
-            .appendPath(mediaId.toString())
-            .appendPath("edit")
-            .toString()
+        private fun editPageUrl(mediaId: Int) =
+            Uri.parse(baseModifyListUrl).buildUpon()
+                .appendPath(mediaId.toString())
+                .appendPath("edit")
+                .toString()
 
-        private fun addUrl() = Uri.parse(baseModifyListUrl).buildUpon()
-            .appendPath("add.json")
-            .toString()
+        private fun addUrl() =
+            Uri.parse(baseModifyListUrl).buildUpon()
+                .appendPath("add.json")
+                .toString()
 
         private fun exportPostBody(): RequestBody {
             return FormBody.Builder()
@@ -294,11 +300,12 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         }
 
         private fun mangaPostPayload(track: Track): RequestBody {
-            val body = JSONObject()
-                .put("manga_id", track.media_id)
-                .put("status", track.status)
-                .put("score", track.score)
-                .put("num_read_chapters", track.last_chapter_read)
+            val body =
+                JSONObject()
+                    .put("manga_id", track.media_id)
+                    .put("status", track.status)
+                    .put("score", track.score)
+                    .put("num_read_chapters", track.last_chapter_read)
 
             return body.toString().toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
         }
@@ -356,19 +363,22 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
 
         private fun Element.searchTotalChapters() = if (select(TD)[4].text() == "-") 0 else select(TD)[4].text().toInt()
 
-        private fun Element.searchCoverUrl() = select("img")
-            .attr("data-src")
-            .split("\\?")[0]
-            .replace("/r/50x70/", "/")
+        private fun Element.searchCoverUrl() =
+            select("img")
+                .attr("data-src")
+                .split("\\?")[0]
+                .replace("/r/50x70/", "/")
 
-        private fun Element.searchMediaId() = select("div.picSurround")
-            .select("a").attr("id")
-            .replace("sarea", "")
-            .toInt()
+        private fun Element.searchMediaId() =
+            select("div.picSurround")
+                .select("a").attr("id")
+                .replace("sarea", "")
+                .toInt()
 
-        private fun Element.searchSummary() = select("div.pt4")
-            .first()!!
-            .ownText()
+        private fun Element.searchSummary() =
+            select("div.pt4")
+                .first()!!
+                .ownText()
 
         private fun Element.searchPublishingStatus() = if (select(TD).last()!!.text() == "-") "Publishing" else "Finished"
 
@@ -376,83 +386,62 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
 
         private fun Element.searchStartDate() = select(TD)[6].text()
 
-        private fun getStatus(status: String) = when (status) {
-            "Reading" -> 1
-            "Completed" -> 2
-            "On-Hold" -> 3
-            "Dropped" -> 4
-            "Plan to Read" -> 6
-            else -> 1
-        }
+        private fun getStatus(status: String) =
+            when (status) {
+                "Reading" -> 1
+                "Completed" -> 2
+                "On-Hold" -> 3
+                "Dropped" -> 4
+                "Plan to Read" -> 6
+                else -> 1
+            }
     }
 
     private class MyAnimeListEditData(
         // entry_id
         var entry_id: String,
-
         // manga_id
         var manga_id: String,
-
         // add_manga[status]
         var status: String,
-
         // add_manga[num_read_volumes]
         var num_read_volumes: String,
-
         // last_completed_vol
         var last_completed_vol: String,
-
         // add_manga[num_read_chapters]
         var num_read_chapters: String,
-
         // add_manga[score]
         var score: String,
-
         // add_manga[start_date][month]
         var start_date_month: String, // [1-12]
-
         // add_manga[start_date][day]
         var start_date_day: String,
-
         // add_manga[start_date][year]
         var start_date_year: String,
-
         // add_manga[finish_date][month]
         var finish_date_month: String, // [1-12]
-
         // add_manga[finish_date][day]
         var finish_date_day: String,
-
         // add_manga[finish_date][year]
         var finish_date_year: String,
-
         // add_manga[tags]
         var tags: String,
-
         // add_manga[priority]
         var priority: String,
-
         // add_manga[storage_type]
         var storage_type: String,
-
         // add_manga[num_retail_volumes]
         var num_retail_volumes: String,
-
         // add_manga[num_read_times]
         var num_read_times: String,
-
         // add_manga[reread_value]
         var reread_value: String,
-
         // add_manga[comments]
         var comments: String,
-
         // add_manga[is_asked_to_discuss]
         var is_asked_to_discuss: String,
-
         // add_manga[sns_post_type]
         var sns_post_type: String,
-
         // submitIt
         val submitIt: String = "0"
     ) {

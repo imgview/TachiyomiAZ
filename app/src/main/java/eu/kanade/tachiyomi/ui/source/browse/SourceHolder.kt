@@ -14,8 +14,8 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
  */
 abstract class SourceHolder<VB : ViewBinding>(view: View, adapter: FlexibleAdapter<*>) :
     BaseFlexibleViewHolder(view, adapter) {
-
     abstract val binding: VB
+
     /**
      * Method called from [CatalogueAdapter.onBindViewHolder]. It updates the data for this
      * holder with the given manga.

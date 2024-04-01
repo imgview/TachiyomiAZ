@@ -22,7 +22,6 @@ import eu.kanade.tachiyomi.util.prepUpdateCover
 import eu.kanade.tachiyomi.util.removeCovers
 import exh.MERGED_SOURCE_ID
 import exh.util.await
-import java.util.Date
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import rx.Observable
@@ -31,6 +30,7 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Date
 
 /**
  * Presenter of MangaInfoFragment.
@@ -49,7 +49,6 @@ class MangaInfoPresenter(
     private val coverCache: CoverCache = Injekt.get(),
     private val gson: Gson = Injekt.get()
 ) : BasePresenter<MangaInfoController>() {
-
     /**
      * Subscription to update the manga from the source.
      */
@@ -87,25 +86,26 @@ class MangaInfoPresenter(
      */
     fun fetchMangaFromSource(manualFetch: Boolean = false) {
         if (!fetchMangaSubscription.isNullOrUnsubscribed()) return
-        fetchMangaSubscription = Observable.defer {
-            runAsObservable({
-                val networkManga = source.getMangaDetails(manga.toMangaInfo())
-                val sManga = networkManga.toSManga()
-                manga.prepUpdateCover(coverCache, sManga, manualFetch)
-                manga.copyFrom(sManga)
-                manga.initialized = true
-                db.insertManga(manga).executeAsBlocking()
-                manga
-            })
-        }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeFirst(
-                { view, _ ->
-                    view.onFetchMangaDone()
-                },
-                MangaInfoController::onFetchMangaError
-            )
+        fetchMangaSubscription =
+            Observable.defer {
+                runAsObservable({
+                    val networkManga = source.getMangaDetails(manga.toMangaInfo())
+                    val sManga = networkManga.toSManga()
+                    manga.prepUpdateCover(coverCache, sManga, manualFetch)
+                    manga.copyFrom(sManga)
+                    manga.initialized = true
+                    db.insertManga(manga).executeAsBlocking()
+                    manga
+                })
+            }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeFirst(
+                    { view, _ ->
+                        view.onFetchMangaDone()
+                    },
+                    MangaInfoController::onFetchMangaError
+                )
     }
 
     /**
@@ -115,10 +115,11 @@ class MangaInfoPresenter(
      */
     fun toggleFavorite(): Boolean {
         manga.favorite = !manga.favorite
-        manga.date_added = when (manga.favorite) {
-            true -> Date().time
-            false -> 0
-        }
+        manga.date_added =
+            when (manga.favorite) {
+                true -> Date().time
+                false -> 0
+            }
         if (!manga.favorite) {
             manga.removeCovers(coverCache)
         }
@@ -173,7 +174,10 @@ class MangaInfoPresenter(
      * @param manga the manga to move.
      * @param categories the selected categories.
      */
-    fun moveMangaToCategories(manga: Manga, categories: List<Category>) {
+    fun moveMangaToCategories(
+        manga: Manga,
+        categories: List<Category>
+    ) {
         val mc = categories.filter { it.id != 0 }.map { MangaCategory.create(manga, it) }
         db.setMangaCategories(mc, listOf(manga))
     }
@@ -184,54 +188,66 @@ class MangaInfoPresenter(
      * @param manga the manga to move.
      * @param category the selected category, or null for default category.
      */
-    fun moveMangaToCategory(manga: Manga, category: Category?) {
+    fun moveMangaToCategory(
+        manga: Manga,
+        category: Category?
+    ) {
         moveMangaToCategories(manga, listOfNotNull(category))
     }
+
     /*
     suspend fun recommendationView(manga: Manga): Manga {
         val title = manga.title
         val source = manga.source
 
     }*/
-    suspend fun smartSearchMerge(manga: Manga, originalMangaId: Long): Manga {
-        val originalManga = db.getManga(originalMangaId).await()
-            ?: throw IllegalArgumentException("Unknown manga ID: $originalMangaId")
-        val toInsert = if (originalManga.source == MERGED_SOURCE_ID) {
-            originalManga.apply {
-                val originalChildren = MergedSource.MangaConfig.readFromUrl(gson, url).children
-                if (originalChildren.any { it.source == manga.source && it.url == manga.url }) {
-                    throw IllegalArgumentException("This manga is already merged with the current manga!")
-                }
+    suspend fun smartSearchMerge(
+        manga: Manga,
+        originalMangaId: Long
+    ): Manga {
+        val originalManga =
+            db.getManga(originalMangaId).await()
+                ?: throw IllegalArgumentException("Unknown manga ID: $originalMangaId")
+        val toInsert =
+            if (originalManga.source == MERGED_SOURCE_ID) {
+                originalManga.apply {
+                    val originalChildren = MergedSource.MangaConfig.readFromUrl(gson, url).children
+                    if (originalChildren.any { it.source == manga.source && it.url == manga.url }) {
+                        throw IllegalArgumentException("This manga is already merged with the current manga!")
+                    }
 
-                url = MergedSource.MangaConfig(
-                    originalChildren + MergedSource.MangaSource(
-                        manga.source,
-                        manga.url
+                    url =
+                        MergedSource.MangaConfig(
+                            originalChildren +
+                                MergedSource.MangaSource(
+                                    manga.source,
+                                    manga.url
+                                )
+                        ).writeAsUrl(gson)
+                }
+            } else {
+                val newMangaConfig =
+                    MergedSource.MangaConfig(
+                        listOf(
+                            MergedSource.MangaSource(
+                                originalManga.source,
+                                originalManga.url
+                            ),
+                            MergedSource.MangaSource(
+                                manga.source,
+                                manga.url
+                            )
+                        )
                     )
-                ).writeAsUrl(gson)
+                Manga.create(newMangaConfig.writeAsUrl(gson), originalManga.title, MERGED_SOURCE_ID).apply {
+                    copyFrom(originalManga)
+                    favorite = true
+                    last_update = originalManga.last_update
+                    viewer = originalManga.viewer
+                    chapter_flags = originalManga.chapter_flags
+                    sorting = Manga.SORTING_NUMBER
+                }
             }
-        } else {
-            val newMangaConfig = MergedSource.MangaConfig(
-                listOf(
-                    MergedSource.MangaSource(
-                        originalManga.source,
-                        originalManga.url
-                    ),
-                    MergedSource.MangaSource(
-                        manga.source,
-                        manga.url
-                    )
-                )
-            )
-            Manga.create(newMangaConfig.writeAsUrl(gson), originalManga.title, MERGED_SOURCE_ID).apply {
-                copyFrom(originalManga)
-                favorite = true
-                last_update = originalManga.last_update
-                viewer = originalManga.viewer
-                chapter_flags = originalManga.chapter_flags
-                sorting = Manga.SORTING_NUMBER
-            }
-        }
 
         // Note that if the manga are merged in a different order, this won't trigger, but I don't care lol
         val existingManga = db.getManga(toInsert.url, toInsert.source).await()

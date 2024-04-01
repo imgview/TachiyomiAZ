@@ -42,7 +42,6 @@ open class GlobalSearchPresenter(
     val db: DatabaseHelper = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get()
 ) : BasePresenter<GlobalSearchController>() {
-
     /**
      * Enabled sources.
      */
@@ -109,10 +108,11 @@ open class GlobalSearchPresenter(
         val hiddenCatalogues = preferences.hiddenCatalogues().get()
         val pinnedCatalogues = preferences.pinnedCatalogues().get()
 
-        val list = sourceManager.getVisibleCatalogueSources()
-            .filter { it.lang in languages }
-            .filterNot { it.id.toString() in hiddenCatalogues }
-            .sortedBy { "(${it.lang}) ${it.name}" }
+        val list =
+            sourceManager.getVisibleCatalogueSources()
+                .filter { it.lang in languages }
+                .filterNot { it.id.toString() in hiddenCatalogues }
+                .sortedBy { "(${it.lang}) ${it.name}" }
 
         return if (preferences.searchPinnedSourcesOnly()) {
             list.filter { it.id.toString() in pinnedCatalogues }
@@ -128,11 +128,12 @@ open class GlobalSearchPresenter(
         var filteredSources: List<CatalogueSource>? = null
 
         if (!filter.isNullOrEmpty()) {
-            filteredSources = extensionManager.installedExtensions
-                .filter { it.pkgName == filter }
-                .flatMap { it.sources }
-                .filter { it in enabledSources }
-                .filterIsInstance<CatalogueSource>()
+            filteredSources =
+                extensionManager.installedExtensions
+                    .filter { it.pkgName == filter }
+                    .flatMap { it.sources }
+                    .filter { it in enabledSources }
+                    .filterIsInstance<CatalogueSource>()
         }
 
         if (filteredSources != null && filteredSources.isNotEmpty()) {
@@ -149,7 +150,10 @@ open class GlobalSearchPresenter(
     /**
      * Creates a catalogue search item
      */
-    protected open fun createCatalogueSearchItem(source: CatalogueSource, results: List<GlobalSearchCardItem>?): GlobalSearchItem {
+    protected open fun createCatalogueSearchItem(
+        source: CatalogueSource,
+        results: List<GlobalSearchCardItem>?
+    ): GlobalSearchItem {
         return GlobalSearchItem(source, results)
     }
 
@@ -175,46 +179,47 @@ open class GlobalSearchPresenter(
         val pinnedSourceIds = preferences.pinnedCatalogues().get()
 
         fetchSourcesSubscription?.unsubscribe()
-        fetchSourcesSubscription = Observable.from(sources)
-            .flatMap(
-                { source ->
-                    Observable.defer { source.fetchSearchManga(1, query, FilterList()) }
-                        .subscribeOn(Schedulers.io())
-                        .onErrorReturn { MangasPage(emptyList(), false) } // Ignore timeouts or other exceptions
-                        .map { it.mangas.take(10) } // Get at most 10 manga from search result.
-                        .map { list -> list.map { networkToLocalManga(it, source.id) } } // Convert to local manga.
-                        .doOnNext { fetchImage(it, source) } // Load manga covers.
-                        .map { list -> createCatalogueSearchItem(source, list.map { GlobalSearchCardItem(it) }) }
-                },
-                5
-            )
-            .observeOn(AndroidSchedulers.mainThread())
-            // Update matching source with the obtained results
-            .map { result ->
-                items
-                    .map { item -> if (item.source == result.source) result else item }
-                    .sortedWith(
-                        compareBy(
-                            // Bubble up sources that actually have results
-                            { it.results.isNullOrEmpty() },
-                            // Same as initial sort, i.e. pinned first then alphabetically
-                            { it.source.id.toString() !in pinnedSourceIds },
-                            { "${it.source.name} (${it.source.lang})" }
+        fetchSourcesSubscription =
+            Observable.from(sources)
+                .flatMap(
+                    { source ->
+                        Observable.defer { source.fetchSearchManga(1, query, FilterList()) }
+                            .subscribeOn(Schedulers.io())
+                            .onErrorReturn { MangasPage(emptyList(), false) } // Ignore timeouts or other exceptions
+                            .map { it.mangas.take(10) } // Get at most 10 manga from search result.
+                            .map { list -> list.map { networkToLocalManga(it, source.id) } } // Convert to local manga.
+                            .doOnNext { fetchImage(it, source) } // Load manga covers.
+                            .map { list -> createCatalogueSearchItem(source, list.map { GlobalSearchCardItem(it) }) }
+                    },
+                    5
+                )
+                .observeOn(AndroidSchedulers.mainThread())
+                // Update matching source with the obtained results
+                .map { result ->
+                    items
+                        .map { item -> if (item.source == result.source) result else item }
+                        .sortedWith(
+                            compareBy(
+                                // Bubble up sources that actually have results
+                                { it.results.isNullOrEmpty() },
+                                // Same as initial sort, i.e. pinned first then alphabetically
+                                { it.source.id.toString() !in pinnedSourceIds },
+                                { "${it.source.name} (${it.source.lang})" }
+                            )
                         )
-                    )
-            }
-            // Update current state
-            .doOnNext { items = it }
-            // Deliver initial state
-            .startWith(initialItems)
-            .subscribeLatestCache(
-                { view, manga ->
-                    view.setItems(manga)
-                },
-                { _, error ->
-                    Timber.e(error)
                 }
-            )
+                // Update current state
+                .doOnNext { items = it }
+                // Deliver initial state
+                .startWith(initialItems)
+                .subscribeLatestCache(
+                    { view, manga ->
+                        view.setItems(manga)
+                    },
+                    { _, error ->
+                        Timber.e(error)
+                    }
+                )
     }
 
     /**
@@ -222,7 +227,10 @@ open class GlobalSearchPresenter(
      *
      * @param manga the list of manga to initialize.
      */
-    private fun fetchImage(manga: List<Manga>, source: Source) {
+    private fun fetchImage(
+        manga: List<Manga>,
+        source: Source
+    ) {
         fetchImageSubject.onNext(Pair(manga, source))
     }
 
@@ -231,25 +239,26 @@ open class GlobalSearchPresenter(
      */
     private fun initializeFetchImageSubscription() {
         fetchImageSubscription?.unsubscribe()
-        fetchImageSubscription = fetchImageSubject.observeOn(Schedulers.io())
-            .flatMap { pair ->
-                val source = pair.second
-                Observable.from(pair.first).filter { it.thumbnail_url == null && !it.initialized }
-                    .map { Pair(it, source) }
-                    .concatMap { getMangaDetailsObservable(it.first, it.second) }
-                    .map { Pair(source as CatalogueSource, it) }
-            }
-            .onBackpressureBuffer()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                { (source, manga) ->
-                    @Suppress("DEPRECATION")
-                    view?.onMangaInitialized(source, manga)
-                },
-                { error ->
-                    Timber.e(error)
+        fetchImageSubscription =
+            fetchImageSubject.observeOn(Schedulers.io())
+                .flatMap { pair ->
+                    val source = pair.second
+                    Observable.from(pair.first).filter { it.thumbnail_url == null && !it.initialized }
+                        .map { Pair(it, source) }
+                        .concatMap { getMangaDetailsObservable(it.first, it.second) }
+                        .map { Pair(source as CatalogueSource, it) }
                 }
-            )
+                .onBackpressureBuffer()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    { (source, manga) ->
+                        @Suppress("DEPRECATION")
+                        view?.onMangaInitialized(source, manga)
+                    },
+                    { error ->
+                        Timber.e(error)
+                    }
+                )
     }
 
     /**
@@ -258,7 +267,10 @@ open class GlobalSearchPresenter(
      * @param manga the manga to initialize.
      * @return an observable of the manga to initialize
      */
-    private fun getMangaDetailsObservable(manga: Manga, source: Source): Observable<Manga> {
+    private fun getMangaDetailsObservable(
+        manga: Manga,
+        source: Source
+    ): Observable<Manga> {
         return runAsObservable({
             val networkManga = source.getMangaDetails(manga.toMangaInfo())
             manga.copyFrom(networkManga.toSManga())
@@ -276,7 +288,10 @@ open class GlobalSearchPresenter(
      * @param sManga the manga from the source.
      * @return a manga from the database.
      */
-    protected open fun networkToLocalManga(sManga: SManga, sourceId: Long): Manga {
+    protected open fun networkToLocalManga(
+        sManga: SManga,
+        sourceId: Long
+    ): Manga {
         var localManga = db.getManga(sManga.url, sourceId).executeAsBlocking()
         if (localManga == null) {
             val newManga = Manga.create(sManga.url, sManga.title, sourceId)

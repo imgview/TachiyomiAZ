@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.data.database.models.ChapterImpl
  * JSON Serializer used to write / read [ChapterImpl] to / from json
  */
 object ChapterTypeAdapter {
-
     private const val URL = "u"
     private const val READ = "r"
     private const val BOOKMARK = "b"

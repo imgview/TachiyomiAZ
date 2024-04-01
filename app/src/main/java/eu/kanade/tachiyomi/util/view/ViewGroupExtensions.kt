@@ -10,6 +10,9 @@ import androidx.annotation.LayoutRes
  * @param layout the layout to inflate.
  * @param attachToRoot whether to attach the view to the root or not. Defaults to false.
  */
-fun ViewGroup.inflate(@LayoutRes layout: Int, attachToRoot: Boolean = false): View {
+fun ViewGroup.inflate(
+    @LayoutRes layout: Int,
+    attachToRoot: Boolean = false
+): View {
     return LayoutInflater.from(context).inflate(layout, this, attachToRoot)
 }

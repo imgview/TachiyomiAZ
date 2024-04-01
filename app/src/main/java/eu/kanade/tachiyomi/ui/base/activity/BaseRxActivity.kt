@@ -9,7 +9,6 @@ import exh.ui.lock.LockActivityDelegate
 import nucleus.view.NucleusAppCompatActivity
 
 abstract class BaseRxActivity<VB : ViewBinding, P : BasePresenter<*>> : NucleusAppCompatActivity<P>() {
-
     val scope = lifecycleScope
     lateinit var binding: VB
 

@@ -12,7 +12,6 @@ import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
 class Anilist(private val context: Context, id: Int) : TrackService(id) {
-
     companion object {
         const val READING = 1
         const val COMPLETED = 2
@@ -59,17 +58,18 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         return listOf(READING, PLANNING, COMPLETED, REPEATING, PAUSED, DROPPED)
     }
 
-    override fun getStatus(status: Int): String = with(context) {
-        when (status) {
-            READING -> getString(R.string.reading)
-            PLANNING -> getString(R.string.plan_to_read)
-            COMPLETED -> getString(R.string.completed)
-            REPEATING -> getString(R.string.repeating)
-            PAUSED -> getString(R.string.paused)
-            DROPPED -> getString(R.string.dropped)
-            else -> ""
+    override fun getStatus(status: Int): String =
+        with(context) {
+            when (status) {
+                READING -> getString(R.string.reading)
+                PLANNING -> getString(R.string.plan_to_read)
+                COMPLETED -> getString(R.string.completed)
+                REPEATING -> getString(R.string.repeating)
+                PAUSED -> getString(R.string.paused)
+                DROPPED -> getString(R.string.dropped)
+                else -> ""
+            }
         }
-    }
 
     override fun getCompletionStatus(): Int = COMPLETED
 
@@ -96,15 +96,17 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
             // 100 point
             POINT_100 -> index.toFloat()
             // 5 stars
-            POINT_5 -> when (index) {
-                0 -> 0f
-                else -> index * 20f - 10f
-            }
+            POINT_5 ->
+                when (index) {
+                    0 -> 0f
+                    else -> index * 20f - 10f
+                }
             // Smiley
-            POINT_3 -> when (index) {
-                0 -> 0f
-                else -> index * 25f + 10f
-            }
+            POINT_3 ->
+                when (index) {
+                    0 -> 0f
+                    else -> index * 25f + 10f
+                }
             // 10 point decimal
             POINT_10_DECIMAL -> index.toFloat()
             else -> throw Exception("Unknown score type")
@@ -115,16 +117,18 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         val score = track.score
 
         return when (scorePreference.get()) {
-            POINT_5 -> when (score) {
-                0f -> "0 ★"
-                else -> "${((score + 10) / 20).toInt()} ★"
-            }
-            POINT_3 -> when {
-                score == 0f -> "0"
-                score <= 35 -> "😦"
-                score <= 60 -> "😐"
-                else -> "😊"
-            }
+            POINT_5 ->
+                when (score) {
+                    0f -> "0 ★"
+                    else -> "${((score + 10) / 20).toInt()} ★"
+                }
+            POINT_3 ->
+                when {
+                    score == 0f -> "0"
+                    score <= 35 -> "😦"
+                    score <= 60 -> "😐"
+                    else -> "😊"
+                }
             else -> track.toAnilistScore()
         }
     }
@@ -177,7 +181,10 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
             }
     }
 
-    override fun login(username: String, password: String) = login(password)
+    override fun login(
+        username: String,
+        password: String
+    ) = login(password)
 
     fun login(token: String): Completable {
         val oauth = api.createOAuth(token)

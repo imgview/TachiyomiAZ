@@ -13,7 +13,9 @@ import androidx.preference.PreferenceViewHolder
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
 
-class SwitchPreferenceCategory @JvmOverloads constructor(
+class SwitchPreferenceCategory
+@JvmOverloads
+constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) :
@@ -23,7 +25,6 @@ class SwitchPreferenceCategory @JvmOverloads constructor(
         R.attr.switchPreferenceCompatStyle
     ),
     CompoundButton.OnCheckedChangeListener {
-
     private var mChecked = false
 
     private var mCheckedSet = false
@@ -57,7 +58,10 @@ class SwitchPreferenceCategory @JvmOverloads constructor(
         }
     }
 
-    override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
+    override fun onCheckedChanged(
+        buttonView: CompoundButton,
+        isChecked: Boolean
+    ) {
         if (!callChangeListener(isChecked)) {
             buttonView.isChecked = !isChecked
         } else {
@@ -110,11 +114,17 @@ class SwitchPreferenceCategory @JvmOverloads constructor(
         return false
     }
 
-    override fun onGetDefaultValue(a: TypedArray, index: Int): Any {
+    override fun onGetDefaultValue(
+        a: TypedArray,
+        index: Int
+    ): Any {
         return a.getBoolean(index, false)
     }
 
-    override fun onSetInitialValue(restoreValue: Boolean, defaultValue: Any?) {
+    override fun onSetInitialValue(
+        restoreValue: Boolean,
+        defaultValue: Any?
+    ) {
         setChecked(
             if (restoreValue) {
                 getPersistedBoolean(mChecked)

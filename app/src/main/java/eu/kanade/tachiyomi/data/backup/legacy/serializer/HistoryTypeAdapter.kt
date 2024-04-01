@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.data.backup.legacy.models.DHistory
  * JSON Serializer used to write / read [DHistory] to / from json
  */
 object HistoryTypeAdapter {
-
     fun build(): TypeAdapter<DHistory> {
         return typeAdapter {
             write {

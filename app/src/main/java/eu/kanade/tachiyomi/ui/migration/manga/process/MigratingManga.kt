@@ -5,10 +5,10 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.DeferredField
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlin.coroutines.CoroutineContext
 
 class MigratingManga(
     private val db: DatabaseHelper,
@@ -27,6 +27,7 @@ class MigratingManga(
 
     @Volatile
     private var manga: Manga? = null
+
     suspend fun manga(): Manga? {
         if (manga == null) manga = db.getManga(mangaId).executeAsBlocking()
         return manga

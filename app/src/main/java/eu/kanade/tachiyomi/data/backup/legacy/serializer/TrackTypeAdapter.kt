@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.data.database.models.TrackImpl
  * JSON Serializer used to write / read [TrackImpl] to / from json
  */
 object TrackTypeAdapter {
-
     private const val SYNC = "s"
     private const val MEDIA = "r"
     private const val LIBRARY = "ml"

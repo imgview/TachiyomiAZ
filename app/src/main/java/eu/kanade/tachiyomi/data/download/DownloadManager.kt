@@ -22,7 +22,6 @@ import uy.kohesive.injekt.injectLazy
  * @param context the application context.
  */
 class DownloadManager(private val context: Context) {
-
     /**
      * The sources manager.
      */
@@ -124,7 +123,11 @@ class DownloadManager(private val context: Context) {
      * @param chapters the list of chapters to enqueue.
      * @param autoStart whether to start the downloader after enqueing the chapters.
      */
-    fun downloadChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean = true) {
+    fun downloadChapters(
+        manga: Manga,
+        chapters: List<Chapter>,
+        autoStart: Boolean = true
+    ) {
         downloader.queueChapters(manga, chapters, autoStart)
     }
 
@@ -136,7 +139,11 @@ class DownloadManager(private val context: Context) {
      * @param chapter the downloaded chapter.
      * @return an observable containing the list of pages from the chapter.
      */
-    fun buildPageList(source: Source, manga: Manga, chapter: Chapter): Observable<List<Page>> {
+    fun buildPageList(
+        source: Source,
+        manga: Manga,
+        chapter: Chapter
+    ): Observable<List<Page>> {
         return buildPageList(provider.findChapterDir(chapter, manga, source))
     }
 
@@ -148,8 +155,9 @@ class DownloadManager(private val context: Context) {
      */
     private fun buildPageList(chapterDir: UniFile?): Observable<List<Page>> {
         return Observable.fromCallable {
-            val files = chapterDir?.listFiles().orEmpty()
-                .filter { "image" in it.type.orEmpty() }
+            val files =
+                chapterDir?.listFiles().orEmpty()
+                    .filter { "image" in it.type.orEmpty() }
 
             if (files.isEmpty()) {
                 throw Exception("Page list is empty")
@@ -169,7 +177,11 @@ class DownloadManager(private val context: Context) {
      * @param manga the manga of the chapter.
      * @param skipCache whether to skip the directory cache and check in the filesystem.
      */
-    fun isChapterDownloaded(chapter: Chapter, manga: Manga, skipCache: Boolean = false): Boolean {
+    fun isChapterDownloaded(
+        chapter: Chapter,
+        manga: Manga,
+        skipCache: Boolean = false
+    ): Boolean {
         return cache.isChapterDownloaded(chapter, manga, skipCache)
     }
 
@@ -198,7 +210,11 @@ class DownloadManager(private val context: Context) {
      * @param manga the manga of the chapters.
      * @param source the source of the chapters.
      */
-    fun deleteChapters(chapters: List<Chapter>, manga: Manga, source: Source) {
+    fun deleteChapters(
+        chapters: List<Chapter>,
+        manga: Manga,
+        source: Source
+    ) {
         queue.remove(chapters)
         val chapterDirs = provider.findChapterDirs(chapters, manga, source)
         chapterDirs.forEach { it.delete() }
@@ -214,7 +230,10 @@ class DownloadManager(private val context: Context) {
      * @param manga the manga to delete.
      * @param source the source of the manga.
      */
-    fun deleteManga(manga: Manga, source: Source) {
+    fun deleteManga(
+        manga: Manga,
+        source: Source
+    ) {
         queue.remove(manga)
         provider.findMangaDir(manga, source)?.delete()
         cache.removeManga(manga)
@@ -226,7 +245,10 @@ class DownloadManager(private val context: Context) {
      * @param chapters the list of chapters to delete.
      * @param manga the manga of the chapters.
      */
-    fun enqueueDeleteChapters(chapters: List<Chapter>, manga: Manga) {
+    fun enqueueDeleteChapters(
+        chapters: List<Chapter>,
+        manga: Manga
+    ) {
         pendingDeleter.addChapters(chapters, manga)
     }
 
@@ -249,15 +271,21 @@ class DownloadManager(private val context: Context) {
      * @param oldChapter the existing chapter with the old name.
      * @param newChapter the target chapter with the new name.
      */
-    fun renameChapter(source: Source, manga: Manga, oldChapter: Chapter, newChapter: Chapter) {
+    fun renameChapter(
+        source: Source,
+        manga: Manga,
+        oldChapter: Chapter,
+        newChapter: Chapter
+    ) {
         val oldNames = provider.getValidChapterDirNames(oldChapter)
         val newName = provider.getChapterDirName(newChapter)
         val mangaDir = provider.getMangaDir(manga, source)
 
         // Assume there's only 1 version of the chapter name formats present
-        val oldFolder = oldNames.asSequence()
-            .mapNotNull { mangaDir.findFile(it) }
-            .firstOrNull()
+        val oldFolder =
+            oldNames.asSequence()
+                .mapNotNull { mangaDir.findFile(it) }
+                .firstOrNull()
 
         if (oldFolder?.renameTo(newName) == true) {
             cache.removeChapter(oldChapter, manga)

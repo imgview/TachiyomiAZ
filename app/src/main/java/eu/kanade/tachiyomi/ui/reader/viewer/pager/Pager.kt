@@ -16,7 +16,6 @@ open class Pager(
     context: Context,
     isHorizontal: Boolean = true
 ) : DirectionalViewPager(context, isHorizontal) {
-
     /**
      * Tap listener function to execute when a tap is detected.
      */
@@ -30,19 +29,20 @@ open class Pager(
     /**
      * Gesture listener that implements tap and long tap events.
      */
-    private val gestureListener = object : GestureDetectorWithLongTap.Listener() {
-        override fun onSingleTapConfirmed(ev: MotionEvent): Boolean {
-            tapListener?.invoke(ev)
-            return true
-        }
+    private val gestureListener =
+        object : GestureDetectorWithLongTap.Listener() {
+            override fun onSingleTapConfirmed(ev: MotionEvent): Boolean {
+                tapListener?.invoke(ev)
+                return true
+            }
 
-        override fun onLongTapConfirmed(ev: MotionEvent) {
-            val listener = longTapListener
-            if (listener != null && listener.invoke(ev)) {
-                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            override fun onLongTapConfirmed(ev: MotionEvent) {
+                val listener = longTapListener
+                if (listener != null && listener.invoke(ev)) {
+                    performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                }
             }
         }
-    }
 
     /**
      * Gesture detector which handles motion events.

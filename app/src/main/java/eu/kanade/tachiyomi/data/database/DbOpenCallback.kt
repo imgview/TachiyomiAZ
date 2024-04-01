@@ -14,7 +14,6 @@ import exh.metadata.sql.tables.SearchTagTable
 import exh.metadata.sql.tables.SearchTitleTable
 
 class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
-
     companion object {
         /**
          * Name of the database file.
@@ -27,42 +26,47 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         const val DATABASE_VERSION = 15 // [EXH + J2K DRAGNDROP + AZ MERGEDSOURES + DEV DATESORT + 1.4 EXTLIB]
     }
 
-    override fun onCreate(db: SupportSQLiteDatabase) = with(db) {
-        execSQL(MangaTable.createTableQuery)
-        execSQL(ChapterTable.createTableQuery)
-        execSQL(TrackTable.createTableQuery)
-        execSQL(CategoryTable.createTableQuery)
-        execSQL(MangaCategoryTable.createTableQuery)
-        execSQL(HistoryTable.createTableQuery)
-        // EXH -->
-        execSQL(SearchMetadataTable.createTableQuery)
-        execSQL(SearchTagTable.createTableQuery)
-        execSQL(SearchTitleTable.createTableQuery)
-        // EXH <--
-        // AZ -->
-        execSQL(MergedTable.createTableQuery)
-        // AZ <--
+    override fun onCreate(db: SupportSQLiteDatabase) =
+        with(db) {
+            execSQL(MangaTable.createTableQuery)
+            execSQL(ChapterTable.createTableQuery)
+            execSQL(TrackTable.createTableQuery)
+            execSQL(CategoryTable.createTableQuery)
+            execSQL(MangaCategoryTable.createTableQuery)
+            execSQL(HistoryTable.createTableQuery)
+            // EXH -->
+            execSQL(SearchMetadataTable.createTableQuery)
+            execSQL(SearchTagTable.createTableQuery)
+            execSQL(SearchTitleTable.createTableQuery)
+            // EXH <--
+            // AZ -->
+            execSQL(MergedTable.createTableQuery)
+            // AZ <--
 
-        // DB indexes
-        execSQL(MangaTable.createUrlIndexQuery)
-        execSQL(MangaTable.createLibraryIndexQuery)
-        execSQL(ChapterTable.createMangaIdIndexQuery)
-        execSQL(ChapterTable.createUnreadChaptersIndexQuery)
-        execSQL(HistoryTable.createChapterIdIndexQuery)
-        // EXH -->
-        db.execSQL(SearchMetadataTable.createUploaderIndexQuery)
-        db.execSQL(SearchMetadataTable.createIndexedExtraIndexQuery)
-        db.execSQL(SearchTagTable.createMangaIdIndexQuery)
-        db.execSQL(SearchTagTable.createNamespaceNameIndexQuery)
-        db.execSQL(SearchTitleTable.createMangaIdIndexQuery)
-        db.execSQL(SearchTitleTable.createTitleIndexQuery)
-        // EXH <--
-        // AZ -->
-        execSQL(MergedTable.createIndexQuery)
-        // AZ <--
-    }
+            // DB indexes
+            execSQL(MangaTable.createUrlIndexQuery)
+            execSQL(MangaTable.createLibraryIndexQuery)
+            execSQL(ChapterTable.createMangaIdIndexQuery)
+            execSQL(ChapterTable.createUnreadChaptersIndexQuery)
+            execSQL(HistoryTable.createChapterIdIndexQuery)
+            // EXH -->
+            db.execSQL(SearchMetadataTable.createUploaderIndexQuery)
+            db.execSQL(SearchMetadataTable.createIndexedExtraIndexQuery)
+            db.execSQL(SearchTagTable.createMangaIdIndexQuery)
+            db.execSQL(SearchTagTable.createNamespaceNameIndexQuery)
+            db.execSQL(SearchTitleTable.createMangaIdIndexQuery)
+            db.execSQL(SearchTitleTable.createTitleIndexQuery)
+            // EXH <--
+            // AZ -->
+            execSQL(MergedTable.createIndexQuery)
+            // AZ <--
+        }
 
-    override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
+    override fun onUpgrade(
+        db: SupportSQLiteDatabase,
+        oldVersion: Int,
+        newVersion: Int
+    ) {
         if (oldVersion < 2) {
             db.execSQL(ChapterTable.sourceOrderUpdateQuery)
 

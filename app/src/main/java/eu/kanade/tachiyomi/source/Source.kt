@@ -21,7 +21,6 @@ import uy.kohesive.injekt.api.get
  * A basic interface for creating a source. It could be an online source, a local source, etc...
  */
 interface Source : tachiyomi.source.Source {
-
     /**
      * Id for the source. Must be unique.
      */

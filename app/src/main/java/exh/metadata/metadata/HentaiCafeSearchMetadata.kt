@@ -31,16 +31,18 @@ class HentaiCafeSearchMetadata : RaisedSearchMetadata() {
         // Not available
         manga.status = SManga.UNKNOWN
 
-        val detailsDesc = "Title: $title\n" +
-            "Artist: $artist\n"
+        val detailsDesc =
+            "Title: $title\n" +
+                "Artist: $artist\n"
 
         val tagsDesc = tagsToDescription()
 
         manga.genre = tagsToGenreString()
 
-        manga.description = listOf(detailsDesc, tagsDesc.toString())
-            .filter(String::isNotBlank)
-            .joinToString(separator = "\n")
+        manga.description =
+            listOf(detailsDesc, tagsDesc.toString())
+                .filter(String::isNotBlank)
+                .joinToString(separator = "\n")
     }
 
     companion object {
@@ -50,7 +52,6 @@ class HentaiCafeSearchMetadata : RaisedSearchMetadata() {
 
         const val BASE_URL = "https://hentai.cafe"
 
-        fun hcIdFromUrl(url: String) =
-            url.split("/").last { it.isNotBlank() }
+        fun hcIdFromUrl(url: String) = url.split("/").last { it.isNotBlank() }
     }
 }

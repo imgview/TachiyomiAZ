@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.util.Log
 
 object MiuiUtil {
-
     fun isMiui(): Boolean {
         return getSystemProperty("ro.miui.ui.version.name")?.isNotEmpty() ?: false
     }

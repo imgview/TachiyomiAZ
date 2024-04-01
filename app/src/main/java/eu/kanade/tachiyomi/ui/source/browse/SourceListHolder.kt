@@ -20,7 +20,6 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
  */
 class SourceListHolder(private val view: View, adapter: FlexibleAdapter<*>) :
     SourceHolder<SourceListItemBinding>(view, adapter) {
-
     override val binding = SourceListItemBinding.bind(view)
 
     private val favoriteColor = view.context.getResourceColor(R.attr.colorOnSurface, 0.38f)

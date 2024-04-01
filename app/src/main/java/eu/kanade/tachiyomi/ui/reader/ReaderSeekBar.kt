@@ -9,11 +9,12 @@ import androidx.appcompat.widget.AppCompatSeekBar
 /**
  * Seekbar to show current chapter progress.
  */
-class ReaderSeekBar @JvmOverloads constructor(
+class ReaderSeekBar
+@JvmOverloads
+constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : AppCompatSeekBar(context, attrs) {
-
     /**
      * Whether the seekbar should draw from right to left.
      */

@@ -9,9 +9,10 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 
-class BadgePreference @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+class BadgePreference
+@JvmOverloads
+constructor(context: Context, attrs: AttributeSet? = null) :
     Preference(context, attrs) {
-
     private var badgeNumber: Int = 0
 
     init {

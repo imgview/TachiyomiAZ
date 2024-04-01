@@ -15,7 +15,6 @@ import uy.kohesive.injekt.api.get
 class CategoryPresenter(
     private val db: DatabaseHelper = Injekt.get()
 ) : BasePresenter<CategoryController>() {
-
     /**
      * List containing categories.
      */
@@ -86,7 +85,10 @@ class CategoryPresenter(
      * @param category The category to rename.
      * @param name The new name of the category.
      */
-    fun renameCategory(category: Category, name: String) {
+    fun renameCategory(
+        category: Category,
+        name: String
+    ) {
         // Do not allow duplicate categories.
         if (categoryExists(name)) {
             Observable.just(Unit).subscribeFirst({ view, _ -> view.onCategoryExistsError() })

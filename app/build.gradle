@@ -5,7 +5,6 @@ import java.text.SimpleDateFormat
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.android.gms.oss-licenses-plugin'
 apply plugin: 'kotlin-android'
-//apply plugin: 'kotlin-android-extensions' //GOODBYE VIEWBINDING
 apply plugin: 'kotlin-kapt'
 apply plugin: 'com.github.zellius.shortcut-helper'
 apply plugin: 'kotlinx-serialization'
@@ -37,7 +36,7 @@ ext {
 
 android {
     compileSdkVersion 33
-    publishNonDefault true
+    namespace "eu.kanade.tachiyomi"
 
     defaultConfig {
         applicationId "eu.kanade.tachiyomi.az"

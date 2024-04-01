@@ -50,7 +50,7 @@ buildscript {
         classpath("com.google.android.gms:oss-licenses-plugin:0.10.6")
         classpath(kotlin("serialization", version = "1.9.22"))
         // Realm (EH)
-        classpath("io.realm:realm-gradle-plugin:7.0.1")
+        classpath("io.realm:realm-gradle-plugin:10.12.0-transformer-api")
 
         // Firebase (EH)
         //classpath("io.fabric.tools:gradle:1.31.2")
@@ -60,8 +60,6 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        jcenter()
-        //maven { setUrl("https://maven.fabric.io/public") }
     }
 }
 

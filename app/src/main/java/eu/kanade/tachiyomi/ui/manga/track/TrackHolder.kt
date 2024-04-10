@@ -29,7 +29,7 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
             listener.onTitleLongClick(bindingAdapterPosition)
             true
         }
-        binding.trackStartDate.setOnClickListener { listener.onStatusClick(bindingAdapterPosition) }
+        binding.trackStatus.setOnClickListener { listener.onStatusClick(bindingAdapterPosition) }
         binding.trackChapters.setOnClickListener { listener.onChaptersClick(bindingAdapterPosition) }
         binding.trackScore.setOnClickListener { listener.onScoreClick(bindingAdapterPosition) }
         binding.trackStartDate.setOnClickListener { listener.onStartDateClick(bindingAdapterPosition) }

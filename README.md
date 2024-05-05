@@ -19,7 +19,7 @@ https://discord.gg/mihon
 ### match stable/j2k
 - [ ] [add comicinfo xml stuff](https://github.com/mihonapp/mihon/commit/1395343f116bfbc9c3ee04eed372299ea36aa22d)
 - [ ] j2k: editing manga info - [j2k commit](https://github.com/Jays2Kings/tachiyomiJ2K/commit/d3ec230d4baa8584118dc30807728305715db25b)
-- [ ] CBZ support
+- [ ] CBZ support - [related](https://github.com/search?q=repo%3Ajobobby04%2FTachiyomiSY+cbz&type=commits&s=committer-date&o=asc)
 - [ ] add all the new trackers (komga, bakaupdates, etc.)
 - [ ] re-order per-source downloads (idk what this one even means, kraxen added it)
 ### maybe

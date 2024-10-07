@@ -6,7 +6,6 @@ on:
       - 'master'
 
 jobs:
-     
   apk:
     name: Generate APK
     runs-on: ubuntu-latest
@@ -17,7 +16,7 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.11
-      - name: Get NDK 
+      - name: Get NDK
         run: sudo ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --install "ndk;21.0.6113669"
       - name: Setup Android SDK
         run: |
@@ -47,7 +46,7 @@ jobs:
           # The password for the key
           keyPassword: ${{ secrets.KEY_PASSWORD }}
       - name: Upload APK
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: TachiyomiAZ-${{ github.sha }}.apk
           path: ${{ env.SIGNED_RELEASE_FILE }}

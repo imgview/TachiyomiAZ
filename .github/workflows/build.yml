@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - 'master'
-  workflow_dispatch:  # This line allows manual triggering of the workflow
+  workflow_dispatch:  # Memungkinkan workflow dijalankan secara manual
 
 jobs:
   apk:
@@ -12,39 +12,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
-      - name: set up JDK 1.11
+      - name: Checkout code
+        uses: actions/checkout@v1
+      
+      - name: Set up JDK 1.11
         uses: actions/setup-java@v1
         with:
           java-version: 1.11
+      
       - name: Get NDK
         run: sudo ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --install "ndk;21.0.6113669"
+      
       - name: Setup Android SDK
         run: |
           ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "build-tools;29.0.3"
+      
       - name: Write google-services.json
-  uses: DamianReeves/write-file-action@v1.2
-  with:
-    path: app/google-services.json
-    contents: ${{ secrets.GOOGLE_SERVICES_TEXT }}
-    write-mode: overwrite
+        uses: DamianReeves/write-file-action@v1.2
+        with:
+          path: app/google-services.json
+          contents: ${{ secrets.GOOGLE_SERVICES_TEXT }}  # Konten dari secret
+          write-mode: overwrite
+      
       - name: Build Release APK
         run: bash ./gradlew assembleStandardRelease --stacktrace
+      
       - name: Sign Android release
         uses: r0adkll/sign-android-release@v1
         with:
-          # The directory to find your release to sign
           releaseDirectory: app/build/outputs/apk/standard/release
-          # The key used to sign your release in base64 encoded format
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          # The key alias
-          alias: ${{ secrets.ALIAS }}
-          # The password to the keystore
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          # The password for the key
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}  # Secret untuk kunci penandatanganan APK
+          alias: ${{ secrets.ALIAS }}  # Secret untuk alias
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}  # Secret untuk password keystore
+          keyPassword: ${{ secrets.KEY_PASSWORD }}  # Secret untuk password kunci
+      
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: TachiyomiAZ-${{ github.sha }}.apk
-          path: ${{ env.SIGNED_RELEASE_FILE }}
+          path: app/build/outputs/apk/standard/release/app-standard-release.apk

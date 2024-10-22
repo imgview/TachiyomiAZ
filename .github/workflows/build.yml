@@ -23,14 +23,11 @@ jobs:
         run: |
           ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "build-tools;29.0.3"
       - name: Write google-services.json
-        uses: DamianReeves/write-file-action@v1.2
-        with:
-          # The path to the file to write
-          path: app/google-services.json
-          # The contents of the file
-          contents: ${{ secrets.GOOGLE_SERVICES_TEXT }}
-          # The mode of writing to use: `overwrite`, `append`, or `preserve`.
-          write-mode: overwrite # optional, default is preserve
+  uses: DamianReeves/write-file-action@v1.2
+  with:
+    path: app/google-services.json
+    contents: ${{ secrets.GOOGLE_SERVICES_TEXT }}
+    write-mode: overwrite
       - name: Build Release APK
         run: bash ./gradlew assembleStandardRelease --stacktrace
       - name: Sign Android release
